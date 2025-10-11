@@ -1,3 +1,5 @@
+//Para agregar iconos tienen que buscarlos en Expo Icons y agregarlo como estan aqui
+
 import Fontisto from "@expo/vector-icons/Fontisto";
 
 export function SettingIcon() {

@@ -10,13 +10,18 @@ export function Missions({ title, progress }) {
       <Text style={styles.title}>{title}</Text>
 
       <View style={styles.barContainer}>
-        <View style={[styles.barFill, { width: `${progress * 100}%` }]} />
-        {!completed && (
-          <Text style={styles.progressText}>{Math.round(progress * 100)}%</Text>
-        )}
+        <View
+          style={[
+            styles.barFill,
+            { width: `${completed ? 100 : progress * 100}%` },
+          ]}
+        />
+        <Text
+          style={[styles.progressText, completed && styles.completedTextInside]}
+        >
+          {completed ? "¡Completada!" : `${Math.round(progress * 100)}%`}
+        </Text>
       </View>
-
-      {completed && <Text style={styles.completedText}>¡Completada!</Text>}
     </View>
   );
 }
@@ -43,11 +48,12 @@ const styles = StyleSheet.create({
   },
   barContainer: {
     width: "85%",
-    height: 14,
+    height: 16,
     backgroundColor: "#fff",
     borderRadius: 10,
     overflow: "hidden",
     justifyContent: "center",
+    alignItems: "center",
   },
   barFill: {
     position: "absolute",
@@ -61,11 +67,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 12,
     color: "#6EA8FF",
+    fontWeight: "500",
   },
-  completedText: {
-    marginTop: 6,
-    fontSize: 12,
-    color: "#6EA8FF",
+  completedTextInside: {
+    color: "white",
     fontWeight: "600",
   },
 });
