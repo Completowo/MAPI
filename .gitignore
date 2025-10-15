@@ -36,6 +36,9 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# Archivo de configuración con claves secretas
+config.js
+
 # generated native folders
 /ios
 /android
