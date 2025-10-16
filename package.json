@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
+    "@google/genai": "^1.24.0",
+    "@google/generative-ai": "^0.24.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "expo": "~54.0.9",
