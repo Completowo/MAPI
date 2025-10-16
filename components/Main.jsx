@@ -1,5 +1,5 @@
 //Imports de React
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, View, Image, ScrollView, TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -15,16 +15,15 @@ import { getGeminiResponse } from "../services/gemini";
 
 export function Main() {
   const insets = useSafeAreaInsets();
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Hola, soy M.A.P.I., tu asistente personal." },
-    { id: 2, text: "¿Cómo has estado el día de hoy?" },
-  ]);
-  const [isLoading, setIsLoading] = useState(true);
+  const scrollViewRef = useRef();
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [prompt, setPrompt] = useState("");
 
   useEffect(() => {
     const fetchInitialGreeting = async () => {
-      const response = await getGeminiResponse(setPrompt);
+      setIsLoading(true);
+      const response = await getGeminiResponse("Hola");
 
       const responseSentences = response
         .split(/(?<=[.?!])\s+/)
@@ -33,14 +32,46 @@ export function Main() {
       const newMessages = responseSentences.map((sentence) => ({
         id: Math.random(),
         text: sentence.trim(),
+        sender: "assistant",
       }));
 
-      setMessages((prevMessages) => [...prevMessages, ...newMessages]);
+      setMessages(newMessages);
       setIsLoading(false);
     };
 
     fetchInitialGreeting();
   }, []);
+
+  const handleSend = async () => {
+    if (prompt.trim().length === 0) {
+      return;
+    }
+
+    const userMessage = {
+      id: Math.random(),
+      text: prompt,
+      sender: "user",
+    };
+
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    const currentPrompt = prompt;
+    setPrompt("");
+    setIsLoading(true);
+
+    const response = await getGeminiResponse(currentPrompt);
+    const responseSentences = response
+      .split(/(?<=[.?!])\s+/)
+      .filter((sentence) => sentence.trim().length > 0);
+
+    const newAssistantMessages = responseSentences.map((sentence) => ({
+      id: Math.random(),
+      text: sentence.trim(),
+      sender: "assistant",
+    }));
+
+    setMessages((prevMessages) => [...prevMessages, ...newAssistantMessages]);
+    setIsLoading(false);
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -64,11 +95,15 @@ export function Main() {
       {/* Contenedor del chat con scroll */}
       <View style={styles.chatSection}>
         <ScrollView
+          ref={scrollViewRef}
           contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 10 }}
           showsVerticalScrollIndicator={false}
+          onContentSizeChange={() =>
+            scrollViewRef.current?.scrollToEnd({ animated: true })
+          }
         >
-          {messages.slice(-3).map((msg) => (
-            <Chat key={msg.id} text={msg.text} />
+          {messages.map((msg) => (
+            <Chat key={msg.id} text={msg.text} sender={msg.sender} />
           ))}
           {isLoading && <Chat text="Escribiendo..." isThinking />}
         </ScrollView>
@@ -79,7 +114,13 @@ export function Main() {
           resizeMode="contain"
         />
       </View>
-      <TextInput value={prompt} onChangeText={setPrompt} placeholder="Hola" />
+      <TextInput
+        style={styles.input}
+        value={prompt}
+        onChangeText={setPrompt}
+        placeholder="Escribe tu consulta..."
+        onSubmitEditing={handleSend}
+      />
     </View>
   );
 }
@@ -110,5 +151,14 @@ const styles = StyleSheet.create({
     width: 150,
     height: 225,
     marginRight: 10,
+  },
+  input: {
+    height: 50,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    margin: 10,
+    backgroundColor: "#fff",
   },
 });
