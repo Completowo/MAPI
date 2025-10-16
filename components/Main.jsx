@@ -1,5 +1,5 @@
 //Imports de React
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, View, Image, ScrollView, TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -15,16 +15,15 @@ import { getGeminiResponse } from "../services/gemini";
 
 export function Main() {
   const insets = useSafeAreaInsets();
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Hola, soy M.A.P.I., tu asistente personal." },
-    { id: 2, text: "¿Cómo has estado el día de hoy?" },
-  ]);
-  const [isLoading, setIsLoading] = useState(true);
+  const scrollViewRef = useRef();
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [prompt, setPrompt] = useState("");
 
   useEffect(() => {
     const fetchInitialGreeting = async () => {
-      const response = await getGeminiResponse(setPrompt);
+      setIsLoading(true);
+      const response = await getGeminiResponse("Hola");
 
       const responseSentences = response
         .split(/(?<=[.?!])\s+/)
@@ -33,21 +32,49 @@ export function Main() {
       const newMessages = responseSentences.map((sentence) => ({
         id: Math.random(),
         text: sentence.trim(),
+        sender: "assistant",
       }));
 
-      setMessages((prevMessages) => [...prevMessages, ...newMessages]);
+      setMessages(newMessages);
       setIsLoading(false);
     };
 
     fetchInitialGreeting();
   }, []);
 
+  const handleSend = async () => {
+    if (prompt.trim().length === 0) {
+      return;
+    }
+
+    const userMessage = {
+      id: Math.random(),
+      text: prompt,
+      sender: "user",
+    };
+
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    const currentPrompt = prompt;
+    setPrompt("");
+    setIsLoading(true);
+
+    const response = await getGeminiResponse(currentPrompt);
+    const responseSentences = response
+      .split(/(?<=[.?!])\s+/)
+      .filter((sentence) => sentence.trim().length > 0);
+
+    const newAssistantMessages = responseSentences.map((sentence) => ({
+      id: Math.random(),
+      text: sentence.trim(),
+      sender: "assistant",
+    }));
+
+    setMessages((prevMessages) => [...prevMessages, ...newAssistantMessages]);
+    setIsLoading(false);
+  };
+
   return (
-<<<<<<< HEAD
-    <View style = {[styles.todo]}>
-=======
     <View style={{ flex: 1 }}>
->>>>>>> a07e7ac4079abcfca400746a387ac4bf87307268
       <View
         style={[
           styles.header,
@@ -65,28 +92,19 @@ export function Main() {
       
       <Missions title={"Camina durante 30 minutos"} progress={0.35} />
       <Missions title={"Haste un Check"} progress={1} />
-<<<<<<< HEAD
-      
-      <View style = {[styles.chatMappi]}>
-        <View style={{ flex: 1 }}>
-          <Chat text="Buenos días!" />
-          <Chat text="Cómo amaneciste?" />
-          <Chat text="Hay algo en lo que te pueda ayudar hoy?" />
-        </View>
-        
-        <Image
-          source={require("../assets/mapi.png")}
-          style={{ width: 150, height: 225 }}
-=======
 
       {/* Contenedor del chat con scroll */}
       <View style={styles.chatSection}>
         <ScrollView
+          ref={scrollViewRef}
           contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 10 }}
           showsVerticalScrollIndicator={false}
+          onContentSizeChange={() =>
+            scrollViewRef.current?.scrollToEnd({ animated: true })
+          }
         >
-          {messages.slice(-3).map((msg) => (
-            <Chat key={msg.id} text={msg.text} />
+          {messages.map((msg) => (
+            <Chat key={msg.id} text={msg.text} sender={msg.sender} />
           ))}
           {isLoading && <Chat text="Escribiendo..." isThinking />}
         </ScrollView>
@@ -94,11 +112,16 @@ export function Main() {
         <Image
           source={require("../assets/mapi.png")}
           style={styles.mapiImage}
->>>>>>> a07e7ac4079abcfca400746a387ac4bf87307268
           resizeMode="contain"
         />
       </View>
-      <TextInput value={prompt} onChangeText={setPrompt} placeholder="Hola" />
+      <TextInput
+        style={styles.input}
+        value={prompt}
+        onChangeText={setPrompt}
+        placeholder="Escribe tu consulta..."
+        onSubmitEditing={handleSend}
+      />
     </View>
   );
 }
@@ -123,16 +146,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
   },
-<<<<<<< HEAD
-
-  chatMappi: {
-    position: 'absolute',
-    bottom: 50,
-    flexDirection: "row", 
-    alignItems: "flex-end", 
-    marginTop: 50,
-  }
-=======
   chatSection: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -144,5 +157,4 @@ const styles = StyleSheet.create({
     height: 225,
     marginRight: 10,
   },
->>>>>>> a07e7ac4079abcfca400746a387ac4bf87307268
 });
