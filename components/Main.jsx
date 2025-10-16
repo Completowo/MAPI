@@ -15,7 +15,7 @@ import { Chat } from "./Chat";
 export function Main() {
   const insets = useSafeAreaInsets();
   return (
-    <View>
+    <View style = {[styles.todo]}>
       <View
         style={[
           styles.header,
@@ -29,19 +29,20 @@ export function Main() {
         </View>
       </View>
       <LastCheck mgdl={90} lastCheck={26} />
+      
       <Missions title={"Camina durante 30 minutos"} progress={0.35} />
       <Missions title={"Haste un Check"} progress={1} />
-      <View
-        style={{ flexDirection: "row", alignItems: "flex-end", marginTop: 50 }}
-      >
+      
+      <View style = {[styles.chatMappi]}>
         <View style={{ flex: 1 }}>
-          <Chat text="Hola, soy M.A.P.I., tu asistente personal." />
-          <Chat text="¿Cómo has estado el día de hoy?" />
-          <Chat text="El día de hoy tus niveles de azúcar en sangre se encuentran bastante bien, sigue así." />
+          <Chat text="Buenos días!" />
+          <Chat text="Cómo amaneciste?" />
+          <Chat text="Hay algo en lo que te pueda ayudar hoy?" />
         </View>
+        
         <Image
           source={require("../assets/mapi.png")}
-          style={{ width: 150, height: 225, marginRight: 10 }}
+          style={{ width: 150, height: 225 }}
           resizeMode="contain"
         />
       </View>
@@ -50,6 +51,10 @@ export function Main() {
 }
 
 const styles = StyleSheet.create({
+  todo: {
+    height: '100vh'
+  },
+
   header: {
     width: "100%",
     minHeight: 60,
@@ -65,4 +70,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
   },
+
+  chatMappi: {
+    position: 'absolute',
+    bottom: 50,
+    flexDirection: "row", 
+    alignItems: "flex-end", 
+    marginTop: 50,
+  }
 });
