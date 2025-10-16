@@ -89,6 +89,7 @@ export function Main() {
       </View>
 
       <LastCheck mgdl={90} lastCheck={26} />
+      
       <Missions title={"Camina durante 30 minutos"} progress={0.35} />
       <Missions title={"Haste un Check"} progress={1} />
 
@@ -126,6 +127,10 @@ export function Main() {
 }
 
 const styles = StyleSheet.create({
+  todo: {
+    height: '100vh'
+  },
+
   header: {
     width: "100%",
     minHeight: 60,
@@ -151,14 +156,5 @@ const styles = StyleSheet.create({
     width: 150,
     height: 225,
     marginRight: 10,
-  },
-  input: {
-    height: 50,
-    borderColor: "#ddd",
-    borderWidth: 1,
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    margin: 10,
-    backgroundColor: "#fff",
   },
 });
