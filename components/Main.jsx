@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, Image, ScrollView, TextInput } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image,
+  ScrollView,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Imports de Iconos
@@ -12,6 +19,9 @@ import { Missions } from "./Missions";
 import { Chat } from "./Chat";
 import { BotonGrabacion } from "./BotonGrabacion";
 import { getGeminiResponse } from "../services/gemini";
+
+//Import misiones
+import missions from "../assets/missions.json";
 
 export function Main() {
   const insets = useSafeAreaInsets();
@@ -90,6 +100,11 @@ export function Main() {
     setIsLoading(false);
   };
 
+  //Funcion para solo sacar 2 misiones
+  const randomMissions = [...missions]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 2);
+
   return (
     <View style={{ flex: 1 }}>
       <View
@@ -107,8 +122,15 @@ export function Main() {
 
       <LastCheck mgdl={90} lastCheck={26} />
 
-      <Missions title={"Camina durante 30 minutos"} progress={0.35} />
-      <Missions title={"Haste un Check"} progress={1} />
+      {randomMissions.map((mission, index) => {
+        return (
+          <Missions
+            key={index}
+            title={mission.title}
+            progress={mission.progress}
+          />
+        );
+      })}
 
       {/* Contenedor del chat con scroll */}
       <View style={styles.chatSection}>
@@ -125,7 +147,6 @@ export function Main() {
           ))}
           {isLoading && <Chat text="Escribiendo..." isThinking />}
         </ScrollView>
-
 
         <Image
           source={require("../assets/mapi.png")}
@@ -145,6 +166,7 @@ export function Main() {
             sender: "user",
           };
           setMessages((prev) => [...prev, userMessage]);
+          <ActivityIndicator size="small" />;
 
           // 2. Pedir respuesta de Gemini
           handleSendTranscription(text);
