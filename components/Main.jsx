@@ -1,16 +1,16 @@
-//Imports de React
 import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, View, Image, ScrollView, TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-//Imports de Iconos
+// Imports de Iconos
 import { SettingIcon, BellIcon } from "./Icons";
 
-//Imports de Componentes
+// Imports de Componentes
 import { Points } from "./Points";
 import { LastCheck } from "./LastCheck";
 import { Missions } from "./Missions";
 import { Chat } from "./Chat";
+import { BotonGrabacion } from "./BotonGrabacion";
 import { getGeminiResponse } from "../services/gemini";
 
 export function Main() {
@@ -43,9 +43,7 @@ export function Main() {
   }, []);
 
   const handleSend = async () => {
-    if (prompt.trim().length === 0) {
-      return;
-    }
+    if (prompt.trim().length === 0) return;
 
     const userMessage = {
       id: Math.random(),
@@ -59,6 +57,25 @@ export function Main() {
     setIsLoading(true);
 
     const response = await getGeminiResponse(currentPrompt);
+    const responseSentences = response
+      .split(/(?<=[.?!])\s+/)
+      .filter((sentence) => sentence.trim().length > 0);
+
+    const newAssistantMessages = responseSentences.map((sentence) => ({
+      id: Math.random(),
+      text: sentence.trim(),
+      sender: "assistant",
+    }));
+
+    setMessages((prevMessages) => [...prevMessages, ...newAssistantMessages]);
+    setIsLoading(false);
+  };
+
+  const handleSendTranscription = async (transcription) => {
+    if (!transcription) return;
+    setIsLoading(true);
+    const response = await getGeminiResponse(transcription);
+
     const responseSentences = response
       .split(/(?<=[.?!])\s+/)
       .filter((sentence) => sentence.trim().length > 0);
@@ -89,7 +106,7 @@ export function Main() {
       </View>
 
       <LastCheck mgdl={90} lastCheck={26} />
-      
+
       <Missions title={"Camina durante 30 minutos"} progress={0.35} />
       <Missions title={"Haste un Check"} progress={1} />
 
@@ -109,18 +126,29 @@ export function Main() {
           {isLoading && <Chat text="Escribiendo..." isThinking />}
         </ScrollView>
 
+
         <Image
           source={require("../assets/mapi.png")}
           style={styles.mapiImage}
           resizeMode="contain"
         />
       </View>
-      <TextInput
-        style={styles.input}
-        value={prompt}
-        onChangeText={setPrompt}
-        placeholder="Escribe tu consulta..."
-        onSubmitEditing={handleSend}
+
+      <BotonGrabacion
+        onTranscription={(text) => {
+          if (!text) return;
+
+          // 1. Agregar mensaje de usuario
+          const userMessage = {
+            id: Math.random(),
+            text,
+            sender: "user",
+          };
+          setMessages((prev) => [...prev, userMessage]);
+
+          // 2. Pedir respuesta de Gemini
+          handleSendTranscription(text);
+        }}
       />
     </View>
   );
@@ -128,9 +156,8 @@ export function Main() {
 
 const styles = StyleSheet.create({
   todo: {
-    height: '100vh'
+    height: "100vh",
   },
-
   header: {
     width: "100%",
     minHeight: 60,
