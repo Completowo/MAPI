@@ -35,10 +35,10 @@ export function Main() {
       setIsLoading(true);
       const response = await getGeminiResponse("Hola");
 
+      //Divide la respuesta en oraciones
       const responseSentences = response
         .split(/(?<=[.?!])\s+/)
         .filter((sentence) => sentence.trim().length > 0);
-
       const newMessages = responseSentences.map((sentence) => ({
         id: Math.random(),
         text: sentence.trim(),
@@ -52,34 +52,6 @@ export function Main() {
     fetchInitialGreeting();
   }, []);
 
-  const handleSend = async () => {
-    if (prompt.trim().length === 0) return;
-
-    const userMessage = {
-      id: Math.random(),
-      text: prompt,
-      sender: "user",
-    };
-
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-    const currentPrompt = prompt;
-    setPrompt("");
-    setIsLoading(true);
-
-    const response = await getGeminiResponse(currentPrompt);
-    const responseSentences = response
-      .split(/(?<=[.?!])\s+/)
-      .filter((sentence) => sentence.trim().length > 0);
-
-    const newAssistantMessages = responseSentences.map((sentence) => ({
-      id: Math.random(),
-      text: sentence.trim(),
-      sender: "assistant",
-    }));
-
-    setMessages((prevMessages) => [...prevMessages, ...newAssistantMessages]);
-    setIsLoading(false);
-  };
 
   const handleSendTranscription = async (transcription) => {
     if (!transcription) return;
@@ -143,6 +115,7 @@ export function Main() {
           }
         >
           {messages.map((msg) => (
+            console.log("msg", msg),
             <Chat key={msg.id} text={msg.text} sender={msg.sender} />
           ))}
           {isLoading && <Chat text="Escribiendo..." isThinking />}
@@ -166,7 +139,6 @@ export function Main() {
             sender: "user",
           };
           setMessages((prev) => [...prev, userMessage]);
-          <ActivityIndicator size="small" />;
 
           // 2. Pedir respuesta de Gemini
           handleSendTranscription(text);
