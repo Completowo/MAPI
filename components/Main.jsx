@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, Image, ScrollView, TextInput } from "react-native";
+import { StyleSheet, View, Image, ScrollView, TextInput, Pressable, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Imports de Iconos
 import { SettingIcon, BellIcon } from "./Icons";
@@ -11,6 +12,8 @@ import { LastCheck } from "./LastCheck";
 import { Missions } from "./Missions";
 import { Chat } from "./Chat";
 import { BotonGrabacion } from "./BotonGrabacion";
+import { Login } from "./Login";
+import { Register } from "./Register";
 import { getGeminiResponse } from "../services/gemini";
 
 export function Main() {
@@ -19,6 +22,28 @@ export function Main() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showRegister, setShowRegister] = useState(true); // true = mostrar registro, false = mostrar login
+  const [userData, setUserData] = useState(null);
+
+  // Cargar estado de autenticación al inicio
+  useEffect(() => {
+    const loadAuthState = async () => {
+      try {
+        const storedAuth = await AsyncStorage.getItem('@auth_state');
+        const storedUser = await AsyncStorage.getItem('@user_data');
+        
+        if (storedAuth === 'true' && storedUser) {
+          setIsAuthenticated(true);
+          setUserData(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error('Error loading auth state:', error);
+      }
+    };
+
+    loadAuthState();
+  }, []);
 
   useEffect(() => {
     const fetchInitialGreeting = async () => {
@@ -90,6 +115,70 @@ export function Main() {
     setIsLoading(false);
   };
 
+  // Handlers para autenticación
+  const handleLogin = async (userData) => {
+    try {
+      await AsyncStorage.setItem('@auth_state', 'true');
+      await AsyncStorage.setItem('@user_data', JSON.stringify(userData));
+      setUserData(userData);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Error saving auth state:', error);
+      Alert.alert('Error', 'No se pudo iniciar sesión');
+    }
+  };
+
+  const handleRegister = async (userData) => {
+    try {
+      await AsyncStorage.setItem('@auth_state', 'true');
+      await AsyncStorage.setItem('@user_data', JSON.stringify(userData));
+      setUserData(userData);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Error saving auth state:', error);
+      Alert.alert('Error', 'No se pudo completar el registro');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('@auth_state');
+      await AsyncStorage.removeItem('@user_data');
+      setIsAuthenticated(false);
+      setUserData(null);
+      setShowRegister(false); // Mostrar login después de cerrar sesión
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Alert.alert('Error', 'No se pudo cerrar sesión');
+    }
+  };
+
+  // Si no está autenticado, mostrar Login/Register
+  if (!isAuthenticated) {
+    return (
+      <View style={[styles.authContainer, { paddingTop: insets.top }]}>
+        {showRegister ? (
+          <Register
+            onSwitchToLogin={() => setShowRegister(false)}
+            onRegisterSuccess={(userData) => {
+              console.log('Registro exitoso:', userData);
+              handleRegister(userData);
+            }}
+          />
+        ) : (
+          <Login
+            onSwitchToRegister={() => setShowRegister(true)}
+            onLoginSuccess={(userData) => {
+              console.log('Login exitoso:', userData);
+              handleLogin(userData);
+            }}
+          />
+        )}
+      </View>
+    );
+  }
+
+  // Vista principal cuando está autenticado
   return (
     <View style={{ flex: 1 }}>
       <View
@@ -102,6 +191,9 @@ export function Main() {
         <View style={styles.icons}>
           <BellIcon />
           <SettingIcon />
+          <Pressable onPress={handleLogout} style={styles.logoutButton}>
+            <Text style={styles.logoutText}>Cerrar sesión</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -158,6 +250,13 @@ const styles = StyleSheet.create({
   todo: {
     height: "100vh",
   },
+  authContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
   header: {
     width: "100%",
     minHeight: 60,
@@ -172,6 +271,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
+  },
+  logoutButton: {
+    backgroundColor: "#ff3b30",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginLeft: 16,
+  },
+  logoutText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
   },
   chatSection: {
     flexDirection: "row",
