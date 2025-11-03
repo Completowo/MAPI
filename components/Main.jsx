@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, Image, ScrollView, TextInput, Pressable, Text } from "react-native";
+import { StyleSheet, View, Image, ScrollView, TextInput, Pressable, Text, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -14,6 +14,8 @@ import { Chat } from "./Chat";
 import { BotonGrabacion } from "./BotonGrabacion";
 import { Login } from "./Login";
 import { Register } from "./Register";
+import { RoleSelection } from "./RoleSelection";
+import { PatientHome } from "./PatientHome";
 import { getGeminiResponse } from "../services/gemini";
 
 export function Main() {
@@ -25,6 +27,8 @@ export function Main() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showRegister, setShowRegister] = useState(true); // true = mostrar registro, false = mostrar login
   const [userData, setUserData] = useState(null);
+  const [showRoleSelection, setShowRoleSelection] = useState(true);
+  const [selectedRole, setSelectedRole] = useState(null); // 'doctor' | 'patient' | null
 
   // Cargar estado de autenticación al inicio
   useEffect(() => {
@@ -147,18 +151,55 @@ export function Main() {
       setIsAuthenticated(false);
       setUserData(null);
       setShowRegister(false); // Mostrar login después de cerrar sesión
+      setShowRoleSelection(true);
+      setSelectedRole(null);
     } catch (error) {
       console.error('Error during logout:', error);
       Alert.alert('Error', 'No se pudo cerrar sesión');
     }
   };
-
-  // Si no está autenticado, mostrar Login/Register
+  // Si no está autenticado, mostrar flujo de selección de rol y auth
   if (!isAuthenticated) {
+    // 1) Mostrar pantalla inicial de selección de rol
+    if (showRoleSelection) {
+      return (
+        <View style={[styles.authContainer, { paddingTop: insets.top }]}>
+          <RoleSelection
+            onSelectDoctor={() => {
+              setSelectedRole('doctor');
+              setShowRoleSelection(false);
+              setShowRegister(true);
+            }}
+            onSelectPatient={() => {
+              setSelectedRole('patient');
+              setShowRoleSelection(false);
+            }}
+          />
+        </View>
+      );
+    }
+
+    // 2) Si eligió paciente, mostrar página en blanco con botón volver
+    if (selectedRole === 'patient') {
+      return (
+        <View style={[styles.authContainer, { paddingTop: insets.top }]}> 
+          <PatientHome onBack={() => {
+            setSelectedRole(null);
+            setShowRoleSelection(true);
+          }} />
+        </View>
+      );
+    }
+
+    // 3) Si eligió médico, mostrar login/register existentes
     return (
-      <View style={[styles.authContainer, { paddingTop: insets.top }]}>
+      <View style={[styles.authContainer, { paddingTop: insets.top }]}> 
         {showRegister ? (
           <Register
+            onBack={() => {
+              setSelectedRole(null);
+              setShowRoleSelection(true);
+            }}
             onSwitchToLogin={() => setShowRegister(false)}
             onRegisterSuccess={(userData) => {
               console.log('Registro exitoso:', userData);

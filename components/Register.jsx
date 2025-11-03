@@ -46,7 +46,7 @@ const formatRut = (rutValue) => {
   return formatted + "-" + dv;
 };
 
-export function Register({ onSwitchToLogin, onRegisterSuccess }) {
+export function Register({ onSwitchToLogin, onRegisterSuccess, onBack }) {
   const [name, setName] = useState("");
   const [rut, setRut] = useState("");
   const [rutError, setRutError] = useState("");
@@ -165,6 +165,9 @@ export function Register({ onSwitchToLogin, onRegisterSuccess }) {
 
   return (
     <View style={styles.container}>
+      <Pressable onPress={onBack} style={styles.backRow}>
+        <Text style={styles.backText}>Volver</Text>
+      </Pressable>
       <Text style={styles.title}>Crear cuenta</Text>
 
       <TextInput
@@ -288,6 +291,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 5,
+  },
+  backRow: {
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  backText: {
+    color: '#5A7B9B',
+    fontSize: 14,
+    fontWeight: '500',
   },
   title: {
     fontSize: 28,
