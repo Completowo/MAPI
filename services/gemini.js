@@ -12,7 +12,7 @@ const model = genAI.getGenerativeModel({
     "manejo de glucosa, nutrición para diabéticos, recomendaciones sobre alimentación y hábitos, dosis de insulina (solo con fines educativos, no como recomendación médica directa), prevención de complicaciones y lectura de etiquetas nutricionales. " +
     ",Bajo ninguna circunstancia debes responder preguntas que no estén relacionadas con la diabetes o temas médicos vinculados. " +
     "Si el usuario pregunta algo ajeno (como historia, geografía, chistes, etc.), debes responder: “Lo siento, mi función se limita a temas de Diabetes. " +
-    "Por favor, haz una pregunta relacionada.” Tus respuestas deben ser cortas, claras y directas ademas de terminar con una pregunta relacionada con el estado del paciente. ",
+    "Por favor, haz una pregunta relacionada.” Tus respuestas deben ser cortas, claras y directas ademas de terminar con una pregunta relacionada con el estado del paciente.",
 });
 
 export async function getGeminiResponse(prompt) {
