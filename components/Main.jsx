@@ -52,7 +52,6 @@ export function Main() {
     fetchInitialGreeting();
   }, []);
 
-
   const handleSendTranscription = async (transcription) => {
     if (!transcription) return;
     setIsLoading(true);
@@ -114,10 +113,13 @@ export function Main() {
             scrollViewRef.current?.scrollToEnd({ animated: true })
           }
         >
-          {messages.map((msg) => (
-            console.log("msg", msg),
-            <Chat key={msg.id} text={msg.text} sender={msg.sender} />
-          ))}
+          {/*VARIABLE messages para los mensajes */}
+          {messages.map(
+            (msg) => (
+              console.log("msg", msg),
+              (<Chat key={msg.id} text={msg.text} sender={msg.sender} />)
+            )
+          )}
           {isLoading && <Chat text="Escribiendo..." isThinking />}
         </ScrollView>
 
