@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     marginTop: 16,
-    marginBottom: 8,
+    marginBottom: 8
   },
   row: {
     flexDirection: "row",
@@ -33,8 +33,7 @@ const styles = StyleSheet.create({
   unit: {
     color: "#83C1FF",
     fontSize: 16,
-    marginLeft: 8,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   lastCheck: {
     color: "#83C1FF",
