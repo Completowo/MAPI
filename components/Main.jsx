@@ -22,6 +22,7 @@ import { getGeminiResponse } from "../services/gemini";
 
 //Import misiones
 import missions from "../assets/missions.json";
+import { Switch } from "react-native-web";
 
 export function Main() {
   const insets = useSafeAreaInsets();
@@ -29,7 +30,7 @@ export function Main() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [prompt, setPrompt] = useState("");
-  const [mapiEmotion, setMapiEmotion] = useState("Neutral");
+  const [mapiEmotion, setMapiEmotion] = useState("saludo");
 
   useEffect(() => {
     const fetchInitialGreeting = async () => {
@@ -38,7 +39,7 @@ export function Main() {
 
       // Obtener emoción
       const [firstLine, ...restLines] = response.split("\n");
-      const emotion = firstLine.split(":")[1]?.trim() || "Neutral";
+      const emotion = firstLine.split(":")[1]?.trim().toLowerCase() || "saludo";
       console.log("EMOCIÓN:", emotion);
 
       // Unir el resto del texto (sin la línea de emoción)
@@ -71,7 +72,7 @@ export function Main() {
 
     // 1. Obtener emoción
     const [firstLine, ...restLines] = response.split("\n");
-    const emotion = firstLine.split(":")[1]?.trim() || "Neutral";
+    const emotion = firstLine.split(":")[1]?.trim().toLowerCase() || "saludo";
     console.log("EMOCIÓN:", emotion);
 
     // 2. Eliminar la línea de emoción y limpiar el texto
@@ -98,6 +99,23 @@ export function Main() {
   const randomMissions = [...missions]
     .sort(() => Math.random() - 0.5)
     .slice(0, 2);
+  
+  const cambiarImagenEmocion = (Emotion) => {
+    switch (Emotion) {
+      case "saludo":
+        return require("../assets/MAPI-emociones/Saludo.png")
+      case "neutral":
+        return require("../assets/MAPI-emociones/Neutral.png")
+      case "feliz":
+        return require("../assets/MAPI-emociones/Feliz.png")
+      case "preocupado":
+        return require("../assets/MAPI-emociones/Preocupado-2.png")
+      case "enojado":
+        return require("../assets/MAPI-emociones/Enojado.png")
+      default:
+        return require("../assets/MAPI-emociones/Nose1.png")
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -139,7 +157,7 @@ export function Main() {
           {/*VARIABLE messages para los mensajes */}
           {messages.map(
             (msg) => (
-              console.log("msg", msg),
+              //console.log("msg", msg),
               (<Chat key={msg.id} text={msg.text} sender={msg.sender} />)
             )
           )}
@@ -147,7 +165,7 @@ export function Main() {
         </ScrollView>
 
         <Image
-          source={require("../assets/mapi.png")}
+          source={cambiarImagenEmocion(mapiEmotion)}
           style={styles.mapiImage}
           resizeMode="contain"
         />
