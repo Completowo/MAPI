@@ -29,22 +29,33 @@ export function Main() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [mapiEmotion, setMapiEmotion] = useState("Neutral");
 
   useEffect(() => {
     const fetchInitialGreeting = async () => {
       setIsLoading(true);
       const response = await getGeminiResponse("Hola");
 
-      //Divide la respuesta en oraciones
-      const responseSentences = response
+      // Obtener emoción
+      const [firstLine, ...restLines] = response.split("\n");
+      const emotion = firstLine.split(":")[1]?.trim() || "Neutral";
+      console.log("EMOCIÓN:", emotion);
+
+      // Unir el resto del texto (sin la línea de emoción)
+      const cleanedResponse = restLines.join("\n");
+
+      // Dividir en oraciones
+      const responseSentences = cleanedResponse
         .split(/(?<=[.?!])\s+/)
         .filter((sentence) => sentence.trim().length > 0);
+
       const newMessages = responseSentences.map((sentence) => ({
         id: Math.random(),
         text: sentence.trim(),
         sender: "assistant",
       }));
 
+      setMapiEmotion(emotion);
       setMessages(newMessages);
       setIsLoading(false);
     };
@@ -55,18 +66,30 @@ export function Main() {
   const handleSendTranscription = async (transcription) => {
     if (!transcription) return;
     setIsLoading(true);
+
     const response = await getGeminiResponse(transcription);
 
-    const responseSentences = response
+    // 1. Obtener emoción
+    const [firstLine, ...restLines] = response.split("\n");
+    const emotion = firstLine.split(":")[1]?.trim() || "Neutral";
+    console.log("EMOCIÓN:", emotion);
+
+    // 2. Eliminar la línea de emoción y limpiar el texto
+    const cleanedResponse = restLines.join("\n");
+
+    // 3. Dividir en oraciones
+    const responseSentences = cleanedResponse
       .split(/(?<=[.?!])\s+/)
       .filter((sentence) => sentence.trim().length > 0);
 
+    // 4. Crear mensajes
     const newAssistantMessages = responseSentences.map((sentence) => ({
       id: Math.random(),
       text: sentence.trim(),
       sender: "assistant",
     }));
 
+    setMapiEmotion(emotion);
     setMessages((prevMessages) => [...prevMessages, ...newAssistantMessages]);
     setIsLoading(false);
   };
