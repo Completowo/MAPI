@@ -112,6 +112,8 @@ export function Main() {
         return require("../assets/MAPI-emociones/Preocupado-2.png")
       case "enojado":
         return require("../assets/MAPI-emociones/Enojado.png")
+      case "durmiendo":
+        return require("../assets/MAPI-emociones/Durmiendo.png")
       default:
         return require("../assets/MAPI-emociones/Nose1.png")
     }
@@ -193,7 +195,7 @@ export function Main() {
 
 const styles = StyleSheet.create({
   todo: {
-    height: "100vh",
+    height: "95vh",
   },
   header: {
     width: "100%",
