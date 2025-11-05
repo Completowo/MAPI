@@ -114,6 +114,10 @@ export function Main() {
         return require("../assets/MAPI-emociones/Enojado.png")
       case "durmiendo":
         return require("../assets/MAPI-emociones/Durmiendo.png")
+      case "shock":
+        return require("../assets/MAPI-emociones/Shock.png")
+      case "confusion":
+        return require("../assets/MAPI-emociones/Confusion.png")
       default:
         return require("../assets/MAPI-emociones/Nose1.png")
     }
@@ -216,6 +220,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     marginTop: 50,
+    marginBottom:20,
     flex: 1, // permite que el scroll ocupe espacio dinámico
   },
   mapiImage: {
