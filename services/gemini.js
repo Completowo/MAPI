@@ -1,8 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// ¡CUIDADO! No es seguro exponer tu API Key en el código del cliente.
-// Considera usar variables de entorno para protegerla.
-const API_KEY = "AIzaSyC6_Xg99KGiIgfTkutSvTlemqIOVmiGnHU";
+//API, Le pongo _LOL al final para que no gaste tokens :D
+const API_KEY = "AIzaSyC6_Xg99KGiIgfTkutSvTlemqIOVmiGnHU_LOL";
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 

@@ -1,16 +1,21 @@
-//Imports de React
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, Image, ScrollView, TextInput } from "react-native";
+import { StyleSheet, View, Image, ScrollView, TextInput, Pressable, Text, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-//Imports de Iconos
+// Imports de Iconos
 import { SettingIcon, BellIcon } from "./Icons";
 
-//Imports de Componentes
+// Imports de Componentes
 import { Points } from "./Points";
 import { LastCheck } from "./LastCheck";
 import { Missions } from "./Missions";
 import { Chat } from "./Chat";
+import { BotonGrabacion } from "./BotonGrabacion";
+import { Login } from "./Login";
+import { Register } from "./Register";
+import { RoleSelection } from "./RoleSelection";
+import { PatientHome } from "./PatientHome";
 import { getGeminiResponse } from "../services/gemini";
 
 export function Main() {
@@ -19,6 +24,30 @@ export function Main() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showRegister, setShowRegister] = useState(true); // true = mostrar registro, false = mostrar login
+  const [userData, setUserData] = useState(null);
+  const [showRoleSelection, setShowRoleSelection] = useState(true);
+  const [selectedRole, setSelectedRole] = useState(null); // 'doctor' | 'patient' | null
+
+  // Cargar estado de autenticación al inicio
+  useEffect(() => {
+    const loadAuthState = async () => {
+      try {
+        const storedAuth = await AsyncStorage.getItem('@auth_state');
+        const storedUser = await AsyncStorage.getItem('@user_data');
+        
+        if (storedAuth === 'true' && storedUser) {
+          setIsAuthenticated(true);
+          setUserData(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error('Error loading auth state:', error);
+      }
+    };
+
+    loadAuthState();
+  }, []);
 
   useEffect(() => {
     const fetchInitialGreeting = async () => {
@@ -43,9 +72,7 @@ export function Main() {
   }, []);
 
   const handleSend = async () => {
-    if (prompt.trim().length === 0) {
-      return;
-    }
+    if (prompt.trim().length === 0) return;
 
     const userMessage = {
       id: Math.random(),
@@ -73,6 +100,126 @@ export function Main() {
     setIsLoading(false);
   };
 
+  const handleSendTranscription = async (transcription) => {
+    if (!transcription) return;
+    setIsLoading(true);
+    const response = await getGeminiResponse(transcription);
+
+    const responseSentences = response
+      .split(/(?<=[.?!])\s+/)
+      .filter((sentence) => sentence.trim().length > 0);
+
+    const newAssistantMessages = responseSentences.map((sentence) => ({
+      id: Math.random(),
+      text: sentence.trim(),
+      sender: "assistant",
+    }));
+
+    setMessages((prevMessages) => [...prevMessages, ...newAssistantMessages]);
+    setIsLoading(false);
+  };
+
+  // Handlers para autenticación
+  const handleLogin = async (userData) => {
+    try {
+      await AsyncStorage.setItem('@auth_state', 'true');
+      await AsyncStorage.setItem('@user_data', JSON.stringify(userData));
+      setUserData(userData);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Error saving auth state:', error);
+      Alert.alert('Error', 'No se pudo iniciar sesión');
+    }
+  };
+
+  const handleRegister = async (userData) => {
+    try {
+      await AsyncStorage.setItem('@auth_state', 'true');
+      await AsyncStorage.setItem('@user_data', JSON.stringify(userData));
+      setUserData(userData);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Error saving auth state:', error);
+      Alert.alert('Error', 'No se pudo completar el registro');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('@auth_state');
+      await AsyncStorage.removeItem('@user_data');
+      setIsAuthenticated(false);
+      setUserData(null);
+      setShowRegister(false); // Mostrar login después de cerrar sesión
+      setShowRoleSelection(true);
+      setSelectedRole(null);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Alert.alert('Error', 'No se pudo cerrar sesión');
+    }
+  };
+  // Si no está autenticado, mostrar flujo de selección de rol y auth
+  if (!isAuthenticated) {
+    // 1) Mostrar pantalla inicial de selección de rol
+    if (showRoleSelection) {
+      return (
+        <View style={[styles.authContainer, { paddingTop: insets.top }]}>
+          <RoleSelection
+            onSelectDoctor={() => {
+              setSelectedRole('doctor');
+              setShowRoleSelection(false);
+              setShowRegister(true);
+            }}
+            onSelectPatient={() => {
+              setSelectedRole('patient');
+              setShowRoleSelection(false);
+            }}
+          />
+        </View>
+      );
+    }
+
+    // 2) Si eligió paciente, mostrar página en blanco con botón volver
+    if (selectedRole === 'patient') {
+      return (
+        <View style={[styles.authContainer, { paddingTop: insets.top }]}> 
+          <PatientHome onBack={() => {
+            setSelectedRole(null);
+            setShowRoleSelection(true);
+          }} />
+        </View>
+      );
+    }
+
+    // 3) Si eligió médico, mostrar login/register existentes
+    return (
+      <View style={[styles.authContainer, { paddingTop: insets.top }]}> 
+        {showRegister ? (
+          <Register
+            onBack={() => {
+              setSelectedRole(null);
+              setShowRoleSelection(true);
+            }}
+            onSwitchToLogin={() => setShowRegister(false)}
+            onRegisterSuccess={(userData) => {
+              console.log('Registro exitoso:', userData);
+              handleRegister(userData);
+            }}
+          />
+        ) : (
+          <Login
+            onSwitchToRegister={() => setShowRegister(true)}
+            onLoginSuccess={(userData) => {
+              console.log('Login exitoso:', userData);
+              handleLogin(userData);
+            }}
+          />
+        )}
+      </View>
+    );
+  }
+
+  // Vista principal cuando está autenticado
   return (
     <View style={{ flex: 1 }}>
       <View
@@ -85,11 +232,14 @@ export function Main() {
         <View style={styles.icons}>
           <BellIcon />
           <SettingIcon />
+          <Pressable onPress={handleLogout} style={styles.logoutButton}>
+            <Text style={styles.logoutText}>Cerrar sesión</Text>
+          </Pressable>
         </View>
       </View>
 
       <LastCheck mgdl={90} lastCheck={26} />
-      
+
       <Missions title={"Camina durante 30 minutos"} progress={0.35} />
       <Missions title={"Haste un Check"} progress={1} />
 
@@ -109,18 +259,29 @@ export function Main() {
           {isLoading && <Chat text="Escribiendo..." isThinking />}
         </ScrollView>
 
+
         <Image
           source={require("../assets/mapi.png")}
           style={styles.mapiImage}
           resizeMode="contain"
         />
       </View>
-      <TextInput
-        style={styles.input}
-        value={prompt}
-        onChangeText={setPrompt}
-        placeholder="Escribe tu consulta..."
-        onSubmitEditing={handleSend}
+
+      <BotonGrabacion
+        onTranscription={(text) => {
+          if (!text) return;
+
+          // 1. Agregar mensaje de usuario
+          const userMessage = {
+            id: Math.random(),
+            text,
+            sender: "user",
+          };
+          setMessages((prev) => [...prev, userMessage]);
+
+          // 2. Pedir respuesta de Gemini
+          handleSendTranscription(text);
+        }}
       />
     </View>
   );
@@ -128,9 +289,15 @@ export function Main() {
 
 const styles = StyleSheet.create({
   todo: {
-    height: '100vh'
+    height: "100vh",
   },
-
+  authContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
   header: {
     width: "100%",
     minHeight: 60,
@@ -145,6 +312,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
+  },
+  logoutButton: {
+    backgroundColor: "#ff3b30",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginLeft: 16,
+  },
+  logoutText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
   },
   chatSection: {
     flexDirection: "row",
