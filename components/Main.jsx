@@ -29,13 +29,16 @@ export function Main() {
   const scrollViewRef = useRef();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [prompt, setPrompt] = useState("");
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
 
   useEffect(() => {
     const fetchInitialGreeting = async () => {
       setIsLoading(true);
-      const response = await getGeminiResponse("Hola");
+
+      const initialPrompt = [
+        {role: "user", parts:[{text: "Hola"}] }
+      ]
+      const response = await getGeminiResponse(initialPrompt);
 
       // Obtener emoción
       const [firstLine, ...restLines] = response.split("\n");
@@ -50,12 +53,22 @@ export function Main() {
         .split(/(?<=[.?!])\s+/)
         .filter((sentence) => sentence.trim().length > 0);
 
+      //Mensaje IA  
       const newMessages = responseSentences.map((sentence) => ({
         id: Math.random(),
         text: sentence.trim(),
         sender: "assistant",
       }));
 
+      //Mensaje usuario :D
+      const userGreatingMessage ={
+        id: Math.random(),
+        text: "Hola",
+        sender: "user",
+      }
+
+      setMessages([userGreatingMessage, ...newMessages])
+      
       setMapiEmotion(emotion);
       setMessages(newMessages);
       setIsLoading(false);
@@ -64,11 +77,30 @@ export function Main() {
     fetchInitialGreeting();
   }, []);
 
+  //PAPUUU
   const handleSendTranscription = async (transcription) => {
     if (!transcription) return;
     setIsLoading(true);
 
-    const response = await getGeminiResponse(transcription);
+    //MENSAJE DEL USUARIO
+    const newUserMessage = {
+      id: Math.random(),
+      text: transcription,
+      sender: "user",
+    };
+
+
+
+    const updatedMesages = [...messages, newUserMessage];
+
+    const apiHistory = updatedMesages.map((msg)=>{
+      return {
+        role: msg.sender ==='user' ? 'user' : 'model',
+        parts:[{text: msg.text}]
+      }
+    })
+
+    const response = await getGeminiResponse(apiHistory);
 
     // 1. Obtener emoción
     const [firstLine, ...restLines] = response.split("\n");
@@ -83,16 +115,20 @@ export function Main() {
       .split(/(?<=[.?!])\s+/)
       .filter((sentence) => sentence.trim().length > 0);
 
-    // 4. Crear mensajes
+        //MENSAJE DE LA IA
     const newAssistantMessages = responseSentences.map((sentence) => ({
       id: Math.random(),
       text: sentence.trim(),
       sender: "assistant",
     }));
 
+
+    
+    setMessages([...updatedMesages, ...newAssistantMessages]);
     setMapiEmotion(emotion);
-    setMessages((prevMessages) => [...prevMessages, ...newAssistantMessages]);
     setIsLoading(false);
+
+    console.log(messages)
   };
 
   //Funcion para solo sacar 2 misiones

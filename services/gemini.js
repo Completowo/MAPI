@@ -13,9 +13,17 @@ const model = genAI.getGenerativeModel({
   systemInstruction: Perso1,
 });
 
-export async function getGeminiResponse(prompt) {
+
+export async function getGeminiResponse(apiHistory) {
   try {
-    const result = await model.generateContent(prompt);
+    // Ya no se usa 'generateContent(prompt)', sino 'generateContent(objeto)'
+    const result = await model.generateContent({
+      contents: apiHistory, // <-- Aquí se pasa el historial completo
+      generationConfig: {
+        maxOutputTokens: 1000, // Opcional, pero recomendado
+      },
+    });
+
     const response = await result.response;
     const text = response.text();
     return text;
