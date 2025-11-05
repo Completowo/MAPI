@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+npm-debug.log
 
 # Expo
 .expo/
@@ -42,3 +43,6 @@ config.js
 # generated native folders
 /ios
 /android
+
+# .env file
+.env
