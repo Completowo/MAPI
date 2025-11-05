@@ -22,12 +22,14 @@ import { getGeminiResponse } from "../services/gemini";
 
 //Import misiones
 import missions from "../assets/missions.json";
+import { Switch } from "react-native-web";
 
 export function Main() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [mapiEmotion, setMapiEmotion] = useState("saludo");
 
   useEffect(() => {
     const fetchInitialGreeting = async () => {
@@ -38,8 +40,16 @@ export function Main() {
       ]
       const response = await getGeminiResponse(initialPrompt);
 
-      //Divide la respuesta en oraciones
-      const responseSentences = response
+      // Obtener emoción
+      const [firstLine, ...restLines] = response.split("\n");
+      const emotion = firstLine.split(":")[1]?.trim().toLowerCase() || "saludo";
+      console.log("EMOCIÓN:", emotion);
+
+      // Unir el resto del texto (sin la línea de emoción)
+      const cleanedResponse = restLines.join("\n");
+
+      // Dividir en oraciones
+      const responseSentences = cleanedResponse
         .split(/(?<=[.?!])\s+/)
         .filter((sentence) => sentence.trim().length > 0);
 
@@ -59,6 +69,8 @@ export function Main() {
 
       setMessages([userGreatingMessage, ...newMessages])
       
+      setMapiEmotion(emotion);
+      setMessages(newMessages);
       setIsLoading(false);
     };
 
@@ -90,7 +102,16 @@ export function Main() {
 
     const response = await getGeminiResponse(apiHistory);
 
-    const responseSentences = response
+    // 1. Obtener emoción
+    const [firstLine, ...restLines] = response.split("\n");
+    const emotion = firstLine.split(":")[1]?.trim().toLowerCase() || "saludo";
+    console.log("EMOCIÓN:", emotion);
+
+    // 2. Eliminar la línea de emoción y limpiar el texto
+    const cleanedResponse = restLines.join("\n");
+
+    // 3. Dividir en oraciones
+    const responseSentences = cleanedResponse
       .split(/(?<=[.?!])\s+/)
       .filter((sentence) => sentence.trim().length > 0);
 
@@ -104,6 +125,7 @@ export function Main() {
 
     
     setMessages([...updatedMesages, ...newAssistantMessages]);
+    setMapiEmotion(emotion);
     setIsLoading(false);
 
     console.log(messages)
@@ -113,6 +135,25 @@ export function Main() {
   const randomMissions = [...missions]
     .sort(() => Math.random() - 0.5)
     .slice(0, 2);
+  
+  const cambiarImagenEmocion = (Emotion) => {
+    switch (Emotion) {
+      case "saludo":
+        return require("../assets/MAPI-emociones/Saludo.png")
+      case "neutral":
+        return require("../assets/MAPI-emociones/Neutral.png")
+      case "feliz":
+        return require("../assets/MAPI-emociones/Feliz.png")
+      case "preocupado":
+        return require("../assets/MAPI-emociones/Preocupado-2.png")
+      case "enojado":
+        return require("../assets/MAPI-emociones/Enojado.png")
+      case "durmiendo":
+        return require("../assets/MAPI-emociones/Durmiendo.png")
+      default:
+        return require("../assets/MAPI-emociones/Nose1.png")
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -151,14 +192,18 @@ export function Main() {
             scrollViewRef.current?.scrollToEnd({ animated: true })
           }
         >
-          {messages.map((msg) => (
-            <Chat key={msg.id} text={msg.text} sender={msg.sender} />
-          ))}
+          {/*VARIABLE messages para los mensajes */}
+          {messages.map(
+            (msg) => (
+              //console.log("msg", msg),
+              (<Chat key={msg.id} text={msg.text} sender={msg.sender} />)
+            )
+          )}
           {isLoading && <Chat text="Escribiendo..." isThinking />}
         </ScrollView>
 
         <Image
-          source={require("../assets/mapi.png")}
+          source={cambiarImagenEmocion(mapiEmotion)}
           style={styles.mapiImage}
           resizeMode="contain"
         />
@@ -186,7 +231,7 @@ export function Main() {
 
 const styles = StyleSheet.create({
   todo: {
-    height: "100vh",
+    height: "95vh",
   },
   header: {
     width: "100%",
