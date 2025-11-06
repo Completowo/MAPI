@@ -6,8 +6,10 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
+  Text,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Link } from "expo-router";
 
 // Imports de Iconos
 import { SettingIcon, BellIcon } from "./Icons";
@@ -180,6 +182,9 @@ export function Main() {
         <View style={styles.icons}>
           <BellIcon />
           <SettingIcon />
+          <Link href="/RoleSelection">
+            <Text>BotonPruebas</Text>
+          </Link>
         </View>
       </View>
 
@@ -241,8 +246,10 @@ export function Main() {
 }
 
 const styles = StyleSheet.create({
-  todo: {
-    height: "95vh",
+  container: {
+    height: "50vh",
+    flex: 1,
+    backgroundColor: "#fff",
   },
   header: {
     width: "100%",
