@@ -33,7 +33,3 @@ npm start
 ## Notas importantes
 - No compartas tu archivo `.env` con datos sensibles
 - El archivo `.env` está incluido en `.gitignore` para mantener seguras tus credenciales
-
-## Notas importantes
-- No compartas tu archivo `.env` con datos sensibles
-- El archivo `.env` está incluido en `.gitignore` para mantener seguras tus credenciales
