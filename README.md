@@ -1,4 +1,4 @@
-# MAPI - Medical API Project
+# MAPI
 
 ## Requisitos previos
 - Node.js instalado
