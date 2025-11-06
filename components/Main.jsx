@@ -35,25 +35,30 @@ export function Main() {
     const fetchInitialGreeting = async () => {
       setIsLoading(true);
 
-      const initialPrompt = [
-        {role: "user", parts:[{text: "Hola"}] }
-      ]
+      const initialPrompt = [{ role: "user", parts: [{ text: "Hola" }] }];
       const response = await getGeminiResponse(initialPrompt);
 
       // Obtener emoción
-      const [firstLine, ...restLines] = response.split("\n");
-      const emotion = firstLine.split(":")[1]?.trim().toLowerCase() || "saludo";
+      const emotionMatch = response.match(
+        /Emocion:\s*["'(]*([\wáéíóú]+)["')]*\s*/i
+      );
+      const emotion = emotionMatch
+        ? emotionMatch[1].toLowerCase().replace(/\./g, "")
+        : "neutral";
       console.log("EMOCIÓN:", emotion);
 
       // Unir el resto del texto (sin la línea de emoción)
-      const cleanedResponse = restLines.join("\n");
+      const cleanedResponse = response
+        .replace(/Emocion:\s*["'(]*[\wáéíóú]+["')]*\s*/i, "")
+        .trim();
 
       // Dividir en oraciones
       const responseSentences = cleanedResponse
         .split(/(?<=[.?!])\s+/)
-        .filter((sentence) => sentence.trim().length > 0);
+        .map((s) => s.trim())
+        .filter((s) => s && s !== "." && s !== "..." && s.length > 1);
 
-      //Mensaje IA  
+      //Mensaje IA
       const newMessages = responseSentences.map((sentence) => ({
         id: Math.random(),
         text: sentence.trim(),
@@ -61,14 +66,14 @@ export function Main() {
       }));
 
       //Mensaje usuario :D
-      const userGreatingMessage ={
+      const userGreatingMessage = {
         id: Math.random(),
         text: "Hola",
         sender: "user",
-      }
+      };
 
-      setMessages([userGreatingMessage, ...newMessages])
-      
+      setMessages([userGreatingMessage, ...newMessages]);
+
       setMapiEmotion(emotion);
       setMessages(newMessages);
       setIsLoading(false);
@@ -89,75 +94,79 @@ export function Main() {
       sender: "user",
     };
 
-
-
     const updatedMesages = [...messages, newUserMessage];
 
-    const apiHistory = updatedMesages.map((msg)=>{
+    const apiHistory = updatedMesages.map((msg) => {
       return {
-        role: msg.sender ==='user' ? 'user' : 'model',
-        parts:[{text: msg.text}]
-      }
-    })
+        role: msg.sender === "user" ? "user" : "model",
+        parts: [{ text: msg.text }],
+      };
+    });
 
     const response = await getGeminiResponse(apiHistory);
 
-    // 1. Obtener emoción
-    const [firstLine, ...restLines] = response.split("\n");
-    const emotion = firstLine.split(":")[1]?.trim().toLowerCase() || "saludo";
+    // Obtener emoción
+    const emotionMatch = response.match(
+      /Emocion:\s*["'(]*([\wáéíóúñ]+)["')]*\s*/i
+    );
+    const emotion = emotionMatch
+      ? emotionMatch[1].toLowerCase().replace(/\./g, "")
+      : "neutral";
+    emotion.toLowerCase();
     console.log("EMOCIÓN:", emotion);
 
-    // 2. Eliminar la línea de emoción y limpiar el texto
-    const cleanedResponse = restLines.join("\n");
+    // Unir el resto del texto (sin la línea de emoción)
+    const cleanedResponse = response
+      .replace(/Emocion:\s*["'(]*[\wáéíóúñ]+["')]*\s*/i, "")
+      .trim();
 
-    // 3. Dividir en oraciones
+    // Dividir en oraciones
     const responseSentences = cleanedResponse
       .split(/(?<=[.?!])\s+/)
-      .filter((sentence) => sentence.trim().length > 0);
+      .map((s) => s.trim())
+      .filter((s) => s && s !== "." && s !== "..." && s.length > 1);
 
-        //MENSAJE DE LA IA
+    //MENSAJE DE LA IA
     const newAssistantMessages = responseSentences.map((sentence) => ({
       id: Math.random(),
       text: sentence.trim(),
       sender: "assistant",
     }));
 
-
-    
     setMessages([...updatedMesages, ...newAssistantMessages]);
     setMapiEmotion(emotion);
     setIsLoading(false);
 
-    console.log(messages)
+    console.log(messages);
   };
 
   //Funcion para solo sacar 2 misiones
   const randomMissions = [...missions]
     .sort(() => Math.random() - 0.5)
     .slice(0, 2);
-  
+
   const cambiarImagenEmocion = (Emotion) => {
     switch (Emotion) {
       case "saludo":
-        return require("../assets/MAPI-emociones/Saludo.png")
+        return require("../assets/MAPI-emociones/Saludo.png");
       case "neutral":
-        return require("../assets/MAPI-emociones/Neutral.png")
+        return require("../assets/MAPI-emociones/Neutral.png");
       case "feliz":
-        return require("../assets/MAPI-emociones/Feliz.png")
+        return require("../assets/MAPI-emociones/Feliz.png");
       case "preocupado":
-        return require("../assets/MAPI-emociones/Preocupado-2.png")
+        return require("../assets/MAPI-emociones/Preocupado-2.png");
       case "enojado":
-        return require("../assets/MAPI-emociones/Enojado.png")
+        return require("../assets/MAPI-emociones/Enojado.png");
       case "durmiendo":
-        return require("../assets/MAPI-emociones/Durmiendo.png")
+        return require("../assets/MAPI-emociones/Durmiendo.png");
       case "shock":
-        return require("../assets/MAPI-emociones/Shock.png")
+        return require("../assets/MAPI-emociones/Shock.png");
       case "confusion":
-        return require("../assets/MAPI-emociones/Confusion.png")
+        return require("../assets/MAPI-emociones/Confusion.png");
       default:
-        return require("../assets/MAPI-emociones/Nose1.png")
+        return require("../assets/MAPI-emociones/Nose1.png");
     }
-  }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -197,12 +206,10 @@ export function Main() {
           }
         >
           {/*VARIABLE messages para los mensajes */}
-          {messages.map(
-            (msg) => (
-              //console.log("msg", msg),
-              (<Chat key={msg.id} text={msg.text} sender={msg.sender} />)
-            )
-          )}
+          {messages.map((msg) => (
+            //console.log("msg", msg),
+            <Chat key={msg.id} text={msg.text} sender={msg.sender} />
+          ))}
           {isLoading && <Chat text="Escribiendo..." isThinking />}
         </ScrollView>
 
@@ -256,7 +263,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     marginTop: 50,
-    marginBottom:20,
+    marginBottom: 20,
     flex: 1, // permite que el scroll ocupe espacio dinámico
   },
   mapiImage: {
