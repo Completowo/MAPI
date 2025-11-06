@@ -149,3 +149,15 @@ export async function login({ email, password }) {
   }
   return res.json();
 }
+
+export async function deleteMedico(id) {
+  const res = await fetch(`${BASE}/medicos/${id}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Error eliminando médico: ${res.status} ${txt}`);
+  }
+  return res.json();
+}

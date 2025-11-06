@@ -33,9 +33,9 @@ export function Main() {
   const [showRoleSelection, setShowRoleSelection] = useState(true);
   const [selectedRole, setSelectedRole] = useState(null); // 'doctor' | 'patient' | null
 
-  // Cargar estado de autenticación al inicio
+  // Cargar estado de autenticación al inicio y verificar estado del médico periódicamente
   useEffect(() => {
-    const loadAuthState = async () => {
+    const verifyMedicoStatus = async () => {
       try {
         const storedAuth = await AsyncStorage.getItem('@auth_state');
         const storedUser = await AsyncStorage.getItem('@user_data');
@@ -53,16 +53,27 @@ export function Main() {
             console.log('Usuario no encontrado en MongoDB, cerrando sesión');
             // Si el médico no existe, limpiar el estado local
             await handleLogout();
+            Alert.alert(
+              'Sesión finalizada',
+              'Tu cuenta ha sido eliminada del sistema'
+            );
           }
         }
       } catch (error) {
-        console.error('Error loading auth state:', error);
+        console.error('Error verificando estado:', error);
         // Si hay error, mejor cerrar sesión para evitar estados inconsistentes
         await handleLogout();
       }
     };
 
-    loadAuthState();
+    // Verificar al inicio
+    verifyMedicoStatus();
+
+    // Verificar cada 30 segundos si el médico sigue existiendo
+    const interval = setInterval(verifyMedicoStatus, 30000);
+
+    // Limpiar intervalo al desmontar
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -250,6 +261,15 @@ export function Main() {
       <MedicoHome
         medicoData={userData}
         onLogout={handleLogout}
+      />
+    );
+  }
+
+  // Vista de administrador
+  if (userData?.role === 'admin') {
+    return (
+      <AdminDoctores
+        onBack={handleLogout}
       />
     );
   }

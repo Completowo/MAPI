@@ -138,6 +138,21 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Delete medico endpoint
+app.delete('/api/medicos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const medico = await Medico.findByIdAndDelete(id);
+    if (!medico) {
+      return res.status(404).json({ error: 'Médico no encontrado' });
+    }
+    res.json({ success: true, message: 'Médico eliminado exitosamente', requireLogout: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error eliminando médico' });
+  }
+});
+
 const os = require('os');
 
 function getLocalIPs() {
