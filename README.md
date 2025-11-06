@@ -1,5 +1,4 @@
 # MAPI
-
 ## Requisitos previos
 - Node.js instalado
 - MongoDB instalado o acceso a MongoDB Atlas
@@ -13,9 +12,9 @@ cd MAPI
 ```
 
 2. **Configurar variables de entorno**
-- Copia el archivo de ejemplo `.env.example` a `.env`:
-```bash
-cp .env.example .env
+- Crea el archivo `.env`:
+```content
+MONGODB_URI=mongodb+srv://user:password@cluster1.eyqle9c.mongodb.net/mapi?retryWrites=true&w=majority
 ```
 - Edita el archivo `.env` con tus valores específicos
 
@@ -30,6 +29,10 @@ Para iniciar el proyecto, ejecuta:
 ```bash
 npm start
 ```
+
+## Notas importantes
+- No compartas tu archivo `.env` con datos sensibles
+- El archivo `.env` está incluido en `.gitignore` para mantener seguras tus credenciales
 
 ## Notas importantes
 - No compartas tu archivo `.env` con datos sensibles
