@@ -21,6 +21,10 @@ import { PacienteLogin } from "./PacienteLogin";
 import { getGeminiResponse } from "../services/gemini";
 import { saveMedico } from "../services/api";
 
+//Import misiones
+import missions from "../assets/missions.json";
+import { Switch } from "react-native-web";
+
 export function Main() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef();
@@ -75,22 +79,52 @@ export function Main() {
     // Limpiar intervalo al desmontar
     return () => clearInterval(interval);
   }, []);
+  const [mapiEmotion, setMapiEmotion] = useState("saludo");
 
   useEffect(() => {
     const fetchInitialGreeting = async () => {
       setIsLoading(true);
-      const response = await getGeminiResponse("Hola");
 
-      const responseSentences = response
+      const initialPrompt = [{ role: "user", parts: [{ text: "Hola" }] }];
+      const response = await getGeminiResponse(initialPrompt);
+
+      // Obtener emoción
+      const emotionMatch = response.match(
+        /Emocion:\s*["'(]*([\wáéíóú]+)["')]*\s*/i
+      );
+      const emotion = emotionMatch
+        ? emotionMatch[1].toLowerCase().replace(/\./g, "")
+        : "neutral";
+      console.log("EMOCIÓN:", emotion);
+
+      // Unir el resto del texto (sin la línea de emoción)
+      const cleanedResponse = response
+        .replace(/Emocion:\s*["'(]*[\wáéíóú]+["')]*\s*/i, "")
+        .trim();
+
+      // Dividir en oraciones
+      const responseSentences = cleanedResponse
         .split(/(?<=[.?!])\s+/)
-        .filter((sentence) => sentence.trim().length > 0);
+        .map((s) => s.trim())
+        .filter((s) => s && s !== "." && s !== "..." && s.length > 1);
 
+      //Mensaje IA
       const newMessages = responseSentences.map((sentence) => ({
         id: Math.random(),
         text: sentence.trim(),
         sender: "assistant",
       }));
 
+      //Mensaje usuario :D
+      const userGreatingMessage = {
+        id: Math.random(),
+        text: "Hola",
+        sender: "user",
+      };
+
+      setMessages([userGreatingMessage, ...newMessages]);
+
+      setMapiEmotion(emotion);
       setMessages(newMessages);
       setIsLoading(false);
     };
@@ -98,52 +132,90 @@ export function Main() {
     fetchInitialGreeting();
   }, []);
 
-  const handleSend = async () => {
-    if (prompt.trim().length === 0) return;
-
-    const userMessage = {
-      id: Math.random(),
-      text: prompt,
-      sender: "user",
-    };
-
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-    const currentPrompt = prompt;
-    setPrompt("");
-    setIsLoading(true);
-
-    const response = await getGeminiResponse(currentPrompt);
-    const responseSentences = response
-      .split(/(?<=[.?!])\s+/)
-      .filter((sentence) => sentence.trim().length > 0);
-
-    const newAssistantMessages = responseSentences.map((sentence) => ({
-      id: Math.random(),
-      text: sentence.trim(),
-      sender: "assistant",
-    }));
-
-    setMessages((prevMessages) => [...prevMessages, ...newAssistantMessages]);
-    setIsLoading(false);
-  };
-
+  //PAPUUU
   const handleSendTranscription = async (transcription) => {
     if (!transcription) return;
     setIsLoading(true);
-    const response = await getGeminiResponse(transcription);
 
-    const responseSentences = response
+    //MENSAJE DEL USUARIO
+    const newUserMessage = {
+      id: Math.random(),
+      text: transcription,
+      sender: "user",
+    };
+
+    const updatedMesages = [...messages, newUserMessage];
+
+    const apiHistory = updatedMesages.map((msg) => {
+      return {
+        role: msg.sender === "user" ? "user" : "model",
+        parts: [{ text: msg.text }],
+      };
+    });
+
+    const response = await getGeminiResponse(apiHistory);
+
+    // Obtener emoción
+    const emotionMatch = response.match(
+      /Emocion:\s*["'(]*([\wáéíóúñ]+)["')]*\s*/i
+    );
+    const emotion = emotionMatch
+      ? emotionMatch[1].toLowerCase().replace(/\./g, "")
+      : "neutral";
+    emotion.toLowerCase();
+    console.log("EMOCIÓN:", emotion);
+
+    // Unir el resto del texto (sin la línea de emoción)
+    const cleanedResponse = response
+      .replace(/Emocion:\s*["'(]*[\wáéíóúñ]+["')]*\s*/i, "")
+      .trim();
+
+    // Dividir en oraciones
+    const responseSentences = cleanedResponse
       .split(/(?<=[.?!])\s+/)
-      .filter((sentence) => sentence.trim().length > 0);
+      .map((s) => s.trim())
+      .filter((s) => s && s !== "." && s !== "..." && s.length > 1);
 
+    //MENSAJE DE LA IA
     const newAssistantMessages = responseSentences.map((sentence) => ({
       id: Math.random(),
       text: sentence.trim(),
       sender: "assistant",
     }));
 
-    setMessages((prevMessages) => [...prevMessages, ...newAssistantMessages]);
+    setMessages([...updatedMesages, ...newAssistantMessages]);
+    setMapiEmotion(emotion);
     setIsLoading(false);
+
+    console.log(messages);
+  };
+
+  //Funcion para solo sacar 2 misiones
+  const randomMissions = [...missions]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 2);
+
+  const cambiarImagenEmocion = (Emotion) => {
+    switch (Emotion) {
+      case "saludo":
+        return require("../assets/MAPI-emociones/Saludo.png");
+      case "neutral":
+        return require("../assets/MAPI-emociones/Neutral.png");
+      case "feliz":
+        return require("../assets/MAPI-emociones/Feliz.png");
+      case "preocupado":
+        return require("../assets/MAPI-emociones/Preocupado-2.png");
+      case "enojado":
+        return require("../assets/MAPI-emociones/Enojado.png");
+      case "durmiendo":
+        return require("../assets/MAPI-emociones/Durmiendo.png");
+      case "shock":
+        return require("../assets/MAPI-emociones/Shock.png");
+      case "confusion":
+        return require("../assets/MAPI-emociones/Confusion.png");
+      default:
+        return require("../assets/MAPI-emociones/Nose1.png");
+    }
   };
 
   // Handlers para autenticación
@@ -295,8 +367,15 @@ export function Main() {
 
       <LastCheck mgdl={90} lastCheck={26} />
 
-      <Missions title={"Camina durante 30 minutos"} progress={0.35} />
-      <Missions title={"Haste un Check"} progress={1} />
+      {randomMissions.map((mission, index) => {
+        return (
+          <Missions
+            key={index}
+            title={mission.title}
+            progress={mission.progress}
+          />
+        );
+      })}
 
       {/* Contenedor del chat con scroll */}
       <View style={styles.chatSection}>
@@ -308,15 +387,16 @@ export function Main() {
             scrollViewRef.current?.scrollToEnd({ animated: true })
           }
         >
+          {/*VARIABLE messages para los mensajes */}
           {messages.map((msg) => (
+            //console.log("msg", msg),
             <Chat key={msg.id} text={msg.text} sender={msg.sender} />
           ))}
           {isLoading && <Chat text="Escribiendo..." isThinking />}
         </ScrollView>
 
-
         <Image
-          source={require("../assets/mapi.png")}
+          source={cambiarImagenEmocion(mapiEmotion)}
           style={styles.mapiImage}
           resizeMode="contain"
         />
@@ -344,7 +424,7 @@ export function Main() {
 
 const styles = StyleSheet.create({
   todo: {
-    height: "100vh",
+    height: "95vh",
   },
   authContainer: {
     flex: 1,
@@ -384,6 +464,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     marginTop: 50,
+    marginBottom: 20,
     flex: 1, // permite que el scroll ocupe espacio dinámico
   },
   mapiImage: {
