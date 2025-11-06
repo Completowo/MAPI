@@ -16,7 +16,10 @@ import { Login } from "./Login";
 import { Register } from "./Register";
 import { RoleSelection } from "./RoleSelection";
 import { PatientHome } from "./PatientHome";
+import { MedicoHome } from "./MedicoHome";
+import { PacienteLogin } from "./PacienteLogin";
 import { getGeminiResponse } from "../services/gemini";
+import { saveMedico } from "../services/api";
 
 export function Main() {
   const insets = useSafeAreaInsets();
@@ -38,11 +41,24 @@ export function Main() {
         const storedUser = await AsyncStorage.getItem('@user_data');
         
         if (storedAuth === 'true' && storedUser) {
-          setIsAuthenticated(true);
-          setUserData(JSON.parse(storedUser));
+          const userData = JSON.parse(storedUser);
+          
+          // Verificar si el usuario aún existe en MongoDB
+          try {
+            await verificarMedico({ email: userData.email });
+            // Si no hay error, el médico existe
+            setIsAuthenticated(true);
+            setUserData(userData);
+          } catch (err) {
+            console.log('Usuario no encontrado en MongoDB, cerrando sesión');
+            // Si el médico no existe, limpiar el estado local
+            await handleLogout();
+          }
         }
       } catch (error) {
         console.error('Error loading auth state:', error);
+        // Si hay error, mejor cerrar sesión para evitar estados inconsistentes
+        await handleLogout();
       }
     };
 
@@ -179,14 +195,20 @@ export function Main() {
       );
     }
 
-    // 2) Si eligió paciente, mostrar página en blanco con botón volver
+    // Si eligió paciente, mostrar login por RUT
     if (selectedRole === 'patient') {
       return (
         <View style={[styles.authContainer, { paddingTop: insets.top }]}> 
-          <PatientHome onBack={() => {
-            setSelectedRole(null);
-            setShowRoleSelection(true);
-          }} />
+          <PacienteLogin 
+            onBack={() => {
+              setSelectedRole(null);
+              setShowRoleSelection(true);
+            }}
+            onLoginSuccess={(pacienteData) => {
+              setUserData(pacienteData);
+              setIsAuthenticated(true);
+            }}
+          />
         </View>
       );
     }
@@ -201,9 +223,12 @@ export function Main() {
               setShowRoleSelection(true);
             }}
             onSwitchToLogin={() => setShowRegister(false)}
-            onRegisterSuccess={(userData) => {
+            onRegisterSuccess={async (userData) => {
               console.log('Registro exitoso:', userData);
-              handleRegister(userData);
+              // Guardar en AsyncStorage y actualizar estado
+              await handleRegister(userData);
+              // Cambiar a la vista de login después del registro exitoso
+              setShowRegister(false);
             }}
           />
         ) : (
@@ -220,6 +245,16 @@ export function Main() {
   }
 
   // Vista principal cuando está autenticado
+  if (userData?.role === 'medico') {
+    return (
+      <MedicoHome
+        medicoData={userData}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  // Vista de paciente (la original)
   return (
     <View style={{ flex: 1 }}>
       <View

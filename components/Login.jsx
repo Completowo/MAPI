@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Text, TextInput, Pressable, Alert } from "react-native";
+import { login } from "../services/api";
 
 export function Login({ onSwitchToRegister, onLoginSuccess }) {
   const [email, setEmail] = useState("");
@@ -18,13 +19,26 @@ export function Login({ onSwitchToRegister, onLoginSuccess }) {
       return;
     }
 
-    // Pasar datos al callback de éxito
-    if (onLoginSuccess) {
-      onLoginSuccess({
-        email,
-        // No enviar la contraseña al estado, solo usarla para auth
-      });
-    }
+    // Llamar al backend para validar credenciales
+    (async () => {
+      try {
+        const res = await login({ email, password });
+        if (res && res.success && res.medico) {
+          if (onLoginSuccess) {
+            // Agregar el rol al objeto del médico
+            onLoginSuccess({
+              ...res.medico,
+              role: 'medico'
+            });
+          }
+        } else {
+          Alert.alert('Error', 'Credenciales inválidas');
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        Alert.alert('Error', 'No se pudo iniciar sesión');
+      }
+    })();
   };
 
   return (

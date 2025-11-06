@@ -9,31 +9,19 @@ import {
   Alert,
 } from "react-native";
 import * as DocumentPicker from 'expo-document-picker';
+import { saveMedicoMultipart } from "../services/api";
 
 // Función para formatear RUT
 const formatRut = (rutValue) => {
-  // Eliminar todos los caracteres no numéricos ni K/k
   let cleaned = rutValue.replace(/[^0-9kK]/g, "").toUpperCase();
-  
-  // Si está vacío, retornar vacío
   if (!cleaned) return "";
-  
-  // Separar dígito verificador
   let dv = cleaned.slice(-1);
   let numbers = cleaned.slice(0, -1);
-  
-  // Asegurar que solo tenemos números en la parte principal
   numbers = numbers.replace(/[^0-9]/g, "");
-  
-  // Rellenar con ceros a la izquierda si es necesario
   while (numbers.length < 8) {
     numbers = "0" + numbers;
   }
-  
-  // Tomar solo los últimos 8 dígitos si es más largo
   numbers = numbers.slice(-8);
-  
-  // Formatear con puntos
   let formatted = "";
   for (let i = numbers.length - 1; i >= 0; i--) {
     formatted = numbers[i] + formatted;
@@ -41,8 +29,6 @@ const formatRut = (rutValue) => {
       formatted = "." + formatted;
     }
   }
-  
-  // Agregar guión y dígito verificador
   return formatted + "-" + dv;
 };
 
@@ -50,28 +36,64 @@ export function Register({ onSwitchToLogin, onRegisterSuccess, onBack }) {
   const [name, setName] = useState("");
   const [rut, setRut] = useState("");
   const [rutError, setRutError] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("+56 9 ");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [fileError, setFileError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
-  const inputRef = useRef(null);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const validatePasswords = () => {
     if (password.length === 0 || confirmPassword.length === 0) {
-      setPasswordError("");
-      return true;
+      setPasswordError("Ambos campos de contraseña son requeridos");
+      return false;
+    }
+
+    if (password.length < 6) {
+      setPasswordError("La contraseña debe tener al menos 6 caracteres");
+      return false;
     }
 
     if (password !== confirmPassword) {
       setPasswordError("Las contraseñas no coinciden");
       return false;
     }
+    
     setPasswordError("");
     return true;
+  };
+
+  const formatPhoneNumber = (value) => {
+    let numbers = value.replace(/[^\d]/g, '');
+    if (!numbers) return "+56 9 ";
+    if (numbers.startsWith('56')) {
+      numbers = numbers.substring(2);
+    }
+    if (numbers.startsWith('9')) {
+      numbers = numbers.substring(1);
+    }
+    numbers = numbers.substring(0, 8);
+    
+    if (numbers.length > 0) {
+      let formatted = "+56 9";
+      if (numbers.length > 0) {
+        formatted += " " + numbers.substring(0, 4);
+      }
+      if (numbers.length > 4) {
+        formatted += " " + numbers.substring(4);
+      }
+      return formatted;
+    }
+    
+    return "+56 9 ";
+  };
+
+  const validatePhone = (phoneNumber) => {
+    const cleaned = phoneNumber.replace(/\s/g, '');
+    return /^\+569\d{8}$/.test(cleaned);
   };
 
   const handlePickFile = async () => {
@@ -85,9 +107,11 @@ export function Register({ onSwitchToLogin, onRegisterSuccess, onBack }) {
           if (!file) return;
           if (!file.name.toLowerCase().endsWith(".pdf")) {
             setSelectedFileName("");
+            setSelectedFile(null);
             setFileError("Solo se permiten archivos PDF");
             return;
           }
+          setSelectedFile(file);
           setSelectedFileName(file.name);
           setFileError("");
         };
@@ -95,7 +119,6 @@ export function Register({ onSwitchToLogin, onRegisterSuccess, onBack }) {
         return;
       }
 
-      // Selección nativa usando expo-document-picker
       const result = await DocumentPicker.getDocumentAsync({
         type: "application/pdf",
         copyToCacheDirectory: true,
@@ -105,8 +128,8 @@ export function Register({ onSwitchToLogin, onRegisterSuccess, onBack }) {
         return;
       }
 
-      // En iOS/Android, result.assets[0] contiene la info del archivo
       const file = result.assets[0];
+      setSelectedFile(file);
       setSelectedFileName(file.name);
       setFileError("");
     } catch (err) {
@@ -115,49 +138,105 @@ export function Register({ onSwitchToLogin, onRegisterSuccess, onBack }) {
     }
   };
 
-  const [isRegistering, setIsRegistering] = useState(false);
-
   const handleRegister = async () => {
-    const pwOk = validatePasswords();
-    if (!pwOk) return;
-
-    // Validación mínima de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert("Email inválido", "Por favor ingresa un correo válido.");
-      return;
-    }
-
-    if (!name || !rut || !phone) {
-      Alert.alert("Datos incompletos", "Por favor completa todos los campos.");
-      return;
-    }
-
-    // Validar formato de RUT antes de enviar
-    const formattedRut = formatRut(rut);
-    if (formattedRut.length < 11) {
-      setRutError("RUT inválido");
-      Alert.alert("RUT inválido", "Por favor ingresa un RUT válido.");
-      return;
-    }
-    setRut(formattedRut); // Asegurar formato final
-
-    setIsRegistering(true);
-
     try {
-      // Pasar datos al callback de éxito (sin incluir contraseña)
+      console.log('Iniciando proceso de registro...');
+
+      // Validar campos obligatorios
+      if (!name || !rut || !phone || !email || !password || !confirmPassword) {
+        Alert.alert('Error', 'Todos los campos son obligatorios');
+        return;
+      }
+
+      // Validar contraseñas
+      if (!validatePasswords()) {
+        return; // validatePasswords ya muestra el error
+      }
+
+      // Validar email
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        Alert.alert('Error', 'Email inválido');
+        return;
+      }
+
+      // Validar teléfono
+      if (!validatePhone(phone)) {
+        Alert.alert('Error', 'Número de teléfono inválido');
+        return;
+      }
+
+      // Validar archivo
+      if (!selectedFile) {
+        Alert.alert('Error', 'Debes subir un documento PDF');
+        return;
+      }
+
+      // Validar RUT
+      const formattedRut = formatRut(rut);
+      if (formattedRut.length < 11) {
+        setRutError("RUT inválido");
+        Alert.alert("Error", "RUT inválido");
+        return;
+      }
+
+      setIsRegistering(true);
+
+      // Preparar el archivo según la plataforma
+      const fileToUpload = Platform.OS === 'web' ? selectedFile : {
+        uri: selectedFile.uri,
+        name: selectedFile.name || 'document.pdf',
+        type: selectedFile.mimeType || 'application/pdf'
+      };
+
+      console.log('Enviando registro con:', {
+        nombre: name,
+        run: formattedRut,
+        telefono: phone,
+        email,
+        tieneArchivo: !!fileToUpload,
+        plataforma: Platform.OS
+      });
+
+      const res = await saveMedicoMultipart({
+        nombre: name,
+        run: formattedRut,
+        telefono: phone,
+        email,
+        password,
+        file: fileToUpload
+      });
+
+      if (!res || !res._id) {
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+      console.log('Registro exitoso:', res);
+
       if (onRegisterSuccess) {
-        await onRegisterSuccess({
-          name,
-          rut,
-          phone,
-          email,
-          pdfFileName: selectedFileName,
-          // No enviar la contraseña al estado, solo usarla para auth
+        onRegisterSuccess({
+          id: res._id,
+          name: res.nombre,
+          rut: res.run,
+          phone: res.telefono,
+          email: res.email,
+          role: 'medico'
         });
       }
+
+      Alert.alert(
+        'Éxito',
+        'Registro completado correctamente',
+        [{ text: 'OK', onPress: () => onSwitchToLogin?.() }]
+      );
+
     } catch (error) {
-      Alert.alert("Error", "No se pudo completar el registro");
+      console.error('Error en registro:', error);
+      Alert.alert(
+        'Error',
+        error.message.includes('Network request failed')
+          ? 'Error de conexión. Verifica tu red y el servidor.'
+          : 'No se pudo completar el registro. Intenta nuevamente.'
+      );
     } finally {
       setIsRegistering(false);
     }
@@ -168,6 +247,7 @@ export function Register({ onSwitchToLogin, onRegisterSuccess, onBack }) {
       <Pressable onPress={onBack} style={styles.backRow}>
         <Text style={styles.backText}>Volver</Text>
       </Pressable>
+      
       <Text style={styles.title}>Crear cuenta</Text>
 
       <TextInput
@@ -183,17 +263,13 @@ export function Register({ onSwitchToLogin, onRegisterSuccess, onBack }) {
         placeholder="RUT (ej: 12.345.678-9)"
         value={rut}
         onChangeText={(text) => {
-          // Permitir escribir sin formato
           setRut(text);
           setRutError("");
         }}
         onBlur={() => {
-          // Al perder foco, formatear y validar
           if (rut) {
             const formattedRut = formatRut(rut);
             setRut(formattedRut);
-            
-            // Validación básica: largo mínimo con formato XX.XXX.XXX-X
             if (formattedRut.length < 11) {
               setRutError("RUT inválido");
             }
@@ -209,7 +285,7 @@ export function Register({ onSwitchToLogin, onRegisterSuccess, onBack }) {
         placeholder="Teléfono"
         keyboardType="phone-pad"
         value={phone}
-        onChangeText={setPhone}
+        onChangeText={(text) => setPhone(formatPhoneNumber(text))}
         placeholderTextColor="#999"
       />
 

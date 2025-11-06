@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 //API, Le pongo _LOL al final para que no gaste tokens :D
-const API_KEY = "AIzaSyC6_Xg99KGiIgfTkutSvTlemqIOVmiGnHU_LOL";
+const API_KEY = "AIzaSyC6_Xg99KGiIgfTkutSvTlemqIOVmiGnHU";
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
