@@ -3,5 +3,5 @@ import { Main } from "../components/Main";
 import { RoleSelection } from "./RoleSelection";
 
 export default function Index() {
-  return <RoleSelection />;
+  return <Main />;
 }

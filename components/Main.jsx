@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link } from "expo-router";
+import { supabase } from "../services/supabase";
 
 // Imports de Iconos
 import { SettingIcon, BellIcon } from "./Icons";
@@ -138,6 +139,17 @@ export function Main() {
     setMessages([...updatedMesages, ...newAssistantMessages]);
     setMapiEmotion(emotion);
     setIsLoading(false);
+
+    //Mandar chat a Supabase
+    const { error } = await supabase.from("chats").upsert([
+      {
+        id: "1",
+        messages: updatedMesages,
+        created_at: new Date(),
+      },
+    ]);
+
+    if (error) console.log("Error guardando chat", error);
 
     console.log(messages);
   };
