@@ -12,21 +12,21 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link } from "expo-router";
 
 // Imports de Iconos
-import { SettingIcon, BellIcon } from "./Icons";
+import { SettingIcon, BellIcon } from "../components/Icons";
 
 // Imports de Componentes
-import { Points } from "./Points";
-import { LastCheck } from "./LastCheck";
-import { Missions } from "./Missions";
-import { Chat } from "./Chat";
-import { BotonGrabacion } from "./BotonGrabacion";
+import { Points } from "../components/Points";
+import { LastCheck } from "../components/LastCheck";
+import { Missions } from "../components/Missions";
+import { Chat } from "../components/Chat";
+import { BotonGrabacion } from "../components/BotonGrabacion";
 import { getGeminiResponse } from "../services/gemini";
 
 //Import misiones
 import missions from "../assets/missions.json";
 import { Switch } from "react-native-web";
 
-export function Main() {
+export default function Main() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef();
   const [messages, setMessages] = useState([]);
