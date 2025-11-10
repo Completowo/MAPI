@@ -38,7 +38,7 @@ export function Main() {
   const fetchChatHistory = async () => {
     const { data, error } = await supabase
       .from("chats")
-      .select("messages")
+      .select("messages", "emotion")
       .eq("id", "1")
       .single();
 
@@ -47,7 +47,10 @@ export function Main() {
       return [];
     }
 
-    return data?.messages || [];
+    return {
+      messages: data?.messages || [],
+      emotion: data?.emotion || "neutral",
+    };
   };
 
   //Trae el historial devuelva
@@ -55,10 +58,13 @@ export function Main() {
     const fetchData = async () => {
       setIsLoading(true);
 
-      const history = await fetchChatHistory();
+      const { messages: history, emotion: historyEmotion } =
+        await fetchChatHistory();
 
+      //Setear Historial y emociones desde la base de datos
       if (history.length > 0) {
         console.log("Historial cargado desde Supabase ✅");
+        setMapiEmotion(historyEmotion || "neutral");
         setMessages(history);
         setIsLoading(false);
         return;
@@ -69,14 +75,14 @@ export function Main() {
       const response = await getGeminiResponse(initialPrompt);
 
       const emotionMatch = response.match(
-        /Emocion:\s*["'(]*([\wáéíóú]+)["')]*\s*/i
+        /Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i
       );
       const emotion = emotionMatch
         ? emotionMatch[1].toLowerCase().replace(/\./g, "")
         : "neutral";
 
       const cleanedResponse = response
-        .replace(/Emocion:\s*["'(]*[\wáéíóú]+["')]*\s*/i, "")
+        .replace(/Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i, "")
         .trim();
 
       const responseSentences = cleanedResponse
@@ -101,6 +107,7 @@ export function Main() {
         {
           id: "1",
           messages: combinedMessages,
+          emotion: emotion,
           created_at: new Date(),
         },
       ]);
@@ -109,10 +116,12 @@ export function Main() {
     fetchData();
   }, []);
 
-  //Función principal de chat
+  //Función principal de chat de la ia
   const handleSendTranscription = async (transcription) => {
     if (!transcription) return;
     setIsLoading(true);
+
+    const { messages: history } = await fetchChatHistory();
 
     //MENSAJE DEL USUARIO
     const newUserMessage = {
@@ -121,7 +130,7 @@ export function Main() {
       sender: "user",
     };
 
-    const updatedMesages = [...messages, newUserMessage];
+    const updatedMesages = [...history, newUserMessage];
 
     const apiHistory = updatedMesages.map((msg) => {
       return {
@@ -134,7 +143,7 @@ export function Main() {
 
     // Obtener emoción
     const emotionMatch = response.match(
-      /Emocion:\s*["'(]*([\wáéíóúñ]+)["')]*\s*/i
+      /Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i
     );
     const emotion = emotionMatch
       ? emotionMatch[1].toLowerCase().replace(/\./g, "")
@@ -144,7 +153,7 @@ export function Main() {
 
     // Unir el resto del texto (sin la línea de emoción)
     const cleanedResponse = response
-      .replace(/Emocion:\s*["'(]*[\wáéíóúñ]+["')]*\s*/i, "")
+      .replace(/Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i, "")
       .trim();
 
     // Dividir en oraciones
@@ -172,12 +181,14 @@ export function Main() {
         id: "1",
         messages: finalMessages,
         created_at: new Date(),
+        emotion: emotion,
       },
     ]);
 
     if (error) console.log("Error guardando chat", error);
 
-    console.log(messages);
+    console.log(apiHistory);
+    console.log("Emocion: ", emotion);
   };
 
   //Funcion para solo sacar 2 misiones
