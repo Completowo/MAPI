@@ -1,16 +1,55 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Picker } from '@react-native-picker/picker';
+import { registerDoctor } from '../services/supabase';
 
 export default function DoctorRegister() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     nombre: '',
     rut: '',
+    especialidad: '',
+    institucionMedica: '',
+    codigoPostalInstitucion: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  async function handleRegister() {
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    // Basic validations
+    if (!formData.nombre || !formData.rut || !formData.email || !formData.password || !formData.confirmPassword) {
+      setErrorMsg('Por favor completa todos los campos requeridos.');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMsg('Las contraseñas no coinciden.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error, user } = await registerDoctor(formData);
+      if (error) {
+        setErrorMsg(error.message || 'Error al registrar en Supabase.');
+      } else {
+        setSuccessMsg('Registro exitoso. Revisa tu email para confirmar (si aplica).');
+        // Optionally navigate to login
+        // router.push('doctorLogin');
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Error inesperado.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <KeyboardAvoidingView 
@@ -27,7 +66,6 @@ export default function DoctorRegister() {
         <Text style={styles.subtitle}>Complete sus datos para registrarse</Text>
 
         <View style={styles.form}>
-          {/* Nombre completo */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Nombre Completo</Text>
             <TextInput
@@ -39,7 +77,6 @@ export default function DoctorRegister() {
             />
           </View>
 
-          {/* RUT */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>RUT</Text>
             <TextInput
@@ -51,7 +88,6 @@ export default function DoctorRegister() {
             />
           </View>
 
-          {/* Email */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Correo Electrónico</Text>
             <TextInput
@@ -64,18 +100,48 @@ export default function DoctorRegister() {
             />
           </View>
 
-          {/* Botón para subir archivos */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Documentos Médicos</Text>
-            <TouchableOpacity style={styles.uploadButton}>
-              <Text style={styles.uploadButtonText}>📎 Subir documentos</Text>
-            </TouchableOpacity>
-            <Text style={styles.helperText}>
-              Sube tu título médico y documentos que acrediten tu profesión
-            </Text>
+            <Text style={styles.label}>Especialidad</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={formData.especialidad}
+                onValueChange={(value) => setFormData({...formData, especialidad: value})}
+                style={styles.picker}
+              >
+                <Picker.Item label="Seleccione especialidad..." value="" />
+                <Picker.Item label="Endocrinología" value="Endocrinología" />
+                <Picker.Item label="Medicina Interna" value="Medicina Interna" />
+                <Picker.Item label="Pediatría" value="Pediatría" />
+                <Picker.Item label="Medicina Familiar" value="Medicina Familiar" />
+                <Picker.Item label="Nutrición y Dietética" value="Nutrición y Dietética" />
+              </Picker>
+            </View>
           </View>
 
-          {/* Contraseña */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Institución Médica</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: Hospital San José"
+              value={formData.institucionMedica}
+              onChangeText={(text) => setFormData({...formData, institucionMedica: text})}
+              autoCapitalize="words"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Código Postal (Institución)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: 8320000"
+              value={formData.codigoPostalInstitucion}
+              onChangeText={(text) => setFormData({...formData, codigoPostalInstitucion: text})}
+              keyboardType="numeric"
+            />
+          </View>
+
+          {/* correo movido arriba del RUT */}
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Contraseña</Text>
             <TextInput
@@ -87,7 +153,6 @@ export default function DoctorRegister() {
             />
           </View>
 
-          {/* Confirmar Contraseña */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Confirmar Contraseña</Text>
             <TextInput
@@ -99,12 +164,17 @@ export default function DoctorRegister() {
             />
           </View>
 
-          {/* Botón de registro */}
-          <TouchableOpacity style={styles.registerButton}>
-            <Text style={styles.registerButtonText}>Registrarse</Text>
+          {errorMsg ? <Text style={{ color: 'red', textAlign: 'center' }}>{errorMsg}</Text> : null}
+          {successMsg ? <Text style={{ color: 'green', textAlign: 'center' }}>{successMsg}</Text> : null}
+
+          <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.registerButtonText}>Registrarse</Text>
+            )}
           </TouchableOpacity>
 
-          {/* Link para volver al login */}
           <TouchableOpacity 
             style={styles.loginLink}
             onPress={() => router.push('doctorLogin')}
@@ -172,6 +242,22 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     fontSize: 16,
     backgroundColor: '#FAFAFA',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#FAFAFA',
+  },
+  picker: {
+    width: '100%',
+    minHeight: Platform.OS === 'web' ? 48 : 56,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === 'web' ? 10 : 12,
+    fontSize: 16,
+    color: '#333',
+    justifyContent: 'center',
   },
   uploadButton: {
     padding: 16,
