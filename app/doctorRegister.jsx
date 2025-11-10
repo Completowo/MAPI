@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Keyboa
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import { registerDoctor } from '../services/supabase';
+import postalCodes from '../assets/cl_cods_post.json';
 
 export default function DoctorRegister() {
   const router = useRouter();
@@ -16,15 +17,98 @@ export default function DoctorRegister() {
     password: '',
     confirmPassword: '',
   });
+  
+  function cleanRut(value) {
+    if (!value) return '';
+    return value.replace(/\.|\-|\s/g, '').toUpperCase();
+  }
+
+  function formatRut(value) {
+    const cleaned = cleanRut(value);
+    if (cleaned.length === 0) return '';
+    const body = cleaned.slice(0, -1);
+    const dv = cleaned.slice(-1);
+    if (!body) return cleaned;
+    const withDots = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${withDots}-${dv}`;
+  }
+
+  function validateRut(value) {
+    const cleaned = cleanRut(value);
+    if (!cleaned || cleaned.length < 2) return false;
+    const body = cleaned.slice(0, -1);
+    let dv = cleaned.slice(-1);
+    dv = dv === 'K' ? 'K' : dv;
+    // Accept RUT bodies of 7 or 8 digits (most Chilean RUTs are 7 or 8 digits long)
+    if (!/^\d{7,8}$/.test(body)) return false;
+    let sum = 0;
+    let multiplier = 2;
+    for (let i = body.length - 1; i >= 0; i--) {
+      sum += parseInt(body.charAt(i), 10) * multiplier;
+      multiplier = multiplier === 7 ? 2 : multiplier + 1;
+    }
+    const remainder = sum % 11;
+    const expected = 11 - remainder;
+    let expectedDv = '';
+    if (expected === 11) expectedDv = '0';
+    else if (expected === 10) expectedDv = 'K';
+    else expectedDv = String(expected);
+    return expectedDv === dv;
+  }
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [postalValid, setPostalValid] = useState(null);
+  const [postalInfo, setPostalInfo] = useState(null);
+
+  let postalSet = null;
+  let postalMap = null;
+  try {
+    if (Array.isArray(postalCodes)) {
+      const map = new Map();
+      const list = postalCodes
+        .map((item) => {
+          if (item == null) return null;
+          if (typeof item === 'object') {
+            const code = item['Código Postal'] ?? item['codigo_postal'] ?? item.codigo ?? item.code ?? item.postal ?? null;
+            if (code == null) return null;
+            const cleaned = String(code).replace(/\D/g, '').padStart(7, '0');
+            map.set(cleaned, item);
+            return cleaned;
+          }
+          const cleaned = String(item).replace(/\D/g, '').padStart(7, '0');
+          map.set(cleaned, item);
+          return cleaned;
+        })
+        .filter(Boolean);
+      postalSet = new Set(list);
+      postalMap = map;
+    }
+  } catch (e) {
+    postalSet = null;
+    postalMap = null;
+    console.warn('Error building postalSet from assets/cl_cods_post.json', e);
+  }
+
+  function isValidChilePostalCode(value) {
+    if (value === undefined || value === null) return false;
+    const cleaned = String(value).replace(/\D/g, '');
+    if (!/^\d{7}$/.test(cleaned)) return false;
+    if (!postalSet) return true;
+    return postalSet.has(cleaned);
+  }
+
+  function getPostalInfo(value) {
+    if (!postalMap) return null;
+    const cleaned = String(value).replace(/\D/g, '');
+    if (!/^\d{7}$/.test(cleaned)) return null;
+    return postalMap.get(cleaned) ?? null;
+  }
 
   async function handleRegister() {
     setErrorMsg('');
     setSuccessMsg('');
 
-    // Basic validations
     if (!formData.nombre || !formData.rut || !formData.email || !formData.password || !formData.confirmPassword) {
       setErrorMsg('Por favor completa todos los campos requeridos.');
       return;
@@ -33,6 +117,20 @@ export default function DoctorRegister() {
       setErrorMsg('Las contraseñas no coinciden.');
       return;
     }
+    const rutValid = validateRut(formData.rut);
+    if (!rutValid) {
+      setErrorMsg('RUT inválido. Por favor verifica el RUT ingresado.');
+      return;
+    }
+
+    const postalOk = isValidChilePostalCode(formData.codigoPostalInstitucion || '');
+    if (!postalOk) {
+      setErrorMsg('Código postal inválido. Por favor verifica el código postal de la institución.');
+      return;
+    }
+
+    const formattedRut = formatRut(formData.rut);
+    setFormData(prev => ({ ...prev, rut: formattedRut }));
 
     setLoading(true);
     try {
@@ -41,8 +139,7 @@ export default function DoctorRegister() {
         setErrorMsg(error.message || 'Error al registrar en Supabase.');
       } else {
         setSuccessMsg('Registro exitoso. Revisa tu email para confirmar (si aplica).');
-        // Optionally navigate to login
-        // router.push('doctorLogin');
+
       }
     } catch (err) {
       setErrorMsg(err.message || 'Error inesperado.');
@@ -83,9 +180,26 @@ export default function DoctorRegister() {
               style={styles.input}
               placeholder="Ej: 12.345.678-9"
               value={formData.rut}
-              onChangeText={(text) => setFormData({...formData, rut: text})}
-              keyboardType="numeric"
+              onChangeText={(text) => {
+                // allow digits, K, dots, hyphens, spaces
+                const filtered = text.replace(/[^0-9kK\.\-\s]/g, '');
+                const cleaned = cleanRut(filtered);
+                // if user typed a complete RUT (7 or 8 digits body + DV), format it immediately
+                if (/^\d{7,8}[0-9Kk]$/.test(cleaned)) {
+                  setFormData(prev => ({ ...prev, rut: formatRut(cleaned) }));
+                } else {
+                  setFormData(prev => ({ ...prev, rut: filtered }));
+                }
+              }}
+              keyboardType="default"
             />
+            {formData.rut ? (
+              validateRut(formData.rut) ? (
+                <Text style={[styles.helperText, { color: '#2e7d32' }]}>✔ RUT válido</Text>
+              ) : (
+                <Text style={[styles.helperText, { color: '#d32f2f' }]}>✖ RUT inválido</Text>
+              )
+            ) : null}
           </View>
 
           <View style={styles.inputContainer}>
@@ -133,14 +247,42 @@ export default function DoctorRegister() {
             <Text style={styles.label}>Código Postal (Institución)</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: 8320000"
+              placeholder="Ej: 0000000"
               value={formData.codigoPostalInstitucion}
-              onChangeText={(text) => setFormData({...formData, codigoPostalInstitucion: text})}
+              onChangeText={(text) => {
+                const filtered = text.replace(/\D/g, '');
+                setFormData(prev => ({...prev, codigoPostalInstitucion: filtered}));
+                if (filtered.length === 7) {
+                  const ok = !!isValidChilePostalCode(filtered);
+                  setPostalValid(ok);
+                  setPostalInfo(ok ? getPostalInfo(filtered) : null);
+                } else {
+                  setPostalValid(null);
+                  setPostalInfo(null);
+                }
+              }}
+              onBlur={() => {
+                const value = formData.codigoPostalInstitucion || '';
+                const ok = isValidChilePostalCode(value);
+                setPostalValid(!!ok);
+                setPostalInfo(ok ? getPostalInfo(value) : null);
+              }}
               keyboardType="numeric"
             />
+            {formData.codigoPostalInstitucion ? (
+              postalValid === null ? (
+                <Text style={styles.helperText}>Verificando código postal...</Text>
+              ) : postalValid ? (
+                postalInfo ? (
+                  <Text style={[styles.helperText, { color: '#2e7d32' }]}>✔ Código postal válido — {postalInfo['Comuna/Localidad'] || postalInfo.comuna || ''}, {postalInfo['Región'] || postalInfo.region || ''}</Text>
+                ) : (
+                  <Text style={[styles.helperText, { color: '#2e7d32' }]}>✔ Código postal válido</Text>
+                )
+              ) : (
+                <Text style={[styles.helperText, { color: '#d32f2f' }]}>✖ Código postal inválido</Text>
+              )
+            ) : null}
           </View>
-
-          {/* correo movido arriba del RUT */}
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Contraseña</Text>
