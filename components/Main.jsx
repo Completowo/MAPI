@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link } from "expo-router";
+import { supabase } from "../services/supabase";
 
 // Imports de Iconos
 import { SettingIcon, BellIcon } from "./Icons";
@@ -33,61 +34,94 @@ export function Main() {
   const [isLoading, setIsLoading] = useState(false);
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
 
+  //Función para obtener el chat de Supabase
+  const fetchChatHistory = async () => {
+    const { data, error } = await supabase
+      .from("chats")
+      .select("messages", "emotion")
+      .eq("id", "1")
+      .single();
+
+    if (error) {
+      console.log("Error al obtener el chat", error);
+      return [];
+    }
+
+    return {
+      messages: data?.messages || [],
+      emotion: data?.emotion || "neutral",
+    };
+  };
+
+  //Trae el historial devuelva
   useEffect(() => {
-    const fetchInitialGreeting = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
 
+      const { messages: history, emotion: historyEmotion } =
+        await fetchChatHistory();
+
+      //Setear Historial y emociones desde la base de datos
+      if (history.length > 0) {
+        console.log("Historial cargado desde Supabase ✅");
+        setMapiEmotion(historyEmotion || "neutral");
+        setMessages(history);
+        setIsLoading(false);
+        return;
+      }
+
+      //Si no hay historial, iniciar saludo
       const initialPrompt = [{ role: "user", parts: [{ text: "Hola" }] }];
       const response = await getGeminiResponse(initialPrompt);
 
-      // Obtener emoción
       const emotionMatch = response.match(
-        /Emocion:\s*["'(]*([\wáéíóú]+)["')]*\s*/i
+        /Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i
       );
       const emotion = emotionMatch
         ? emotionMatch[1].toLowerCase().replace(/\./g, "")
         : "neutral";
-      console.log("EMOCIÓN:", emotion);
 
-      // Unir el resto del texto (sin la línea de emoción)
       const cleanedResponse = response
-        .replace(/Emocion:\s*["'(]*[\wáéíóú]+["')]*\s*/i, "")
+        .replace(/Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i, "")
         .trim();
 
-      // Dividir en oraciones
       const responseSentences = cleanedResponse
         .split(/(?<=[.?!])\s+/)
         .map((s) => s.trim())
         .filter((s) => s && s !== "." && s !== "..." && s.length > 1);
 
-      //Mensaje IA
+      const userGreeting = { id: Math.random(), text: "Hola", sender: "user" };
       const newMessages = responseSentences.map((sentence) => ({
         id: Math.random(),
         text: sentence.trim(),
         sender: "assistant",
       }));
 
-      //Mensaje usuario :D
-      const userGreatingMessage = {
-        id: Math.random(),
-        text: "Hola",
-        sender: "user",
-      };
-
-      setMessages([userGreatingMessage, ...newMessages]);
-
+      const combinedMessages = [userGreeting, ...newMessages];
+      setMessages(combinedMessages);
       setMapiEmotion(emotion);
-      setMessages(newMessages);
       setIsLoading(false);
+
+      // Guardar nuevo chat en Supabase
+      await supabase.from("chats").upsert([
+        {
+          id: "1",
+          messages: combinedMessages,
+          emotion: emotion,
+          created_at: new Date(),
+        },
+      ]);
     };
 
-    fetchInitialGreeting();
+    fetchData();
   }, []);
 
-  //PAPUUU
+  //Función principal de chat de la ia
   const handleSendTranscription = async (transcription) => {
     if (!transcription) return;
     setIsLoading(true);
+
+    const { messages: history } = await fetchChatHistory();
 
     //MENSAJE DEL USUARIO
     const newUserMessage = {
@@ -96,7 +130,7 @@ export function Main() {
       sender: "user",
     };
 
-    const updatedMesages = [...messages, newUserMessage];
+    const updatedMesages = [...history, newUserMessage];
 
     const apiHistory = updatedMesages.map((msg) => {
       return {
@@ -109,7 +143,7 @@ export function Main() {
 
     // Obtener emoción
     const emotionMatch = response.match(
-      /Emocion:\s*["'(]*([\wáéíóúñ]+)["')]*\s*/i
+      /Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i
     );
     const emotion = emotionMatch
       ? emotionMatch[1].toLowerCase().replace(/\./g, "")
@@ -119,7 +153,7 @@ export function Main() {
 
     // Unir el resto del texto (sin la línea de emoción)
     const cleanedResponse = response
-      .replace(/Emocion:\s*["'(]*[\wáéíóúñ]+["')]*\s*/i, "")
+      .replace(/Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i, "")
       .trim();
 
     // Dividir en oraciones
@@ -135,11 +169,26 @@ export function Main() {
       sender: "assistant",
     }));
 
-    setMessages([...updatedMesages, ...newAssistantMessages]);
+    const finalMessages = [...updatedMesages, ...newAssistantMessages];
+
+    setMessages(finalMessages);
     setMapiEmotion(emotion);
     setIsLoading(false);
 
-    console.log(messages);
+    //Mandar chat a Supabase
+    const { error } = await supabase.from("chats").upsert([
+      {
+        id: "1",
+        messages: finalMessages,
+        created_at: new Date(),
+        emotion: emotion,
+      },
+    ]);
+
+    if (error) console.log("Error guardando chat", error);
+
+    console.log(apiHistory);
+    console.log("Emocion: ", emotion);
   };
 
   //Funcion para solo sacar 2 misiones
