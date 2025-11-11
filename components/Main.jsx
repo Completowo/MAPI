@@ -32,6 +32,7 @@ export function Main() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
+  const [mgdl, setMgdl] = useState("0");
 
   const id = "2";
 
@@ -238,7 +239,7 @@ export function Main() {
         </View>
       </View>
 
-      <LastCheck mgdl={90} lastCheck={26} />
+      <LastCheck lastCheck={26} />
 
       {randomMissions.map((mission, index) => {
         return (
