@@ -25,7 +25,6 @@ import { getGeminiResponse } from "../services/gemini";
 
 //Import misiones
 import missions from "../assets/missions.json";
-import { Switch } from "react-native-web";
 
 export function Main() {
   const insets = useSafeAreaInsets();
@@ -34,12 +33,14 @@ export function Main() {
   const [isLoading, setIsLoading] = useState(false);
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
 
+  const id = "2";
+
   //Función para obtener el chat de Supabase
   const fetchChatHistory = async () => {
     const { data, error } = await supabase
       .from("chats")
       .select("messages", "emotion")
-      .eq("id", "1")
+      .eq("id", id)
       .single();
 
     if (error) {
@@ -105,7 +106,7 @@ export function Main() {
       // Guardar nuevo chat en Supabase
       await supabase.from("chats").upsert([
         {
-          id: "1",
+          id: id,
           messages: combinedMessages,
           emotion: emotion,
           created_at: new Date(),
@@ -178,7 +179,7 @@ export function Main() {
     //Mandar chat a Supabase
     const { error } = await supabase.from("chats").upsert([
       {
-        id: "1",
+        id: id,
         messages: finalMessages,
         created_at: new Date(),
         emotion: emotion,
