@@ -7,6 +7,7 @@ import postalCodes from '../assets/cl_cods_post.json';
 
 export default function DoctorRegister() {
   const router = useRouter();
+  // Estado del formulario con todos los campos necesarios para registrar un médico
   const [formData, setFormData] = useState({
     nombre: '',
     rut: '',
@@ -18,11 +19,13 @@ export default function DoctorRegister() {
     confirmPassword: '',
   });
   
+  // Función para limpiar el RUT
   function cleanRut(value) {
     if (!value) return '';
     return value.replace(/\.|\-|\s/g, '').toUpperCase();
   }
 
+  // Función para formatear el RUT
   function formatRut(value) {
     const cleaned = cleanRut(value);
     if (cleaned.length === 0) return '';
@@ -33,6 +36,7 @@ export default function DoctorRegister() {
     return `${withDots}-${dv}`;
   }
 
+  // Función para validar RUT usando el algoritmo del dígito verificador
   function validateRut(value) {
     const cleaned = cleanRut(value);
     if (!cleaned || cleaned.length < 2) return false;
@@ -40,6 +44,7 @@ export default function DoctorRegister() {
     let dv = cleaned.slice(-1);
     dv = dv === 'K' ? 'K' : dv;
     if (!/^\d{7,8}$/.test(body)) return false;
+    // Calcular el dígito verificador usando el algoritmo mod-11
     let sum = 0;
     let multiplier = 2;
     for (let i = body.length - 1; i >= 0; i--) {
@@ -54,15 +59,18 @@ export default function DoctorRegister() {
     else expectedDv = String(expected);
     return expectedDv === dv;
   }
+  
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [postalValid, setPostalValid] = useState(null);
   const [postalInfo, setPostalInfo] = useState(null);
 
+  // Procesar y cargar códigos postales desde el archivo JSON
   let postalSet = null;
   let postalMap = null;
   try {
+    // Crear un mapa de códigos postales para validación rápida
     if (Array.isArray(postalCodes)) {
       const map = new Map();
       const list = postalCodes
@@ -89,6 +97,7 @@ export default function DoctorRegister() {
     console.warn('Error building postalSet from assets/cl_cods_post.json', e);
   }
 
+  // Función para validar un código postal
   function isValidChilePostalCode(value) {
     if (value === undefined || value === null) return false;
     const cleaned = String(value).replace(/\D/g, '');
@@ -97,6 +106,7 @@ export default function DoctorRegister() {
     return postalSet.has(cleaned);
   }
 
+  // Función para obtener información del código postal
   function getPostalInfo(value) {
     if (!postalMap) return null;
     const cleaned = String(value).replace(/\D/g, '');
@@ -104,9 +114,12 @@ export default function DoctorRegister() {
     return postalMap.get(cleaned) ?? null;
   }
 
+  // Valida todos los campos, RUT y código postal antes de enviar
   async function handleRegister() {
     setErrorMsg('');
     setSuccessMsg('');
+    
+    // Validar campos requeridos
     if (!formData.nombre || !formData.rut || !formData.email || !formData.password || !formData.confirmPassword) {
       setErrorMsg('Por favor completa todos los campos requeridos.');
       return;
@@ -115,33 +128,39 @@ export default function DoctorRegister() {
       setErrorMsg('Seleccione una especialidad.');
       return;
     }
+    
+    // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
       setErrorMsg('Las contraseñas no coinciden.');
       return;
     }
+    
+    // Validar RUT
     const rutValid = validateRut(formData.rut);
     if (!rutValid) {
       setErrorMsg('RUT inválido. Por favor verifica el RUT ingresado.');
       return;
     }
 
+    // Validar código postal
     const postalOk = isValidChilePostalCode(formData.codigoPostalInstitucion || '');
     if (!postalOk) {
       setErrorMsg('Código postal inválido. Por favor verifica el código postal de la institución.');
       return;
     }
 
+    // Formatear RUT antes de enviarlo
     const formattedRut = formatRut(formData.rut);
     setFormData(prev => ({ ...prev, rut: formattedRut }));
 
     setLoading(true);
     try {
+      // Llamar función de registro desde servicio Supabase
       const { error, user } = await registerDoctor(formData);
       if (error) {
         setErrorMsg(error.message || 'Error al registrar en Supabase.');
       } else {
         setSuccessMsg('Registro exitoso. Redirigiendo al login...');
-        // Give the user a short moment to see the success message, then navigate to login
         setTimeout(() => router.push('doctorLogin'), 1200);
 
       }
@@ -195,6 +214,7 @@ export default function DoctorRegister() {
               }}
               keyboardType="default"
             />
+            {/* Mostrar validación del RUT */}
             {formData.rut ? (
               validateRut(formData.rut) ? (
                 <Text style={[styles.helperText, { color: '#2e7d32' }]}>✔ RUT válido</Text>
@@ -222,8 +242,7 @@ export default function DoctorRegister() {
               <Picker
                 selectedValue={formData.id_especialidad}
                 onValueChange={(value) => setFormData({...formData, id_especialidad: value})}
-                style={styles.picker}
-              >
+                style={styles.picker}>
                 <Picker.Item label="Seleccione especialidad..." value="" />
                 <Picker.Item label="Endocrinología" value={1} />
                 <Picker.Item label="Medicina Interna" value={2} />
@@ -271,6 +290,7 @@ export default function DoctorRegister() {
               }}
               keyboardType="numeric"
             />
+            {/* Mostrar validación del código postal */}
             {formData.codigoPostalInstitucion ? (
               postalValid === null ? (
                 <Text style={styles.helperText}>Verificando código postal...</Text>
@@ -319,6 +339,7 @@ export default function DoctorRegister() {
             )}
           </TouchableOpacity>
 
+          {/* Link para ir a login si ya tiene cuenta */}
           <TouchableOpacity 
             style={styles.loginLink}
             onPress={() => router.push('doctorLogin')}

@@ -3,24 +3,29 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator 
 import { useRouter } from 'expo-router';
 import { loginDoctor } from '../services/supabase';
 
+// Pantalla de inicio de sesión para médicos
+// Permite que un médico registrado inicie sesión con email y contraseña
 export default function DoctorLogin() {
   const router = useRouter();
+  // Estados para almacenar email, contraseña y estado de carga
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Función para manejar el inicio de sesión
   const handleLogin = () => {
     setError('');
     setLoading(true);
     (async () => {
       try {
+        // Llamar función de login desde servicio Supabase
         const { error, user, profile } = await loginDoctor({ email, password });
         if (error) {
           setError(error.message || 'Error al iniciar sesión');
         } else {
-          // Navigate to welcome screen with doctor's name (if profile exists)
+          // Si login es exitoso, obtener el nombre del médico y navegar a doctorView
           const name = (profile && profile.nombre) ? profile.nombre : (user?.email || '');
           router.push(`doctorView?name=${encodeURIComponent(name)}`);
         }
@@ -35,10 +40,12 @@ export default function DoctorLogin() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+        {/* Título y subtítulo de bienvenida */}
         <Text style={styles.title}>Acceso Médico</Text>
         <Text style={styles.subtitle}>Ingresa tus credenciales</Text>
 
         <View style={styles.form}>
+          {/* Campo de entrada para email */}
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"
@@ -48,6 +55,7 @@ export default function DoctorLogin() {
             autoCapitalize="none"
           />
 
+          {/* Campo de entrada para contraseña */}
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
@@ -56,6 +64,7 @@ export default function DoctorLogin() {
             secureTextEntry
           />
 
+          {/* Botón para iniciar sesión */}
           <TouchableOpacity 
             style={styles.loginButton}
             onPress={handleLogin}
@@ -68,8 +77,10 @@ export default function DoctorLogin() {
             )}
           </TouchableOpacity>
 
+          {/* Mostrar mensaje de error si existe */}
           {error ? <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text> : null}
 
+          {/* Botón para navegar a registro de médico */}
           <TouchableOpacity 
             style={styles.registerButton}
             onPress={() => router.push('doctorRegister')}

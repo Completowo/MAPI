@@ -1,17 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
+// URL del backend de Supabase donde se almacenan los datos
 const SUPABASE_URL = 'https://zmmtdshapymhnfywolln.supabase.co';
+// Clave anonima para autenticar solicitudes desde la aplicación cliente
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptbXRkc2hhcHltaG5meXdvbGxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NDU4NzcsImV4cCI6MjA3ODAyMTg3N30.jZ3FI2_RyFapA-c1XK5V84FaTaZSwfPvWd2ngXefj0M';
+// Crear cliente de Supabase para comunicarse con la base de datos
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Registra un nuevo médico en la aplicación
+// Crea una cuenta de autenticación en Supabase Auth y agrega los datos del médico en la tabla 'doctores'
 export async function registerDoctor(formData) {
 	const { email, password, nombre, rut, id_especialidad, institucionMedica, codigoPostalInstitucion } = formData;
+	
+	// Crear usuario de autenticación con email y contraseña
 	const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
 	if (signUpError) {
 		return { error: signUpError };
 	}
 
+	// Obtener los datos del usuario creado
 	const user = data?.user || null;
 
+	// Construir objeto base con datos comunes del médico
 	const baseRow = {
 		user_id: user?.id || null,
 		nombre,
@@ -21,6 +30,8 @@ export async function registerDoctor(formData) {
 		email,
 	};
 
+	// Intentar normalizar el ID de especialidad a número
+	// Si es un número, usarlo directamente; si es string numérico, convertir; si no, dejar como null
 	const variants = [];
 	let parsedEspecialidad = null;
 	if (id_especialidad !== undefined && id_especialidad !== '') {
@@ -30,6 +41,8 @@ export async function registerDoctor(formData) {
 			parsedEspecialidad = parseInt(String(id_especialidad), 10);
 		}
 	}
+	
+	// Crear variantes del registro: con especialidad y sin especialidad (en caso que falle una)
 	if (parsedEspecialidad !== null) {
 		variants.push({ ...baseRow, id_especialidad: parsedEspecialidad });
 	} else {
@@ -37,6 +50,8 @@ export async function registerDoctor(formData) {
 		variants.push({ ...baseRow });
 	}
 
+	// Intentar insertar el registro médico en la tabla 'doctores' con diferentes variantes
+	// Si una falla, intenta con la siguiente
 	let lastError = null;
 	for (const row of variants) {
 		try {
@@ -58,7 +73,10 @@ export async function registerDoctor(formData) {
 	return { error: lastError };
 }
 
+// Inicia sesión de un médico existente
+// Valida credenciales y recupera el perfil completo del médico
 export async function loginDoctor({ email, password }) {
+	// Autenticar con email y contraseña en Supabase Auth
 	const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 	if (signInError) {
 		return { error: signInError };
@@ -68,6 +86,7 @@ export async function loginDoctor({ email, password }) {
 		return { error: new Error('No se obtuvo usuario desde Auth') };
 	}
 	try {
+		// Buscar el perfil completo del médico en la tabla 'doctores' usando su ID de usuario
 		const { data: profile, error: profileErr } = await supabase
 			.from('doctores')
 			.select('*')
@@ -75,7 +94,6 @@ export async function loginDoctor({ email, password }) {
 			.single();
 
 		if (profileErr) {
-			// If no profile found, return user but no profile
 			return { user, error: profileErr };
 		}
 		return { user, profile };
@@ -84,6 +102,8 @@ export async function loginDoctor({ email, password }) {
 	}
 }
 
+// Obtiene la sesión actual del usuario autenticado
+// Retorna los datos de sesión si existe una sesión activa
 export async function getSession() {
 	try {
 		const { data, error } = await supabase.auth.getSession();
@@ -94,6 +114,8 @@ export async function getSession() {
 	}
 }
 
+// Cierra la sesión del usuario actual
+// Invalida el token de autenticación
 export async function logout() {
 	try {
 		const { error } = await supabase.auth.signOut();
@@ -103,6 +125,8 @@ export async function logout() {
 	}
 }
 
+// Obtiene el perfil completo de un médico por su ID de usuario
+// Busca en la tabla 'doctores' el registro asociado al usuario
 export async function getDoctorByUserId(userId) {
 	try {
 		const { data, error } = await supabase
@@ -117,6 +141,8 @@ export async function getDoctorByUserId(userId) {
 	}
 }
 
+// Registra un nuevo paciente asociado a un médico
+// El médico puede registrar pacientes en el sistema especificando sus datos
 export async function insertPatientByDoctor({ nombre, rut, doctor_user_id, diabetes_type }) {
 	try {
 		const row = {
@@ -134,6 +160,8 @@ export async function insertPatientByDoctor({ nombre, rut, doctor_user_id, diabe
 	}
 }
 
+// Busca un paciente existente por su RUT
+// Se utiliza para verificar si un paciente ya fue registrado por algún médico
 export async function findPatientByRut(rut) {
 	try {
 		const { data, error } = await supabase.from('pacientes').select('*').eq('rut', rut).maybeSingle();
@@ -144,19 +172,26 @@ export async function findPatientByRut(rut) {
 	}
 }
 
+// Crea una cuenta de usuario para un paciente existente
+// El paciente debe estar previamente registrado por un médico para usar esta función
+// Requiere: RUT (para identificar al paciente), edad, contraseña y email
 export async function createPatientAccount({ rut, age, password, email, diabetes_type }) {
 	try {
+		// Buscar si el paciente ya existe en el sistema (registrado por médico)
 		const { paciente, error: findErr } = await findPatientByRut(rut);
 		if (findErr) return { error: findErr };
 		if (!paciente) return { error: new Error('RUT no registrado por ningún médico') };
 		if (paciente.user_id) return { error: new Error('Paciente ya tiene cuenta') };
 
+		// Definir email: usar el proporcionado o el registrado, o generar uno por defecto
 		const emailToUse = (email && email.length > 3) ? email : (paciente.email && paciente.email.length > 3 ? paciente.email : `${rut}@mapi.local`);
 
+		// Crear usuario de autenticación para el paciente
 		const { data, error: signUpErr } = await supabase.auth.signUp({ email: emailToUse, password });
 		if (signUpErr) return { error: signUpErr };
 		const user = data?.user || null;
 
+		// Preparar actualizaciones: agregar ID de usuario, edad y email del paciente
 		const updates = { user_id: user?.id ?? null };
 		if (age !== undefined) updates.age = age;
 
@@ -164,10 +199,12 @@ export async function createPatientAccount({ rut, age, password, email, diabetes
 			updates.email = emailToUse;
 		}
 
-				if (diabetes_type !== undefined && diabetes_type !== null) {
-					updates.diabetes_type = diabetes_type;
-				}
+		// Actualizar el tipo de diabetes si se proporciona
+		if (diabetes_type !== undefined && diabetes_type !== null) {
+			updates.diabetes_type = diabetes_type;
+		}
 
+		// Actualizar registro del paciente en la base de datos con su nuevo ID de usuario
 		const { error: updateErr } = await supabase.from('pacientes').update(updates).eq('rut', rut);
 		if (updateErr) return { error: updateErr };
 

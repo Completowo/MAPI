@@ -3,23 +3,28 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput 
 import { useRouter } from 'expo-router';
 import { getSession, logout, getDoctorByUserId, insertPatientByDoctor } from '../services/supabase';
 
+// Pantalla principal para médicos después de iniciar sesión
+// Permite ver información del médico y registrar nuevos pacientes
 export default function DoctorView() {
   const router = useRouter();
+  // Estados para mostrar datos del médico y manejar el registro de pacientes
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [profile, setProfile] = useState(null);
 
-  // patient form state
+  // Estados para el formulario de registro de paciente
   const [patientName, setPatientName] = useState('');
   const [patientRut, setPatientRut] = useState('');
   const [patientDiabetesType, setPatientDiabetesType] = useState('1');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Efecto para cargar datos del médico al montar el componente
   useEffect(() => {
     let mounted = true;
     (async () => {
       setLoading(true);
+      // Obtener sesión actual del usuario autenticado
       const { session, error: sessErr } = await getSession();
       if (sessErr) {
         if (mounted) router.replace('doctorLogin');
@@ -30,12 +35,14 @@ export default function DoctorView() {
         return;
       }
 
+      // Obtener ID del usuario de la sesión
       const userId = session.user?.id;
       if (!userId) {
         if (mounted) router.replace('doctorLogin');
         return;
       }
 
+      // Obtener perfil completo del médico desde la base de datos
       const { profile, error: profErr } = await getDoctorByUserId(userId);
       if (profErr) {
         setName(session.user?.email ?? '');
@@ -50,6 +57,7 @@ export default function DoctorView() {
     return () => { mounted = false; };
   }, [router]);
 
+  // Función para cerrar sesión del médico
   const handleLogout = async () => {
     setLoading(true);
     await logout();
@@ -57,12 +65,13 @@ export default function DoctorView() {
     router.replace('doctorLogin');
   };
 
-  // RUT helper functions (copied from doctorRegister)
+  // Función para limpiar el RUT (eliminar puntos, guiones y espacios)
   function cleanRut(value) {
     if (!value) return '';
     return value.replace(/\.|\-|\s/g, '').toUpperCase();
   }
 
+  // Función para validar RUT chileno usando el algoritmo del dígito verificador
   function validateRut(value) {
     const cleaned = cleanRut(value);
     if (!cleaned || cleaned.length < 2) return false;
@@ -85,27 +94,40 @@ export default function DoctorView() {
     return expectedDv === dv;
   }
 
+  // Función para registrar un nuevo paciente asociado a este médico
   const handleAddPatient = async () => {
     setErrorMsg('');
     setSuccessMsg('');
     const cleanedRut = cleanRut(patientRut);
+    
+    // Validar que nombre y RUT no estén vacíos
     if (!patientName || !cleanedRut) {
       setErrorMsg('Por favor completa nombre y RUT del paciente.');
       return;
     }
+    
+    // Validar que el RUT sea válido
     if (!validateRut(cleanedRut)) {
       setErrorMsg('RUT inválido.');
       return;
     }
+    
     setLoading(true);
-  try {
-  // doctor user id: session user id is profile.user_id (profile is the doctores row)
-  const doctorUserId = profile?.user_id ?? null;
-      const { paciente, error } = await insertPatientByDoctor({ nombre: patientName, rut: cleanedRut, doctor_user_id: doctorUserId, diabetes_type: patientDiabetesType ? parseInt(patientDiabetesType, 10) : null });
+    try {
+      // Obtener ID del usuario del médico para asociar el paciente
+      const doctorUserId = profile?.user_id ?? null;
+      // Insertar nuevo paciente en la base de datos
+      const { paciente, error } = await insertPatientByDoctor({ 
+        nombre: patientName, 
+        rut: cleanedRut, 
+        doctor_user_id: doctorUserId, 
+        diabetes_type: patientDiabetesType ? parseInt(patientDiabetesType, 10) : null 
+      });
       if (error) {
         setErrorMsg(error.message || String(error));
       } else {
         setSuccessMsg('Paciente agregado correctamente.');
+        // Limpiar formulario después de agregar paciente
         setPatientName('');
         setPatientRut('');
         setPatientDiabetesType('1');
@@ -117,6 +139,7 @@ export default function DoctorView() {
     }
   };
 
+  // Mostrar pantalla de carga mientras se obtienen los datos
   if (loading) {
     return (
       <View style={styles.container}>
@@ -127,35 +150,55 @@ export default function DoctorView() {
 
   return (
     <View style={styles.container}>
+      {/* Encabezado con bienvenida al médico */}
       <Text style={styles.text}>Bienvenido {name}</Text>
       <View style={styles.divider} />
+      
+      {/* Sección para registrar un nuevo paciente */}
       <Text style={styles.sectionTitle}>Registrar paciente</Text>
+      
+      {/* Input para nombre del paciente */}
       <TextInput
         style={styles.input}
         placeholder="Nombre paciente"
         value={patientName}
         onChangeText={setPatientName}
       />
+      
+      {/* Input para RUT del paciente */}
       <TextInput
         style={styles.input}
         placeholder="RUT paciente (ej: 12.345.678-9)"
         value={patientRut}
         onChangeText={setPatientRut}
       />
-      {/* Doctor must NOT set the patient's email. The patient will provide their own email when creating their account. */}
+      
+      {/* Botones para seleccionar tipo de diabetes */}
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-        <TouchableOpacity onPress={() => setPatientDiabetesType('1')} style={[styles.typeBtn, patientDiabetesType === '1' && styles.typeBtnActive]}>
+        <TouchableOpacity 
+          onPress={() => setPatientDiabetesType('1')} 
+          style={[styles.typeBtn, patientDiabetesType === '1' && styles.typeBtnActive]}
+        >
           <Text>Diabetes 1</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setPatientDiabetesType('2')} style={[styles.typeBtn, patientDiabetesType === '2' && styles.typeBtnActive]}>
+        <TouchableOpacity 
+          onPress={() => setPatientDiabetesType('2')} 
+          style={[styles.typeBtn, patientDiabetesType === '2' && styles.typeBtnActive]}
+        >
           <Text>Diabetes 2</Text>
         </TouchableOpacity>
       </View>
+      
+      {/* Mostrar mensajes de error y éxito */}
       {errorMsg ? <Text style={{ color: 'red' }}>{errorMsg}</Text> : null}
       {successMsg ? <Text style={{ color: 'green' }}>{successMsg}</Text> : null}
+      
+      {/* Botón para agregar paciente */}
       <TouchableOpacity style={styles.addButton} onPress={handleAddPatient} disabled={loading}>
         <Text style={styles.addButtonText}>{loading ? 'Guardando...' : 'Agregar paciente'}</Text>
       </TouchableOpacity>
+      
+      {/* Botón para cerrar sesión */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Cerrar sesión</Text>
       </TouchableOpacity>
