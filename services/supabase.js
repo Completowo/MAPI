@@ -5,7 +5,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export async function registerDoctor(formData) {
 	const { email, password, nombre, rut, id_especialidad, institucionMedica, codigoPostalInstitucion } = formData;
-
 	const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
 	if (signUpError) {
 		return { error: signUpError };
@@ -59,23 +58,15 @@ export async function registerDoctor(formData) {
 	return { error: lastError };
 }
 
-/**
- * Log in a doctor using email/password.
- * Returns { error, user, profile } where profile is the row from `doctores` (if any).
- */
 export async function loginDoctor({ email, password }) {
-	// Sign in via Supabase Auth
 	const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 	if (signInError) {
 		return { error: signInError };
 	}
-
 	const user = data?.user || null;
 	if (!user) {
 		return { error: new Error('No se obtuvo usuario desde Auth') };
 	}
-
-	// Try to fetch the profile from `doctores` by user_id
 	try {
 		const { data: profile, error: profileErr } = await supabase
 			.from('doctores')
@@ -87,16 +78,12 @@ export async function loginDoctor({ email, password }) {
 			// If no profile found, return user but no profile
 			return { user, error: profileErr };
 		}
-
 		return { user, profile };
 	} catch (e) {
 		return { user, error: e };
 	}
 }
 
-/**
- * Returns the current session (if any).
- */
 export async function getSession() {
 	try {
 		const { data, error } = await supabase.auth.getSession();
@@ -107,9 +94,6 @@ export async function getSession() {
 	}
 }
 
-/**
- * Signs out the current user.
- */
 export async function logout() {
 	try {
 		const { error } = await supabase.auth.signOut();
@@ -119,9 +103,6 @@ export async function logout() {
 	}
 }
 
-/**
- * Fetch doctor profile by auth user id.
- */
 export async function getDoctorByUserId(userId) {
 	try {
 		const { data, error } = await supabase
@@ -131,6 +112,66 @@ export async function getDoctorByUserId(userId) {
 			.single();
 		if (error) return { error };
 		return { profile: data };
+	} catch (e) {
+		return { error: e };
+	}
+}
+
+export async function insertPatientByDoctor({ nombre, rut, doctor_user_id, diabetes_type }) {
+	try {
+		const row = {
+			nombre,
+			rut,
+			doctor_user_id: doctor_user_id || null,
+			email: null,
+			diabetes_type: diabetes_type ?? null,
+		};
+		const { data, error } = await supabase.from('pacientes').insert([row]);
+		if (error) return { error };
+		return { paciente: data?.[0] ?? null };
+	} catch (e) {
+		return { error: e };
+	}
+}
+
+export async function findPatientByRut(rut) {
+	try {
+		const { data, error } = await supabase.from('pacientes').select('*').eq('rut', rut).maybeSingle();
+		if (error) return { error };
+		return { paciente: data ?? null };
+	} catch (e) {
+		return { error: e };
+	}
+}
+
+export async function createPatientAccount({ rut, age, password, email, diabetes_type }) {
+	try {
+		const { paciente, error: findErr } = await findPatientByRut(rut);
+		if (findErr) return { error: findErr };
+		if (!paciente) return { error: new Error('RUT no registrado por ningún médico') };
+		if (paciente.user_id) return { error: new Error('Paciente ya tiene cuenta') };
+
+		const emailToUse = (email && email.length > 3) ? email : (paciente.email && paciente.email.length > 3 ? paciente.email : `${rut}@mapi.local`);
+
+		const { data, error: signUpErr } = await supabase.auth.signUp({ email: emailToUse, password });
+		if (signUpErr) return { error: signUpErr };
+		const user = data?.user || null;
+
+		const updates = { user_id: user?.id ?? null };
+		if (age !== undefined) updates.age = age;
+
+		if (emailToUse && (!paciente.email || paciente.email !== emailToUse)) {
+			updates.email = emailToUse;
+		}
+
+				if (diabetes_type !== undefined && diabetes_type !== null) {
+					updates.diabetes_type = diabetes_type;
+				}
+
+		const { error: updateErr } = await supabase.from('pacientes').update(updates).eq('rut', rut);
+		if (updateErr) return { error: updateErr };
+
+		return { user, paciente: { ...paciente, ...updates } };
 	} catch (e) {
 		return { error: e };
 	}

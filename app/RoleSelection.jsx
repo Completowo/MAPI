@@ -14,7 +14,7 @@ const RoleSelection = () => {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.buttonPatient]}
-            onPress={() => router.push('Main')}
+            onPress={() => router.push('patientEntry')}
           >
             <Text style={[styles.buttonText, styles.buttonTextPrimary]}>Paciente</Text>
             <Text style={[styles.buttonEmoji]}>😉</Text>
