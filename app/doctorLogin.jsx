@@ -1,15 +1,35 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { loginDoctor } from '../services/supabase';
 
 export default function DoctorLogin() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const handleLogin = () => {
-    // Aquí irá la lógica de login
-    console.log('Login attempt:', { email, password });
+    setError('');
+    setLoading(true);
+    (async () => {
+      try {
+        const { error, user, profile } = await loginDoctor({ email, password });
+        if (error) {
+          setError(error.message || 'Error al iniciar sesión');
+        } else {
+          // Navigate to welcome screen with doctor's name (if profile exists)
+          const name = (profile && profile.nombre) ? profile.nombre : (user?.email || '');
+          router.push(`doctorView?name=${encodeURIComponent(name)}`);
+        }
+      } catch (e) {
+        setError(e.message || 'Error inesperado');
+      } finally {
+        setLoading(false);
+      }
+    })();
   };
 
   return (
@@ -39,9 +59,16 @@ export default function DoctorLogin() {
           <TouchableOpacity 
             style={styles.loginButton}
             onPress={handleLogin}
+            disabled={loading}
           >
-            <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+            )}
           </TouchableOpacity>
+
+          {error ? <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text> : null}
 
           <TouchableOpacity 
             style={styles.registerButton}

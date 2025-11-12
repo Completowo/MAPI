@@ -10,7 +10,7 @@ export default function DoctorRegister() {
   const [formData, setFormData] = useState({
     nombre: '',
     rut: '',
-    especialidad: '',
+    id_especialidad: '',
     institucionMedica: '',
     codigoPostalInstitucion: '',
     email: '',
@@ -39,7 +39,6 @@ export default function DoctorRegister() {
     const body = cleaned.slice(0, -1);
     let dv = cleaned.slice(-1);
     dv = dv === 'K' ? 'K' : dv;
-    // Accept RUT bodies of 7 or 8 digits (most Chilean RUTs are 7 or 8 digits long)
     if (!/^\d{7,8}$/.test(body)) return false;
     let sum = 0;
     let multiplier = 2;
@@ -108,9 +107,12 @@ export default function DoctorRegister() {
   async function handleRegister() {
     setErrorMsg('');
     setSuccessMsg('');
-
     if (!formData.nombre || !formData.rut || !formData.email || !formData.password || !formData.confirmPassword) {
       setErrorMsg('Por favor completa todos los campos requeridos.');
+      return;
+    }
+    if (!formData.id_especialidad) {
+      setErrorMsg('Seleccione una especialidad.');
       return;
     }
     if (formData.password !== formData.confirmPassword) {
@@ -138,7 +140,9 @@ export default function DoctorRegister() {
       if (error) {
         setErrorMsg(error.message || 'Error al registrar en Supabase.');
       } else {
-        setSuccessMsg('Registro exitoso. Revisa tu email para confirmar (si aplica).');
+        setSuccessMsg('Registro exitoso. Redirigiendo al login...');
+        // Give the user a short moment to see the success message, then navigate to login
+        setTimeout(() => router.push('doctorLogin'), 1200);
 
       }
     } catch (err) {
@@ -167,7 +171,7 @@ export default function DoctorRegister() {
             <Text style={styles.label}>Nombre Completo</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: Juan Pérez González"
+              placeholder="Combre completo"
               value={formData.nombre}
               onChangeText={(text) => setFormData({...formData, nombre: text})}
               autoCapitalize="words"
@@ -178,13 +182,11 @@ export default function DoctorRegister() {
             <Text style={styles.label}>RUT</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: 12.345.678-9"
+              placeholder="00.000.000-K"
               value={formData.rut}
               onChangeText={(text) => {
-                // allow digits, K, dots, hyphens, spaces
                 const filtered = text.replace(/[^0-9kK\.\-\s]/g, '');
                 const cleaned = cleanRut(filtered);
-                // if user typed a complete RUT (7 or 8 digits body + DV), format it immediately
                 if (/^\d{7,8}[0-9Kk]$/.test(cleaned)) {
                   setFormData(prev => ({ ...prev, rut: formatRut(cleaned) }));
                 } else {
@@ -218,16 +220,16 @@ export default function DoctorRegister() {
             <Text style={styles.label}>Especialidad</Text>
             <View style={styles.pickerContainer}>
               <Picker
-                selectedValue={formData.especialidad}
-                onValueChange={(value) => setFormData({...formData, especialidad: value})}
+                selectedValue={formData.id_especialidad}
+                onValueChange={(value) => setFormData({...formData, id_especialidad: value})}
                 style={styles.picker}
               >
                 <Picker.Item label="Seleccione especialidad..." value="" />
-                <Picker.Item label="Endocrinología" value="Endocrinología" />
-                <Picker.Item label="Medicina Interna" value="Medicina Interna" />
-                <Picker.Item label="Pediatría" value="Pediatría" />
-                <Picker.Item label="Medicina Familiar" value="Medicina Familiar" />
-                <Picker.Item label="Nutrición y Dietética" value="Nutrición y Dietética" />
+                <Picker.Item label="Endocrinología" value={1} />
+                <Picker.Item label="Medicina Interna" value={2} />
+                <Picker.Item label="Pediatría" value={3} />
+                <Picker.Item label="Medicina Familiar" value={4} />
+                <Picker.Item label="Nutrición y Dietética" value={5} />
               </Picker>
             </View>
           </View>
