@@ -1,0 +1,2078 @@
+[
+  {
+    "Comuna/Localidad": "Antofagasta",
+    "Provincia": "Antofagasta",
+    "Región": "Antofagasta",
+    "Código Postal": 1240000
+  },
+  {
+    "Comuna/Localidad": "Mejillones",
+    "Provincia": "Antofagasta",
+    "Región": "Antofagasta",
+    "Código Postal": 1310000
+  },
+  {
+    "Comuna/Localidad": "Sierra Gorda",
+    "Provincia": "Antofagasta",
+    "Región": "Antofagasta",
+    "Código Postal": 1320000
+  },
+  {
+    "Comuna/Localidad": "Taltal",
+    "Provincia": "Antofagasta",
+    "Región": "Antofagasta",
+    "Código Postal": 1300000
+  },
+  {
+    "Comuna/Localidad": "Calama",
+    "Provincia": "El Loa",
+    "Región": "Antofagasta",
+    "Código Postal": 1390000
+  },
+  {
+    "Comuna/Localidad": "Ollague",
+    "Provincia": "El Loa",
+    "Región": "Antofagasta",
+    "Código Postal": 1420000
+  },
+  {
+    "Comuna/Localidad": "San Pedro de Atacama",
+    "Provincia": "El Loa",
+    "Región": "Antofagasta",
+    "Código Postal": 1410000
+  },
+  {
+    "Comuna/Localidad": "María Elena",
+    "Provincia": "Tocopilla",
+    "Región": "Antofagasta",
+    "Código Postal": 1360000
+  },
+  {
+    "Comuna/Localidad": "Tocopilla",
+    "Provincia": "Tocopilla",
+    "Región": "Antofagasta",
+    "Código Postal": 1340000
+  },
+  {
+    "Comuna/Localidad": "Arica",
+    "Provincia": "Arica",
+    "Región": "Arica y Parinacota",
+    "Código Postal": 1000000
+  },
+  {
+    "Comuna/Localidad": "Camarones",
+    "Provincia": "Arica",
+    "Región": "Arica y Parinacota",
+    "Código Postal": 1040000
+  },
+  {
+    "Comuna/Localidad": "General Lagos",
+    "Provincia": "Parinacota",
+    "Región": "Arica y Parinacota",
+    "Código Postal": 1080000
+  },
+  {
+    "Comuna/Localidad": "Putre",
+    "Provincia": "Parinacota",
+    "Región": "Arica y Parinacota",
+    "Código Postal": 1070000
+  },
+  {
+    "Comuna/Localidad": "Chañaral",
+    "Provincia": "Chañaral",
+    "Región": "Atacama",
+    "Código Postal": 1490000
+  },
+  {
+    "Comuna/Localidad": "Diego de Almagro",
+    "Provincia": "Chañaral",
+    "Región": "Atacama",
+    "Código Postal": 1500000
+  },
+  {
+    "Comuna/Localidad": "Caldera",
+    "Provincia": "Copiapó",
+    "Región": "Atacama",
+    "Código Postal": 1570000
+  },
+  {
+    "Comuna/Localidad": "Copiapó",
+    "Provincia": "Copiapó",
+    "Región": "Atacama",
+    "Código Postal": 1530000
+  },
+  {
+    "Comuna/Localidad": "Tierra Amarilla",
+    "Provincia": "Copiapó",
+    "Región": "Atacama",
+    "Código Postal": 1580000
+  },
+  {
+    "Comuna/Localidad": "Alto del Carmen",
+    "Provincia": "Huasco",
+    "Región": "Atacama",
+    "Código Postal": 1650000
+  },
+  {
+    "Comuna/Localidad": "Freirina",
+    "Provincia": "Huasco",
+    "Región": "Atacama",
+    "Código Postal": 1630000
+  },
+  {
+    "Comuna/Localidad": "Huasco",
+    "Provincia": "Huasco",
+    "Región": "Atacama",
+    "Código Postal": 1640000
+  },
+  {
+    "Comuna/Localidad": "Vallenar",
+    "Provincia": "Huasco",
+    "Región": "Atacama",
+    "Código Postal": 1610000
+  },
+  {
+    "Comuna/Localidad": "Aysén",
+    "Provincia": "Aysén",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 6000000
+  },
+  {
+    "Comuna/Localidad": "Cisnes",
+    "Provincia": "Aysén",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 6010000
+  },
+  {
+    "Comuna/Localidad": "Guaitecas",
+    "Provincia": "Aysén",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 6020000
+  },
+  {
+    "Comuna/Localidad": "Cochrane",
+    "Provincia": "Capitán Prat",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 6100000
+  },
+  {
+    "Comuna/Localidad": "O'Higgins",
+    "Provincia": "Capitán Prat",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 6110000
+  },
+  {
+    "Comuna/Localidad": "Tortel",
+    "Provincia": "Capitán Prat",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 6120000
+  },
+  {
+    "Comuna/Localidad": "Coyhaique",
+    "Provincia": "Coyhaique",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 5950000
+  },
+  {
+    "Comuna/Localidad": "Lago Verde",
+    "Provincia": "Coyhaique",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 5960000
+  },
+  {
+    "Comuna/Localidad": "Chile Chico",
+    "Provincia": "General Carrera",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 6050000
+  },
+  {
+    "Comuna/Localidad": "Río Ibáñez",
+    "Provincia": "General Carrera",
+    "Región": "Aysén del General Carlos Ibáñez del Campo",
+    "Código Postal": 6060000
+  },
+  {
+    "Comuna/Localidad": "Arauco",
+    "Provincia": "Arauco",
+    "Región": "Biobío",
+    "Código Postal": 4360000
+  },
+  {
+    "Comuna/Localidad": "Cañete",
+    "Provincia": "Arauco",
+    "Región": "Biobío",
+    "Código Postal": 4390000
+  },
+  {
+    "Comuna/Localidad": "Contulmo",
+    "Provincia": "Arauco",
+    "Región": "Biobío",
+    "Código Postal": 4400000
+  },
+  {
+    "Comuna/Localidad": "Curanilahue",
+    "Provincia": "Arauco",
+    "Región": "Biobío",
+    "Código Postal": 4370000
+  },
+  {
+    "Comuna/Localidad": "Lebu",
+    "Provincia": "Arauco",
+    "Región": "Biobío",
+    "Código Postal": 4350000
+  },
+  {
+    "Comuna/Localidad": "Los Alamos",
+    "Provincia": "Arauco",
+    "Región": "Biobío",
+    "Código Postal": 4380000
+  },
+  {
+    "Comuna/Localidad": "Tirua",
+    "Provincia": "Arauco",
+    "Región": "Biobío",
+    "Código Postal": 4410000
+  },
+  {
+    "Comuna/Localidad": "Alto Biobío",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4590000
+  },
+  {
+    "Comuna/Localidad": "Antuco",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4490000
+  },
+  {
+    "Comuna/Localidad": "Cabrero",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4470000
+  },
+  {
+    "Comuna/Localidad": "Laja",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4560000
+  },
+  {
+    "Comuna/Localidad": "Los Angeles",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4440000
+  },
+  {
+    "Comuna/Localidad": "Mulchén",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4530000
+  },
+  {
+    "Comuna/Localidad": "Nacimiento",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4550000
+  },
+  {
+    "Comuna/Localidad": "Negrete",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4540000
+  },
+  {
+    "Comuna/Localidad": "Quilaco",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4520000
+  },
+  {
+    "Comuna/Localidad": "Quilleco",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4500000
+  },
+  {
+    "Comuna/Localidad": "San Rosendo",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4570000
+  },
+  {
+    "Comuna/Localidad": "Santa Bárbara",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4510000
+  },
+  {
+    "Comuna/Localidad": "Tucapel",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4480000
+  },
+  {
+    "Comuna/Localidad": "Yumbel",
+    "Provincia": "Biobío",
+    "Región": "Biobío",
+    "Código Postal": 4580000
+  },
+  {
+    "Comuna/Localidad": "Chiguayante",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4100000
+  },
+  {
+    "Comuna/Localidad": "Concepción",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4030000
+  },
+  {
+    "Comuna/Localidad": "Coronel",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4190000
+  },
+  {
+    "Comuna/Localidad": "Florida",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4170000
+  },
+  {
+    "Comuna/Localidad": "Hualpén",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4600000
+  },
+  {
+    "Comuna/Localidad": "Hualqui",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4180000
+  },
+  {
+    "Comuna/Localidad": "Lota",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4210000
+  },
+  {
+    "Comuna/Localidad": "Penco",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4150000
+  },
+  {
+    "Comuna/Localidad": "San Pedro De La Paz",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4130000
+  },
+  {
+    "Comuna/Localidad": "Santa Juana",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4230000
+  },
+  {
+    "Comuna/Localidad": "Talcahuano",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4260000
+  },
+  {
+    "Comuna/Localidad": "Tomé",
+    "Provincia": "Concepción",
+    "Región": "Biobío",
+    "Código Postal": 4160000
+  },
+  {
+    "Comuna/Localidad": "Bulnes",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3930000
+  },
+  {
+    "Comuna/Localidad": "Chillán",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3780000
+  },
+  {
+    "Comuna/Localidad": "Chillán Viejo",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3820000
+  },
+  {
+    "Comuna/Localidad": "Cobquecura",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3990000
+  },
+  {
+    "Comuna/Localidad": "Coelemu",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3970000
+  },
+  {
+    "Comuna/Localidad": "Coihueco",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3870000
+  },
+  {
+    "Comuna/Localidad": "El Carmen",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3900000
+  },
+  {
+    "Comuna/Localidad": "Ninhue",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 4010000
+  },
+  {
+    "Comuna/Localidad": "Ñiquén",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3850000
+  },
+  {
+    "Comuna/Localidad": "Pemuco",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3910000
+  },
+  {
+    "Comuna/Localidad": "Pinto",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3880000
+  },
+  {
+    "Comuna/Localidad": "Portezuelo",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3960000
+  },
+  {
+    "Comuna/Localidad": "Quillón",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3940000
+  },
+  {
+    "Comuna/Localidad": "Quirihue",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 4000000
+  },
+  {
+    "Comuna/Localidad": "Ranquil",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3950000
+  },
+  {
+    "Comuna/Localidad": "San Carlos",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3840000
+  },
+  {
+    "Comuna/Localidad": "San Fabián",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3860000
+  },
+  {
+    "Comuna/Localidad": "San Ignacio",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3890000
+  },
+  {
+    "Comuna/Localidad": "San Nicolás",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 4020000
+  },
+  {
+    "Comuna/Localidad": "Trehuaco",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3980000
+  },
+  {
+    "Comuna/Localidad": "Yungay",
+    "Provincia": "Ñuble",
+    "Región": "Biobío",
+    "Código Postal": 3920000
+  },
+  {
+    "Comuna/Localidad": "Canela",
+    "Provincia": "Choapa",
+    "Región": "Coquimbo",
+    "Código Postal": 1960000
+  },
+  {
+    "Comuna/Localidad": "Illapel",
+    "Provincia": "Choapa",
+    "Región": "Coquimbo",
+    "Código Postal": 1930000
+  },
+  {
+    "Comuna/Localidad": "Los Vilos",
+    "Provincia": "Choapa",
+    "Región": "Coquimbo",
+    "Código Postal": 1940000
+  },
+  {
+    "Comuna/Localidad": "Salamanca",
+    "Provincia": "Choapa",
+    "Región": "Coquimbo",
+    "Código Postal": 1950000
+  },
+  {
+    "Comuna/Localidad": "Andacollo",
+    "Provincia": "Elqui",
+    "Región": "Coquimbo",
+    "Código Postal": 1750000
+  },
+  {
+    "Comuna/Localidad": "Coquimbo",
+    "Provincia": "Elqui",
+    "Región": "Coquimbo",
+    "Código Postal": 1780000
+  },
+  {
+    "Comuna/Localidad": "La Higuera",
+    "Provincia": "Elqui",
+    "Región": "Coquimbo",
+    "Código Postal": 1740000
+  },
+  {
+    "Comuna/Localidad": "La Serena",
+    "Provincia": "Elqui",
+    "Región": "Coquimbo",
+    "Código Postal": 1700000
+  },
+  {
+    "Comuna/Localidad": "Paihuano",
+    "Provincia": "Elqui",
+    "Región": "Coquimbo",
+    "Código Postal": 1770000
+  },
+  {
+    "Comuna/Localidad": "Vicuña",
+    "Provincia": "Elqui",
+    "Región": "Coquimbo",
+    "Código Postal": 1760000
+  },
+  {
+    "Comuna/Localidad": "Combarbalá",
+    "Provincia": "Limarí",
+    "Región": "Coquimbo",
+    "Código Postal": 1890000
+  },
+  {
+    "Comuna/Localidad": "Monte Patria",
+    "Provincia": "Limarí",
+    "Región": "Coquimbo",
+    "Código Postal": 1880000
+  },
+  {
+    "Comuna/Localidad": "Ovalle",
+    "Provincia": "Limarí",
+    "Región": "Coquimbo",
+    "Código Postal": 1840000
+  },
+  {
+    "Comuna/Localidad": "Punitaqui",
+    "Provincia": "Limarí",
+    "Región": "Coquimbo",
+    "Código Postal": 1900000
+  },
+  {
+    "Comuna/Localidad": "Río Hurtado",
+    "Provincia": "Limarí",
+    "Región": "Coquimbo",
+    "Código Postal": 1870000
+  },
+  {
+    "Comuna/Localidad": "Carahue",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 5010000
+  },
+  {
+    "Comuna/Localidad": "Cholchol",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 5040000
+  },
+  {
+    "Comuna/Localidad": "Cunco",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4890000
+  },
+  {
+    "Comuna/Localidad": "Curarrehue",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4910000
+  },
+  {
+    "Comuna/Localidad": "Freire",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4940000
+  },
+  {
+    "Comuna/Localidad": "Galvarino",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 5030000
+  },
+  {
+    "Comuna/Localidad": "Gorbea",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4960000
+  },
+  {
+    "Comuna/Localidad": "Lautaro",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4860000
+  },
+  {
+    "Comuna/Localidad": "Loncoche",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4970000
+  },
+  {
+    "Comuna/Localidad": "Melipeuco",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4900000
+  },
+  {
+    "Comuna/Localidad": "Nueva Imperial",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 5020000
+  },
+  {
+    "Comuna/Localidad": "Padre Las Casas",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4850000
+  },
+  {
+    "Comuna/Localidad": "Perquenco",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4870000
+  },
+  {
+    "Comuna/Localidad": "Pitrufquén",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4950000
+  },
+  {
+    "Comuna/Localidad": "Pucón",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4920000
+  },
+  {
+    "Comuna/Localidad": "Saavedra",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 5000000
+  },
+  {
+    "Comuna/Localidad": "Temuco",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4780000
+  },
+  {
+    "Comuna/Localidad": "Teodoro Schmidt",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4990000
+  },
+  {
+    "Comuna/Localidad": "Toltén",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4980000
+  },
+  {
+    "Comuna/Localidad": "Vilcún",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4880000
+  },
+  {
+    "Comuna/Localidad": "Villarrica",
+    "Provincia": "Cautín",
+    "Región": "La Araucanía",
+    "Código Postal": 4930000
+  },
+  {
+    "Comuna/Localidad": "Angol",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4650000
+  },
+  {
+    "Comuna/Localidad": "Collipulli",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4680000
+  },
+  {
+    "Comuna/Localidad": "Curacautín",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4700000
+  },
+  {
+    "Comuna/Localidad": "Ercilla",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4710000
+  },
+  {
+    "Comuna/Localidad": "Lonquimay",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4690000
+  },
+  {
+    "Comuna/Localidad": "Los Sauces",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4760000
+  },
+  {
+    "Comuna/Localidad": "Lumaco",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4740000
+  },
+  {
+    "Comuna/Localidad": "Purén",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4750000
+  },
+  {
+    "Comuna/Localidad": "Renaico",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4670000
+  },
+  {
+    "Comuna/Localidad": "Traiguén",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4730000
+  },
+  {
+    "Comuna/Localidad": "Victoria",
+    "Provincia": "Malleco",
+    "Región": "La Araucanía",
+    "Código Postal": 4720000
+  },
+  {
+    "Comuna/Localidad": "Codegua",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2900000
+  },
+  {
+    "Comuna/Localidad": "Coinco",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3010000
+  },
+  {
+    "Comuna/Localidad": "Coltauco",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3000000
+  },
+  {
+    "Comuna/Localidad": "Doñihue",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3020000
+  },
+  {
+    "Comuna/Localidad": "Graneros",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2880000
+  },
+  {
+    "Comuna/Localidad": "Las Cabras",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3030000
+  },
+  {
+    "Comuna/Localidad": "Machalí",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2910000
+  },
+  {
+    "Comuna/Localidad": "Malloa",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2950000
+  },
+  {
+    "Comuna/Localidad": "Mostazal",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2890000
+  },
+  {
+    "Comuna/Localidad": "Olivar",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2920000
+  },
+  {
+    "Comuna/Localidad": "Peumo",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2990000
+  },
+  {
+    "Comuna/Localidad": "Pichidegua",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2980000
+  },
+  {
+    "Comuna/Localidad": "Quinta de Tilcoco",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2960000
+  },
+  {
+    "Comuna/Localidad": "Rancagua",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2820000
+  },
+  {
+    "Comuna/Localidad": "Rengo",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2940000
+  },
+  {
+    "Comuna/Localidad": "Requinoa",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2930000
+  },
+  {
+    "Comuna/Localidad": "San Vicente",
+    "Provincia": "Cachapoal",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 2970000
+  },
+  {
+    "Comuna/Localidad": "La Estrella",
+    "Provincia": "Cardenal Caro",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3250000
+  },
+  {
+    "Comuna/Localidad": "Litueche",
+    "Provincia": "Cardenal Caro",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3240000
+  },
+  {
+    "Comuna/Localidad": "Marchihue",
+    "Provincia": "Cardenal Caro",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3260000
+  },
+  {
+    "Comuna/Localidad": "Navidad",
+    "Provincia": "Cardenal Caro",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3230000
+  },
+  {
+    "Comuna/Localidad": "Paredones",
+    "Provincia": "Cardenal Caro",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3270000
+  },
+  {
+    "Comuna/Localidad": "Pichilemu",
+    "Provincia": "Cardenal Caro",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3220000
+  },
+  {
+    "Comuna/Localidad": "Chépica",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3120000
+  },
+  {
+    "Comuna/Localidad": "Chimbarongo",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3090000
+  },
+  {
+    "Comuna/Localidad": "Lolol",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3140000
+  },
+  {
+    "Comuna/Localidad": "Nancagua",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3110000
+  },
+  {
+    "Comuna/Localidad": "Palmilla",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3160000
+  },
+  {
+    "Comuna/Localidad": "Peralillo",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3170000
+  },
+  {
+    "Comuna/Localidad": "Placilla",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3100000
+  },
+  {
+    "Comuna/Localidad": "Pumanque",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3150000
+  },
+  {
+    "Comuna/Localidad": "San Fernando",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3070000
+  },
+  {
+    "Comuna/Localidad": "Santa Cruz",
+    "Provincia": "Colchagua",
+    "Región": "Libertador General Bernardo O'Higgins",
+    "Código Postal": 3130000
+  },
+  {
+    "Comuna/Localidad": "Ancud",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5710000
+  },
+  {
+    "Comuna/Localidad": "Castro",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5700000
+  },
+  {
+    "Comuna/Localidad": "Chonchi",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5770000
+  },
+  {
+    "Comuna/Localidad": "Curaco de Vélez",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5740000
+  },
+  {
+    "Comuna/Localidad": "Dalcahue",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5730000
+  },
+  {
+    "Comuna/Localidad": "Puqueldón",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5760000
+  },
+  {
+    "Comuna/Localidad": "Queilén",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5780000
+  },
+  {
+    "Comuna/Localidad": "Quellón",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5790000
+  },
+  {
+    "Comuna/Localidad": "Quemchi",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5720000
+  },
+  {
+    "Comuna/Localidad": "Quinchao",
+    "Provincia": "Chiloé",
+    "Región": "Los Lagos",
+    "Código Postal": 5750000
+  },
+  {
+    "Comuna/Localidad": "Calbuco",
+    "Provincia": "Llanquihue",
+    "Región": "Los Lagos",
+    "Código Postal": 5570000
+  },
+  {
+    "Comuna/Localidad": "Cochamó",
+    "Provincia": "Llanquihue",
+    "Región": "Los Lagos",
+    "Código Postal": 5560000
+  },
+  {
+    "Comuna/Localidad": "Fresia",
+    "Provincia": "Llanquihue",
+    "Región": "Los Lagos",
+    "Código Postal": 5600000
+  },
+  {
+    "Comuna/Localidad": "Frutillar",
+    "Provincia": "Llanquihue",
+    "Región": "Los Lagos",
+    "Código Postal": 5620000
+  },
+  {
+    "Comuna/Localidad": "Llanquihue",
+    "Provincia": "Llanquihue",
+    "Región": "Los Lagos",
+    "Código Postal": 2220000
+  },
+  {
+    "Comuna/Localidad": "Los Muermos",
+    "Provincia": "Llanquihue",
+    "Región": "Los Lagos",
+    "Código Postal": 5590000
+  },
+  {
+    "Comuna/Localidad": "Maullín",
+    "Provincia": "Llanquihue",
+    "Región": "Los Lagos",
+    "Código Postal": 5580000
+  },
+  {
+    "Comuna/Localidad": "Puerto Montt",
+    "Provincia": "Llanquihue",
+    "Región": "Los Lagos",
+    "Código Postal": 5480000
+  },
+  {
+    "Comuna/Localidad": "Puerto Varas",
+    "Provincia": "Llanquihue",
+    "Región": "Los Lagos",
+    "Código Postal": 5550000
+  },
+  {
+    "Comuna/Localidad": "Osorno",
+    "Provincia": "Osorno",
+    "Región": "Los Lagos",
+    "Código Postal": 5290000
+  },
+  {
+    "Comuna/Localidad": "Puerto Octay",
+    "Provincia": "Osorno",
+    "Región": "Los Lagos",
+    "Código Postal": 5370000
+  },
+  {
+    "Comuna/Localidad": "Purranque",
+    "Provincia": "Osorno",
+    "Región": "Los Lagos",
+    "Código Postal": 5380000
+  },
+  {
+    "Comuna/Localidad": "Puyehue",
+    "Provincia": "Osorno",
+    "Región": "Los Lagos",
+    "Código Postal": 5360000
+  },
+  {
+    "Comuna/Localidad": "Río Negro",
+    "Provincia": "Osorno",
+    "Región": "Los Lagos",
+    "Código Postal": 5390000
+  },
+  {
+    "Comuna/Localidad": "San Juan de la Costa",
+    "Provincia": "Osorno",
+    "Región": "Los Lagos",
+    "Código Postal": 5400000
+  },
+  {
+    "Comuna/Localidad": "San Pablo",
+    "Provincia": "Osorno",
+    "Región": "Los Lagos",
+    "Código Postal": 5350000
+  },
+  {
+    "Comuna/Localidad": "Chaitén",
+    "Provincia": "Palena",
+    "Región": "Los Lagos",
+    "Código Postal": 5850000
+  },
+  {
+    "Comuna/Localidad": "Futaleufú",
+    "Provincia": "Palena",
+    "Región": "Los Lagos",
+    "Código Postal": 5870000
+  },
+  {
+    "Comuna/Localidad": "Hualaihue",
+    "Provincia": "Palena",
+    "Región": "Los Lagos",
+    "Código Postal": 5860000
+  },
+  {
+    "Comuna/Localidad": "Palena",
+    "Provincia": "Palena",
+    "Región": "Los Lagos",
+    "Código Postal": 5880000
+  },
+  {
+    "Comuna/Localidad": "Futrono",
+    "Provincia": "Provincia del Ranco",
+    "Región": "Los Ríos",
+    "Código Postal": 5180000
+  },
+  {
+    "Comuna/Localidad": "Lago Ranco",
+    "Provincia": "Provincia del Ranco",
+    "Región": "Los Ríos",
+    "Código Postal": 5220000
+  },
+  {
+    "Comuna/Localidad": "La Unión",
+    "Provincia": "Provincia del Ranco",
+    "Región": "Los Ríos",
+    "Código Postal": 5250000
+  },
+  {
+    "Comuna/Localidad": "Río Bueno",
+    "Provincia": "Provincia del Ranco",
+    "Región": "Los Ríos",
+    "Código Postal": 5240000
+  },
+  {
+    "Comuna/Localidad": "Corral",
+    "Provincia": "Valdivia",
+    "Región": "Los Ríos",
+    "Código Postal": 5190000
+  },
+  {
+    "Comuna/Localidad": "Lanco",
+    "Provincia": "Valdivia",
+    "Región": "Los Ríos",
+    "Código Postal": 5160000
+  },
+  {
+    "Comuna/Localidad": "Los Lagos",
+    "Provincia": "Valdivia",
+    "Región": "Los Ríos",
+    "Código Postal": 5170000
+  },
+  {
+    "Comuna/Localidad": "Máfil",
+    "Provincia": "Valdivia",
+    "Región": "Los Ríos",
+    "Código Postal": 5200000
+  },
+  {
+    "Comuna/Localidad": "Mariquina",
+    "Provincia": "Valdivia",
+    "Región": "Los Ríos",
+    "Código Postal": 5150000
+  },
+  {
+    "Comuna/Localidad": "Paillaco",
+    "Provincia": "Valdivia",
+    "Región": "Los Ríos",
+    "Código Postal": 5230000
+  },
+  {
+    "Comuna/Localidad": "Panguipulli",
+    "Provincia": "Valdivia",
+    "Región": "Los Ríos",
+    "Código Postal": 5210000
+  },
+  {
+    "Comuna/Localidad": "Valdivia",
+    "Provincia": "Valdivia",
+    "Región": "Los Ríos",
+    "Código Postal": 5090000
+  },
+  {
+    "Comuna/Localidad": "Antártica",
+    "Provincia": "Antártica Chilena",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6360000
+  },
+  {
+    "Comuna/Localidad": "Cabo de Hornos",
+    "Provincia": "Antártica Chilena",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6350000
+  },
+  {
+    "Comuna/Localidad": "Laguna Blanca",
+    "Provincia": "Magallanes",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6250000
+  },
+  {
+    "Comuna/Localidad": "Punta Arenas",
+    "Provincia": "Magallanes",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6200000
+  },
+  {
+    "Comuna/Localidad": "Río Verde",
+    "Provincia": "Magallanes",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6240000
+  },
+  {
+    "Comuna/Localidad": "San Gregorio",
+    "Provincia": "Magallanes",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6260000
+  },
+  {
+    "Comuna/Localidad": "Porvenir",
+    "Provincia": "Tierra del Fuego",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6300000
+  },
+  {
+    "Comuna/Localidad": "Primavera",
+    "Provincia": "Tierra del Fuego",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6310000
+  },
+  {
+    "Comuna/Localidad": "Timaukel",
+    "Provincia": "Tierra del Fuego",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6320000
+  },
+  {
+    "Comuna/Localidad": "Natales",
+    "Provincia": "Última Esperanza",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6160000
+  },
+  {
+    "Comuna/Localidad": "Torres del Paine",
+    "Provincia": "Última Esperanza",
+    "Región": "Magallanes y Antártica Chilena",
+    "Código Postal": 6170000
+  },
+  {
+    "Comuna/Localidad": "Cauquenes",
+    "Provincia": "Cauquenes",
+    "Región": "Maule",
+    "Código Postal": 3690000
+  },
+  {
+    "Comuna/Localidad": "Chanco",
+    "Provincia": "Cauquenes",
+    "Región": "Maule",
+    "Código Postal": 3720000
+  },
+  {
+    "Comuna/Localidad": "Pelluhue",
+    "Provincia": "Cauquenes",
+    "Región": "Maule",
+    "Código Postal": 3710000
+  },
+  {
+    "Comuna/Localidad": "Curicó",
+    "Provincia": "Curicó",
+    "Región": "Maule",
+    "Código Postal": 3340000
+  },
+  {
+    "Comuna/Localidad": "Hualañé",
+    "Provincia": "Curicó",
+    "Región": "Maule",
+    "Código Postal": 3400000
+  },
+  {
+    "Comuna/Localidad": "Licantén",
+    "Provincia": "Curicó",
+    "Región": "Maule",
+    "Código Postal": 3410000
+  },
+  {
+    "Comuna/Localidad": "Molina",
+    "Provincia": "Curicó",
+    "Región": "Maule",
+    "Código Postal": 3380000
+  },
+  {
+    "Comuna/Localidad": "Rauco",
+    "Provincia": "Curicó",
+    "Región": "Maule",
+    "Código Postal": 3430000
+  },
+  {
+    "Comuna/Localidad": "Romeral",
+    "Provincia": "Curicó",
+    "Región": "Maule",
+    "Código Postal": 3370000
+  },
+  {
+    "Comuna/Localidad": "Sagrada Familia",
+    "Provincia": "Curicó",
+    "Región": "Maule",
+    "Código Postal": 3390000
+  },
+  {
+    "Comuna/Localidad": "Teno",
+    "Provincia": "Curicó",
+    "Región": "Maule",
+    "Código Postal": 3360000
+  },
+  {
+    "Comuna/Localidad": "Vichuquén",
+    "Provincia": "Curicó",
+    "Región": "Maule",
+    "Código Postal": 3420000
+  },
+  {
+    "Comuna/Localidad": "Colbún",
+    "Provincia": "Linares",
+    "Región": "Maule",
+    "Código Postal": 3610000
+  },
+  {
+    "Comuna/Localidad": "Linares",
+    "Provincia": "Linares",
+    "Región": "Maule",
+    "Código Postal": 3580000
+  },
+  {
+    "Comuna/Localidad": "Longaví",
+    "Provincia": "Linares",
+    "Región": "Maule",
+    "Código Postal": 3620000
+  },
+  {
+    "Comuna/Localidad": "Parral",
+    "Provincia": "Linares",
+    "Región": "Maule",
+    "Código Postal": 3630000
+  },
+  {
+    "Comuna/Localidad": "Retiro",
+    "Provincia": "Linares",
+    "Región": "Maule",
+    "Código Postal": 3640000
+  },
+  {
+    "Comuna/Localidad": "San Javier",
+    "Provincia": "Linares",
+    "Región": "Maule",
+    "Código Postal": 3660000
+  },
+  {
+    "Comuna/Localidad": "Villa Alegre",
+    "Provincia": "Linares",
+    "Región": "Maule",
+    "Código Postal": 3650000
+  },
+  {
+    "Comuna/Localidad": "Yerbas Buenas",
+    "Provincia": "Linares",
+    "Región": "Maule",
+    "Código Postal": 3600000
+  },
+  {
+    "Comuna/Localidad": "Constitución",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3560000
+  },
+  {
+    "Comuna/Localidad": "Curepto",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3570000
+  },
+  {
+    "Comuna/Localidad": "Empedrado",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3540000
+  },
+  {
+    "Comuna/Localidad": "Maule",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3530000
+  },
+  {
+    "Comuna/Localidad": "Pelarco",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3500000
+  },
+  {
+    "Comuna/Localidad": "Pencahue",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3550000
+  },
+  {
+    "Comuna/Localidad": "Río Claro",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3510000
+  },
+  {
+    "Comuna/Localidad": "San Clemente",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3520000
+  },
+  {
+    "Comuna/Localidad": "San Rafael",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3490000
+  },
+  {
+    "Comuna/Localidad": "Talca",
+    "Provincia": "Talca",
+    "Región": "Maule",
+    "Código Postal": 3460000
+  },
+  {
+    "Comuna/Localidad": "Colina",
+    "Provincia": "Chacabuco",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9340000
+  },
+  {
+    "Comuna/Localidad": "Lampa",
+    "Provincia": "Chacabuco",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9380000
+  },
+  {
+    "Comuna/Localidad": "Til til",
+    "Provincia": "Chacabuco",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9420000
+  },
+  {
+    "Comuna/Localidad": "Pirque",
+    "Provincia": "Cordillera",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9480000
+  },
+  {
+    "Comuna/Localidad": "Puente Alto",
+    "Provincia": "Cordillera",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8150000
+  },
+  {
+    "Comuna/Localidad": "San José de Maipo",
+    "Provincia": "Cordillera",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9460000
+  },
+  {
+    "Comuna/Localidad": "Buin",
+    "Provincia": "Maipo",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9500000
+  },
+  {
+    "Comuna/Localidad": "Calera de Tango",
+    "Provincia": "Maipo",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9560000
+  },
+  {
+    "Comuna/Localidad": "Paine",
+    "Provincia": "Maipo",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9540000
+  },
+  {
+    "Comuna/Localidad": "San Bernardo",
+    "Provincia": "Maipo",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8050000
+  },
+  {
+    "Comuna/Localidad": "Alhué",
+    "Provincia": "Melipilla",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9650000
+  },
+  {
+    "Comuna/Localidad": "Curacaví",
+    "Provincia": "Melipilla",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9630000
+  },
+  {
+    "Comuna/Localidad": "María Pinto",
+    "Provincia": "Melipilla",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9620000
+  },
+  {
+    "Comuna/Localidad": "Melipilla",
+    "Provincia": "Melipilla",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9580000
+  },
+  {
+    "Comuna/Localidad": "San Pedro",
+    "Provincia": "Melipilla",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9660000
+  },
+  {
+    "Comuna/Localidad": "Cerrillos",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9200000
+  },
+  {
+    "Comuna/Localidad": "Cerro Navia",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9080000
+  },
+  {
+    "Comuna/Localidad": "Conchalí",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8540000
+  },
+  {
+    "Comuna/Localidad": "El Bosque",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8010000
+  },
+  {
+    "Comuna/Localidad": "Estación Central",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9160000
+  },
+  {
+    "Comuna/Localidad": "Huechuraba",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8580000
+  },
+  {
+    "Comuna/Localidad": "Independencia",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8380000
+  },
+  {
+    "Comuna/Localidad": "La Cisterna",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 7970000
+  },
+  {
+    "Comuna/Localidad": "La Florida",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8240000
+  },
+  {
+    "Comuna/Localidad": "La Granja",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8780000
+  },
+  {
+    "Comuna/Localidad": "La Pintana",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8820000
+  },
+  {
+    "Comuna/Localidad": "La Reina",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 7850000
+  },
+  {
+    "Comuna/Localidad": "Las Condes",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 7550000
+  },
+  {
+    "Comuna/Localidad": "Lo Barnechea",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 7690000
+  },
+  {
+    "Comuna/Localidad": "Lo Espejo",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9120000
+  },
+  {
+    "Comuna/Localidad": "Lo Prado",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8980000
+  },
+  {
+    "Comuna/Localidad": "Macul",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 7810000
+  },
+  {
+    "Comuna/Localidad": "Maipú",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9250000
+  },
+  {
+    "Comuna/Localidad": "Ñuñoa",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 7750000
+  },
+  {
+    "Comuna/Localidad": "Pedro Aguirre Cerda",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8460000
+  },
+  {
+    "Comuna/Localidad": "Peñalolén",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 7910000
+  },
+  {
+    "Comuna/Localidad": "Providencia",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 7500000
+  },
+  {
+    "Comuna/Localidad": "Pudahuel",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9020000
+  },
+  {
+    "Comuna/Localidad": "Quilicura",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8700000
+  },
+  {
+    "Comuna/Localidad": "Quinta Normal",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8500000
+  },
+  {
+    "Comuna/Localidad": "Recoleta",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8420000
+  },
+  {
+    "Comuna/Localidad": "Renca",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8640000
+  },
+  {
+    "Comuna/Localidad": "San Joaquín",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8940000
+  },
+  {
+    "Comuna/Localidad": "San Miguel",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8900000
+  },
+  {
+    "Comuna/Localidad": "San Ramón",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8860000
+  },
+  {
+    "Comuna/Localidad": "Santiago",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 8320000
+  },
+  {
+    "Comuna/Localidad": "Vitacura",
+    "Provincia": "Santiago",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 7630000
+  },
+  {
+    "Comuna/Localidad": "El Monte",
+    "Provincia": "Talagante",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9810000
+  },
+  {
+    "Comuna/Localidad": "Isla de Maipo",
+    "Provincia": "Talagante",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9790000
+  },
+  {
+    "Comuna/Localidad": "Padre Hurtado",
+    "Provincia": "Talagante",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9710000
+  },
+  {
+    "Comuna/Localidad": "Peñaflor",
+    "Provincia": "Talagante",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9750000
+  },
+  {
+    "Comuna/Localidad": "Talagante",
+    "Provincia": "Talagante",
+    "Región": "Metropolitana de Santiago",
+    "Código Postal": 9670000
+  },
+  {
+    "Comuna/Localidad": "Alto Hospicio",
+    "Provincia": "Iquique",
+    "Región": "Tarapacá",
+    "Código Postal": 1130000
+  },
+  {
+    "Comuna/Localidad": "Iquique",
+    "Provincia": "Iquique",
+    "Región": "Tarapacá",
+    "Código Postal": 1100000
+  },
+  {
+    "Comuna/Localidad": "Camiña",
+    "Provincia": "El Tamarugal",
+    "Región": "Tarapacá",
+    "Código Postal": 1150000
+  },
+  {
+    "Comuna/Localidad": "Colchane",
+    "Provincia": "El Tamarugal",
+    "Región": "Tarapacá",
+    "Código Postal": 1160000
+  },
+  {
+    "Comuna/Localidad": "Huara",
+    "Provincia": "El Tamarugal",
+    "Región": "Tarapacá",
+    "Código Postal": 1140000
+  },
+  {
+    "Comuna/Localidad": "Pica",
+    "Provincia": "El Tamarugal",
+    "Región": "Tarapacá",
+    "Código Postal": 1170000
+  },
+  {
+    "Comuna/Localidad": "Pozo Almonte",
+    "Provincia": "El Tamarugal",
+    "Región": "Tarapacá",
+    "Código Postal": 1180000
+  },
+  {
+    "Comuna/Localidad": "Isla de Pascua",
+    "Provincia": "Isla de Pascua",
+    "Región": "Valparaíso",
+    "Código Postal": 2770000
+  },
+  {
+    "Comuna/Localidad": "Calle Larga",
+    "Provincia": "Los Andes",
+    "Región": "Valparaíso",
+    "Código Postal": 2130000
+  },
+  {
+    "Comuna/Localidad": "Los Andes",
+    "Provincia": "Los Andes",
+    "Región": "Valparaíso",
+    "Código Postal": 2100000
+  },
+  {
+    "Comuna/Localidad": "Rinconada",
+    "Provincia": "Los Andes",
+    "Región": "Valparaíso",
+    "Código Postal": 2140000
+  },
+  {
+    "Comuna/Localidad": "San Esteban",
+    "Provincia": "Los Andes",
+    "Región": "Valparaíso",
+    "Código Postal": 2120000
+  },
+  {
+    "Comuna/Localidad": "Limache",
+    "Provincia": "Marga Marga",
+    "Región": "Valparaíso",
+    "Código Postal": 2240000
+  },
+  {
+    "Comuna/Localidad": "Olmué",
+    "Provincia": "Marga Marga",
+    "Región": "Valparaíso",
+    "Código Postal": 2330000
+  },
+  {
+    "Comuna/Localidad": "Quilpué",
+    "Provincia": "Marga Marga",
+    "Región": "Valparaíso",
+    "Código Postal": 2430000
+  },
+  {
+    "Comuna/Localidad": "Villa Alemana",
+    "Provincia": "Marga Marga",
+    "Región": "Valparaíso",
+    "Código Postal": 6500000
+  },
+  {
+    "Comuna/Localidad": "Cabildo",
+    "Provincia": "Petorca",
+    "Región": "Valparaíso",
+    "Código Postal": 2050000
+  },
+  {
+    "Comuna/Localidad": "La Ligua",
+    "Provincia": "Petorca",
+    "Región": "Valparaíso",
+    "Código Postal": 2030000
+  },
+  {
+    "Comuna/Localidad": "Papudo",
+    "Provincia": "Petorca",
+    "Región": "Valparaíso",
+    "Código Postal": 2070000
+  },
+  {
+    "Comuna/Localidad": "Petorca",
+    "Provincia": "Petorca",
+    "Región": "Valparaíso",
+    "Código Postal": 2040000
+  },
+  {
+    "Comuna/Localidad": "Zapallar",
+    "Provincia": "Petorca",
+    "Región": "Valparaíso",
+    "Código Postal": 2060000
+  },
+  {
+    "Comuna/Localidad": "Hijuelas",
+    "Provincia": "Quillota",
+    "Región": "Valparaíso",
+    "Código Postal": 2310000
+  },
+  {
+    "Comuna/Localidad": "La Calera",
+    "Provincia": "Quillota",
+    "Región": "Valparaíso",
+    "Código Postal": 2290000
+  },
+  {
+    "Comuna/Localidad": "La Cruz",
+    "Provincia": "Quillota",
+    "Región": "Valparaíso",
+    "Código Postal": 2280000
+  },
+  {
+    "Comuna/Localidad": "Nogales",
+    "Provincia": "Quillota",
+    "Región": "Valparaíso",
+    "Código Postal": 2300000
+  },
+  {
+    "Comuna/Localidad": "Quillota",
+    "Provincia": "Quillota",
+    "Región": "Valparaíso",
+    "Código Postal": 2260000
+  },
+  {
+    "Comuna/Localidad": "Algarrobo",
+    "Provincia": "San Antonio",
+    "Región": "Valparaíso",
+    "Código Postal": 2710000
+  },
+  {
+    "Comuna/Localidad": "Cartagena",
+    "Provincia": "San Antonio",
+    "Región": "Valparaíso",
+    "Código Postal": 2680000
+  },
+  {
+    "Comuna/Localidad": "El Quisco",
+    "Provincia": "San Antonio",
+    "Región": "Valparaíso",
+    "Código Postal": 2700000
+  },
+  {
+    "Comuna/Localidad": "El Tabo",
+    "Provincia": "San Antonio",
+    "Región": "Valparaíso",
+    "Código Postal": 2690000
+  },
+  {
+    "Comuna/Localidad": "San Antonio",
+    "Provincia": "San Antonio",
+    "Región": "Valparaíso",
+    "Código Postal": 2660000
+  },
+  {
+    "Comuna/Localidad": "Santo Domingo",
+    "Provincia": "San Antonio",
+    "Región": "Valparaíso",
+    "Código Postal": 2720000
+  },
+  {
+    "Comuna/Localidad": "Catemu",
+    "Provincia": "San Felipe de Aconcagua",
+    "Región": "Valparaíso",
+    "Código Postal": 2230000
+  },
+  {
+    "Comuna/Localidad": "Llay Llay",
+    "Provincia": "San Felipe de Aconcagua",
+    "Región": "Valparaíso",
+    "Código Postal": 5610000
+  },
+  {
+    "Comuna/Localidad": "Panquehue",
+    "Provincia": "San Felipe de Aconcagua",
+    "Región": "Valparaíso",
+    "Código Postal": 2210000
+  },
+  {
+    "Comuna/Localidad": "Putaendo",
+    "Provincia": "San Felipe de Aconcagua",
+    "Región": "Valparaíso",
+    "Código Postal": 2190000
+  },
+  {
+    "Comuna/Localidad": "San Felipe",
+    "Provincia": "San Felipe de Aconcagua",
+    "Región": "Valparaíso",
+    "Código Postal": 2170000
+  },
+  {
+    "Comuna/Localidad": "Santa María",
+    "Provincia": "San Felipe de Aconcagua",
+    "Región": "Valparaíso",
+    "Código Postal": 2200000
+  },
+  {
+    "Comuna/Localidad": "Casablanca",
+    "Provincia": "Valparaíso",
+    "Región": "Valparaíso",
+    "Código Postal": 2480000
+  },
+  {
+    "Comuna/Localidad": "Concón",
+    "Provincia": "Valparaíso",
+    "Región": "Valparaíso",
+    "Código Postal": 2510000
+  },
+  {
+    "Comuna/Localidad": "Juan Fernández",
+    "Provincia": "Valparaíso",
+    "Región": "Valparaíso",
+    "Código Postal": 2600000
+  },
+  {
+    "Comuna/Localidad": "Puchuncaví",
+    "Provincia": "Valparaíso",
+    "Región": "Valparaíso",
+    "Código Postal": 2500000
+  },
+  {
+    "Comuna/Localidad": "Quintero",
+    "Provincia": "Valparaíso",
+    "Región": "Valparaíso",
+    "Código Postal": 2490000
+  },
+  {
+    "Comuna/Localidad": "Valparaíso",
+    "Provincia": "Valparaíso",
+    "Región": "Valparaíso",
+    "Código Postal": 2340000
+  },
+  {
+    "Comuna/Localidad": "Viña del Mar",
+    "Provincia": "Valparaíso",
+    "Región": "Valparaíso",
+    "Código Postal": 2520000
+  }
+]

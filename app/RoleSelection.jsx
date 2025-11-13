@@ -1,62 +1,115 @@
-import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 
-export function RoleSelection() {
+const RoleSelection = () => {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Selecciona cómo deseas autenticarte</Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>MAPI</Text>
+        <Text style={styles.subtitle}>¿Eres paciente o médico?</Text>
+        
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.buttonPatient]}
+            onPress={() => router.push('patientEntry')}
+          >
+            <Text style={[styles.buttonText, styles.buttonTextPrimary]}>Paciente</Text>
+            <Text style={[styles.buttonEmoji]}>😉</Text>
+            <Text style={[styles.buttonDescription, styles.buttonDescriptionPrimary]}>
+              ¡Te acompañamos en tu día a día!
+            </Text>
+          </TouchableOpacity>
 
-      <Pressable style={styles.primaryButton}>
-        <Text style={styles.primaryButtonText}>Autenticarse como médico</Text>
-      </Pressable>
-
-      <Pressable style={styles.secondaryButton}>
-        <Text style={styles.secondaryButtonText}>
-          Autenticarse como paciente
-        </Text>
-      </Pressable>
+          <TouchableOpacity
+            style={[styles.button, styles.buttonDoctor]}
+            onPress={() => router.push('doctorLogin')}
+          >
+            <Text style={[styles.buttonText, styles.buttonTextSecondary]}>Médico</Text>
+            <Text style={[styles.buttonEmoji]}>🧑‍⚕️</Text>
+            <Text style={[styles.buttonDescription, styles.buttonDescriptionSecondary]}>
+              Gestiona pacientes y registros
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
-    maxWidth: 540,
-    alignItems: "center",
-    gap: 12,
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
   },
   title: {
-    fontSize: 20,
-    color: "#2B2B2B",
-    marginBottom: 18,
-    textAlign: "center",
+    fontSize: 60,
+    fontWeight: '800',
+    color: '#2196F3',
+    marginBottom: 8,
+    letterSpacing: 2,
   },
-  primaryButton: {
-    width: "100%",
-    backgroundColor: "#83C1FF",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    marginBottom: 10,
+  subtitle: {
+    fontSize: 24,
+    color: '#666',
+    marginBottom: 48,
+    fontWeight: '500',
   },
-  primaryButtonText: {
-    color: "#fff",
-    fontWeight: "600",
+  buttonContainer: {
+    width: '100%',
+    maxWidth: 360,
+    gap: 16,
   },
-  secondaryButton: {
-    width: "100%",
-    backgroundColor: "#F8FBFF",
-    borderWidth: 1,
-    borderColor: "#E6F3FF",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
+  button: {
+    width: '100%',
+    padding: 24,
+    borderRadius: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#2196F3',
   },
-  secondaryButtonText: {
-    color: "#2B2B2B",
-    fontWeight: "500",
+  buttonPatient: {
+    backgroundColor: '#2196F3',
   },
+  buttonDoctor: {
+    backgroundColor: '#ffffff',
+  },
+  buttonText: {
+    fontSize: 28,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  buttonTextPrimary: {
+    color: '#ffffff',
+  },
+  buttonTextSecondary: {
+    color: '#2196F3',
+  },
+  buttonEmoji: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
+  buttonDescription: {
+    fontSize: 16,
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  buttonDescriptionPrimary: {
+    color: '#ffffff',
+    opacity: 0.9,
+  },
+  buttonDescriptionSecondary: {
+    color: '#2196F3',
+    opacity: 0.9,
+  }
 });
 
 export default RoleSelection;
