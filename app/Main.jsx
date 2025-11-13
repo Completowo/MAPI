@@ -16,14 +16,14 @@ import { supabase } from "../services/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Imports de Iconos
-import { SettingIcon, BellIcon } from "./Icons";
+import { SettingIcon, BellIcon } from "../components/Icons";
 
 // Imports de Componentes
-import { Points } from "./Points";
-import { LastCheck } from "./LastCheck";
-import { Missions } from "./Missions";
-import { Chat } from "./Chat";
-import { BotonGrabacion } from "./BotonGrabacion";
+import { Points } from "../components/Points";
+import { LastCheck } from "../components/LastCheck";
+import { Missions } from "../components/Missions";
+import { Chat } from "../components/Chat";
+import { BotonGrabacion } from "../components/BotonGrabacion";
 import { getGeminiResponse } from "../services/gemini";
 
 //Import misiones
