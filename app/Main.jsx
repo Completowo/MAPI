@@ -10,84 +10,124 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link } from "expo-router";
+import { supabase } from "../services/supabase";
+
+//Async Storage Para guardar las misiones y que se cambien cada 24Horas
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Imports de Iconos
-import { SettingIcon, BellIcon } from "../components/Icons";
+import { SettingIcon, BellIcon } from "./Icons";
 
 // Imports de Componentes
-import { Points } from "../components/Points";
-import { LastCheck } from "../components/LastCheck";
-import { Missions } from "../components/Missions";
-import { Chat } from "../components/Chat";
-import { BotonGrabacion } from "../components/BotonGrabacion";
+import { Points } from "./Points";
+import { LastCheck } from "./LastCheck";
+import { Missions } from "./Missions";
+import { Chat } from "./Chat";
+import { BotonGrabacion } from "./BotonGrabacion";
 import { getGeminiResponse } from "../services/gemini";
 
 //Import misiones
 import missions from "../assets/missions.json";
-import { Switch } from "react-native-web";
 
-export default function Main() {
+export function Main() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
+  const [dailyMissions, setDailyMissions] = useState([]);
 
+  //Id del chat en Supabase(Para pruebas)
+  const id = "2";
+
+  //Función para obtener el chat de Supabase
+  const fetchChatHistory = async () => {
+    const { data, error } = await supabase
+      .from("chats")
+      .select("messages", "emotion")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.log("Error al obtener el chat", error);
+      return [];
+    }
+
+    return {
+      messages: data?.messages || [],
+      emotion: data?.emotion || "neutral",
+    };
+  };
+
+  //Trae el historial devuelva
   useEffect(() => {
-    const fetchInitialGreeting = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
 
+      const { messages: history, emotion: historyEmotion } =
+        await fetchChatHistory();
+
+      //Setear Historial y emociones desde la base de datos
+      if (history.length > 0) {
+        console.log("Historial cargado desde Supabase");
+        setMapiEmotion(historyEmotion || "neutral");
+        setMessages(history);
+        setIsLoading(false);
+        return;
+      }
+
+      //Si no hay historial, iniciar saludo
       const initialPrompt = [{ role: "user", parts: [{ text: "Hola" }] }];
       const response = await getGeminiResponse(initialPrompt);
 
-      // Obtener emoción
       const emotionMatch = response.match(
-        /Emocion:\s*["'(]*([\wáéíóú]+)["')]*\s*/i
+        /Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i
       );
       const emotion = emotionMatch
         ? emotionMatch[1].toLowerCase().replace(/\./g, "")
         : "neutral";
-      console.log("EMOCIÓN:", emotion);
 
-      // Unir el resto del texto (sin la línea de emoción)
       const cleanedResponse = response
-        .replace(/Emocion:\s*["'(]*[\wáéíóú]+["')]*\s*/i, "")
+        .replace(/Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i, "")
         .trim();
 
-      // Dividir en oraciones
       const responseSentences = cleanedResponse
         .split(/(?<=[.?!])\s+/)
         .map((s) => s.trim())
         .filter((s) => s && s !== "." && s !== "..." && s.length > 1);
 
-      //Mensaje IA
+      const userGreeting = { id: Math.random(), text: "Hola", sender: "user" };
       const newMessages = responseSentences.map((sentence) => ({
         id: Math.random(),
         text: sentence.trim(),
         sender: "assistant",
       }));
 
-      //Mensaje usuario :D
-      const userGreatingMessage = {
-        id: Math.random(),
-        text: "Hola",
-        sender: "user",
-      };
-
-      setMessages([userGreatingMessage, ...newMessages]);
-
+      const combinedMessages = [userGreeting, ...newMessages];
+      setMessages(combinedMessages);
       setMapiEmotion(emotion);
-      setMessages(newMessages);
       setIsLoading(false);
+
+      // Guardar nuevo chat en Supabase
+      await supabase.from("chats").upsert([
+        {
+          id: id,
+          messages: combinedMessages,
+          emotion: emotion,
+          created_at: new Date(),
+        },
+      ]);
     };
 
-    fetchInitialGreeting();
+    fetchData();
   }, []);
 
-  //PAPUUU
+  //Función principal de chat de la ia
   const handleSendTranscription = async (transcription) => {
     if (!transcription) return;
     setIsLoading(true);
+
+    const { messages: history } = await fetchChatHistory();
 
     //MENSAJE DEL USUARIO
     const newUserMessage = {
@@ -96,7 +136,7 @@ export default function Main() {
       sender: "user",
     };
 
-    const updatedMesages = [...messages, newUserMessage];
+    const updatedMesages = [...history, newUserMessage];
 
     const apiHistory = updatedMesages.map((msg) => {
       return {
@@ -109,7 +149,7 @@ export default function Main() {
 
     // Obtener emoción
     const emotionMatch = response.match(
-      /Emocion:\s*["'(]*([\wáéíóúñ]+)["')]*\s*/i
+      /Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i
     );
     const emotion = emotionMatch
       ? emotionMatch[1].toLowerCase().replace(/\./g, "")
@@ -119,7 +159,7 @@ export default function Main() {
 
     // Unir el resto del texto (sin la línea de emoción)
     const cleanedResponse = response
-      .replace(/Emocion:\s*["'(]*[\wáéíóúñ]+["')]*\s*/i, "")
+      .replace(/Emocion:\s*["'(\[]*([\wáéíóúñ]+)["')\]]*\s*/i, "")
       .trim();
 
     // Dividir en oraciones
@@ -135,17 +175,27 @@ export default function Main() {
       sender: "assistant",
     }));
 
-    setMessages([...updatedMesages, ...newAssistantMessages]);
+    const finalMessages = [...updatedMesages, ...newAssistantMessages];
+
+    setMessages(finalMessages);
     setMapiEmotion(emotion);
     setIsLoading(false);
 
-    console.log(messages);
-  };
+    //Mandar chat a Supabase
+    const { error } = await supabase.from("chats").upsert([
+      {
+        id: id,
+        messages: finalMessages,
+        created_at: new Date(),
+        emotion: emotion,
+      },
+    ]);
 
-  //Funcion para solo sacar 2 misiones
-  const randomMissions = [...missions]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 2);
+    if (error) console.log("Error guardando chat", error);
+
+    console.log(apiHistory);
+    console.log("Emocion: ", emotion);
+  };
 
   const cambiarImagenEmocion = (Emotion) => {
     switch (Emotion) {
@@ -169,6 +219,38 @@ export default function Main() {
         return require("../assets/MAPI-emociones/Nose1.png");
     }
   };
+  //Carga de misiones diarias
+  useEffect(() => {
+    const loadMissions = async () => {
+      try {
+        const saveData = await AsyncStorage.getItem("dailyMissions");
+        const today = new Date().toDateString();
+
+        if (saveData) {
+          const { date, missions } = JSON.parse(saveData);
+
+          if (date === today) {
+            setDailyMissions(missions);
+            return;
+          }
+        }
+
+        //Cargar nuevas misiones aleatorias
+        const newMissions = [...missions]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 2);
+
+        await AsyncStorage.setItem(
+          "dailyMissions",
+          JSON.stringify({ date: today, missions: newMissions })
+        );
+        setDailyMissions(newMissions);
+      } catch (error) {
+        console.error("Error cargando misiones diarias:", error);
+      }
+    };
+    loadMissions();
+  }, [Missions]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -188,17 +270,15 @@ export default function Main() {
         </View>
       </View>
 
-      <LastCheck mgdl={90} lastCheck={26} />
+      <LastCheck lastCheck={26} />
 
-      {randomMissions.map((mission, index) => {
-        return (
-          <Missions
-            key={index}
-            title={mission.title}
-            progress={mission.progress}
-          />
-        );
-      })}
+      {dailyMissions.map((mission, index) => (
+        <Missions
+          key={index}
+          title={mission.title}
+          progress={mission.progress}
+        />
+      ))}
 
       {/* Contenedor del chat con scroll */}
       <View style={styles.chatSection}>
