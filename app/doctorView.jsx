@@ -198,6 +198,11 @@ export default function DoctorView() {
         <Text style={styles.addButtonText}>{loading ? 'Guardando...' : 'Agregar paciente'}</Text>
       </TouchableOpacity>
       
+      {/* Botón para ir a certificados del médico */}
+      <TouchableOpacity style={styles.certButton} onPress={() => router.push('/doctorCertificates')}>
+        <Text style={styles.certButtonText}>Ver certificados</Text>
+      </TouchableOpacity>
+      
       {/* Botón para cerrar sesión */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Cerrar sesión</Text>
@@ -261,4 +266,15 @@ const styles = StyleSheet.create({
   },
   typeBtn: { padding: 8, borderWidth: 1, borderColor: '#ddd', borderRadius: 6, marginRight: 8 },
   typeBtnActive: { backgroundColor: '#cfe8ff' },
+  certButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  certButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
 });

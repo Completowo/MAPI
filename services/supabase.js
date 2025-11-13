@@ -141,6 +141,41 @@ export async function getDoctorByUserId(userId) {
 	}
 }
 
+// Sube un certificado de un médico al bucket público `docsDoctor` dentro de la carpeta `certificados`
+// Parámetros:
+// - fileUri: URI local (por ejemplo DocumentPicker) o Blob/File
+// - filename: nombre que se desea guardar (p. ej. 'certificado.pdf')
+// - doctorUserId: id del usuario médico para organizar en subcarpeta (opcional)
+// Retorna: { publicUrl } o { error }
+export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId }) {
+	try {
+		// Construir ruta dentro del bucket: certificados/<doctorUserId>/<filename>
+		const folder = doctorUserId ? `certificados/${doctorUserId}` : `certificados`;
+		const path = `${folder}/${filename}`;
+
+		// Si nos pasan un Blob/File, lo usamos directamente, si nos pasan un URI (string) lo fetch-eamos
+		let uploadBody = fileUri;
+		if (typeof fileUri === 'string') {
+			const response = await fetch(fileUri);
+			uploadBody = await response.blob();
+		}
+
+		const { data, error: uploadError } = await supabase.storage
+			.from('docsDoctor')
+			.upload(path, uploadBody, { upsert: true });
+
+		if (uploadError) {
+			return { error: uploadError };
+		}
+
+		// Obtener URL pública (bucket público)
+		const { data: publicData } = supabase.storage.from('docsDoctor').getPublicUrl(path);
+		return { publicUrl: publicData?.publicUrl ?? null };
+	} catch (e) {
+		return { error: e };
+	}
+}
+
 // Registra un nuevo paciente asociado a un médico
 // El médico puede registrar pacientes en el sistema especificando sus datos
 export async function insertPatientByDoctor({ nombre, rut, doctor_user_id, diabetes_type }) {
