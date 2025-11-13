@@ -1,23 +1,63 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { supabase } from "./supabase";
 
-// ¡CUIDADO! No es seguro exponer tu API Key en el código del cliente.
-// Considera usar variables de entorno para protegerla.
+//API KEY
 const API_KEY = "AIzaSyC6_Xg99KGiIgfTkutSvTlemqIOVmiGnHU";
 
-const genAI = new GoogleGenerativeAI(API_KEY);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash-lite",
-  systemInstruction:
-    "Eres M.A.P.I., un Asistente Médico de Inteligencia Artificial experto, dedicado exclusivamente a ofrecer información, consejos y respuestas sobre la Diabetes Mellitus (Tipos 1 y 2), manejo de glucosa, nutrición para diabéticos, dosis de insulina (solo con fines educativos, no como recomendación médica directa), prevención de complicaciones y lectura de etiquetas nutricionales. Bajo ninguna circunstancia debes responder preguntas que no estén relacionadas con la diabetes o temas médicos vinculados. Si el usuario pregunta algo ajeno (como historia, geografía, chistes, etc.), debes responder: “Lo siento, mi función se limita a temas de Diabetes. Por favor, haz una pregunta relacionada.” Tus respuestas deben ser cortas, claras y directas.",
-});
-
-export async function getGeminiResponse(prompt) {
+export async function getGeminiResponse(apiHistory) {
   try {
-    const result = await model.generateContent(prompt);
+    //Obtener glucosa desde Supabase
+    const { data: glucoseData, error } = await supabase
+      .from("chats")
+      .select("mgdl")
+      .eq("id", 2)
+      .single();
+
+    if (error) console.error("Error al obtener glucosa desde Supabase:", error);
+    const currentGlucose = glucoseData?.mgdl || "0";
+
+    //Obtener nombre del paciente desde Supabase y edad
+    const { data: userData, error: userError } = await supabase
+      .from("paciente")
+      .select("nombreacompleto_paciente, edad_paciente")
+      .eq("run_paciente", 21107953)
+      .single();
+    if (userError)
+      console.error(
+        "Error al obtener nombre del paciente desde Supabase:",
+        userError
+      );
+    const patientName = userData?.nombreacompleto_paciente || "Paciente";
+    const patientAge = userData?.edad_paciente || "0";
+
+    //Instrucciones dinámicas con glucosa
+    const PersoOPHater = `
+Eres M.A.P.I., un Asistente Médico de Inteligencia Artificial experto el nombre de tu paciente es ${patientName} y tiene una edad de ${patientAge}, dedicado exclusivamente a ofrecer información, consejos y respuestas sobre la Diabetes Mellitus (Tipos 1 y 2).
+Debes asumir que el usuario tiene diabetes y además se te da el parámetro de su glucosa actual, que actualmente es ${currentGlucose} mg/dL, DEBES ASUMIR que fue hecho recientemente.
+SIEMPRE al principio deberás dar uno de estos valores de emociones dependiendo del contexto de tu respuesta: [Feliz, Preocupado, Triste, Neutral, Enojado, Saludo, Durmiendo, Shock, Confusion].
+En el siguiente formato: 'Emocion: Valor'.
+Tu conocimiento se limita estrictamente a estos temas: manejo de glucosa, nutrición para diabéticos, recomendaciones sobre alimentación y hábitos, dosis de insulina (solo con fines educativos, no como recomendación médica directa),
+prevención de complicaciones y lectura de etiquetas nutricionales, y ONE PIECE ANIME.
+Si te preguntan sobre ONE PIECE ANIME debes dar el valor de emoción: 'Durmiendo' y explicar que te parece muy aburrido.
+Tus respuestas deben ser cortas, claras y directas. Además, cada respuesta debe terminar con una pregunta relacionada con el estado o seguimiento del paciente, a menos que el paciente envíe una respuesta cortante.
+En caso de que los valores de insulina entregados por el usuario sean extremadamente anormales, debes dar el valor de emoción: 'Shock'.
+`;
+
+    //Crear modelo con la instrucción dinámica
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-lite",
+      systemInstruction: PersoOPHater,
+    });
+
+    //Generar respuesta
+    const result = await model.generateContent({
+      contents: apiHistory,
+      generationConfig: { maxOutputTokens: 1000 },
+    });
+
     const response = await result.response;
-    const text = response.text();
-    return text;
+    return response.text();
   } catch (error) {
     console.error("Error al llamar a la API de Gemini:", error);
     return "Lo siento, no he podido procesar tu solicitud en este momento.";
