@@ -12,6 +12,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link } from "expo-router";
 import { supabase } from "../services/supabase";
 
+//Async Storage Para guardar las misiones y que se cambien cada 24Horas
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 // Imports de Iconos
 import { SettingIcon, BellIcon } from "./Icons";
 
@@ -32,7 +35,9 @@ export function Main() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
+  const [dailyMissions, setDailyMissions] = useState([]);
 
+  //Id del chat en Supabase(Para pruebas)
   const id = "2";
 
   //Función para obtener el chat de Supabase
@@ -64,7 +69,7 @@ export function Main() {
 
       //Setear Historial y emociones desde la base de datos
       if (history.length > 0) {
-        console.log("Historial cargado desde Supabase ✅");
+        console.log("Historial cargado desde Supabase");
         setMapiEmotion(historyEmotion || "neutral");
         setMessages(history);
         setIsLoading(false);
@@ -192,11 +197,6 @@ export function Main() {
     console.log("Emocion: ", emotion);
   };
 
-  //Funcion para solo sacar 2 misiones
-  const randomMissions = [...missions]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 2);
-
   const cambiarImagenEmocion = (Emotion) => {
     switch (Emotion) {
       case "saludo":
@@ -219,6 +219,38 @@ export function Main() {
         return require("../assets/MAPI-emociones/Nose1.png");
     }
   };
+  //Carga de misiones diarias
+  useEffect(() => {
+    const loadMissions = async () => {
+      try {
+        const saveData = await AsyncStorage.getItem("dailyMissions");
+        const today = new Date().toDateString();
+
+        if (saveData) {
+          const { date, missions } = JSON.parse(saveData);
+
+          if (date === today) {
+            setDailyMissions(missions);
+            return;
+          }
+        }
+
+        //Cargar nuevas misiones aleatorias
+        const newMissions = [...missions]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 2);
+
+        await AsyncStorage.setItem(
+          "dailyMissions",
+          JSON.stringify({ date: today, missions: newMissions })
+        );
+        setDailyMissions(newMissions);
+      } catch (error) {
+        console.error("Error cargando misiones diarias:", error);
+      }
+    };
+    loadMissions();
+  }, [Missions]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -238,17 +270,15 @@ export function Main() {
         </View>
       </View>
 
-      <LastCheck mgdl={90} lastCheck={26} />
+      <LastCheck lastCheck={26} />
 
-      {randomMissions.map((mission, index) => {
-        return (
-          <Missions
-            key={index}
-            title={mission.title}
-            progress={mission.progress}
-          />
-        );
-      })}
+      {dailyMissions.map((mission, index) => (
+        <Missions
+          key={index}
+          title={mission.title}
+          progress={mission.progress}
+        />
+      ))}
 
       {/* Contenedor del chat con scroll */}
       <View style={styles.chatSection}>

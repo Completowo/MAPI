@@ -2,32 +2,55 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
   Modal,
   TextInput,
   TouchableOpacity,
   Image,
 } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../services/supabase";
 
-//ESTO ES PARA EXPORTAR LA GLUCOSA A OTROS COMPONENTES
-let currentGlucose = "0";
-export function getGlucose() {
-  return currentGlucose;
-}
-
-export function LastCheck({ mgdl, lastCheck }) {
+export function LastCheck({ lastCheck }) {
   const [modal, setModal] = useState(false);
   const [glucose, setGlucose] = useState("0");
   const [tempGlucose, setTempGlucose] = useState("");
 
   const toggleModal = () => setModal(!modal);
 
-  const handleConfirm = () => {
-    setGlucose(tempGlucose);
-    currentGlucose = tempGlucose;
-    toggleModal();
-    console.log("Glucosa actualizada a:", currentGlucose);
+  //Cargar el valor desde Supabase al iniciar
+  useEffect(() => {
+    const fetchGlucose = async () => {
+      const { data, error } = await supabase
+        .from("chats")
+        .select("mgdl")
+        .eq("id", 2)
+        .single();
+
+      if (error) console.error("Error cargando glucosa:", error);
+      else setGlucose(data?.mgdl || "0");
+    };
+
+    fetchGlucose();
+  }, []);
+
+  //Guardar en Supabase
+  const handleConfirm = async () => {
+    try {
+      setGlucose(tempGlucose);
+      toggleModal();
+
+      const { error } = await supabase
+        .from("chats")
+        .update({ mgdl: tempGlucose })
+        .eq("id", 2);
+
+      if (error) console.error("Error guardando glucosa:", error);
+      else console.log("✅ Glucosa guardada correctamente:", tempGlucose);
+
+      setTempGlucose("");
+    } catch (err) {
+      console.error("Error al guardar en Supabase:", err);
+    }
   };
 
   return (

@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   progressText: {
     textAlign: "center",
     fontSize: 12,
-    color: "#6EA8FF",
+    color: "#0f61f8ff",
     fontWeight: "500",
   },
   completedTextInside: {
