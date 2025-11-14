@@ -254,12 +254,7 @@ export function Main() {
 
   return (
     <View style={{ flex: 1 }}>
-      <View
-        style={[
-          styles.header,
-          { paddingTop: insets.top, paddingBottom: insets.bottom },
-        ]}
-      >
+      <View style={[styles.header]}>
         <Points points={210} />
         <View style={styles.icons}>
           <BellIcon />
