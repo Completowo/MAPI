@@ -139,6 +139,7 @@ export default function PatientEntry() {
 
   return (
     <View style={styles.container}>
+      {/*Boton de retroceso a la pantalla anterior*/}
       <BackButton onPress={() => router.back()} />
       {/* Título de la pantalla */}
       <Text style={styles.title}>Acceso Paciente</Text>
