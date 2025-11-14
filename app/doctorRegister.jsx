@@ -249,6 +249,7 @@ export default function DoctorRegister() {
                 <Picker.Item label="Pediatría" value={3} />
                 <Picker.Item label="Medicina Familiar" value={4} />
                 <Picker.Item label="Nutrición y Dietética" value={5} />
+                <Picker.Item label="Diabetólogo" value={6} />
               </Picker>
             </View>
           </View>
