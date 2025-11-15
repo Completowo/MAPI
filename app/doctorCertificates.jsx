@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, ActivityIndicator, StyleSheet, Linking, ScrollView, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
-import { getSession, getDoctorByUserId, uploadDoctorCertificate, logout } from '../services/supabase';
+import { getSession, getDoctorByUserId, uploadDoctorCertificate, logout, getDoctorCertificates } from '../services/supabase';
+import { supabase } from '../services/supabase';
 
 // Mapeo de IDs de especialidad a nombres
 const ESPECIALIDADES = {
@@ -26,6 +27,8 @@ export default function DoctorCertificates() {
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [hasCertificate, setHasCertificate] = useState(false);
+  const [certificateUrl, setCertificateUrl] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -53,12 +56,35 @@ export default function DoctorCertificates() {
         setUserId(user.id);
         setProfile(profile);
         setAllowed(true);
+        
+        // Verificar si ya tiene certificado
+        checkForCertificate(user.id);
       }
       setChecking(false);
     }
     check();
     return () => { mounted = false; };
   }, []);
+
+  // Verificar si el doctor ya tiene un certificado
+  const checkForCertificate = async (doctorUserId) => {
+    try {
+      const { certificates } = await getDoctorCertificates(doctorUserId);
+      if (certificates && certificates.length > 0) {
+        setHasCertificate(true);
+        // Obtener URL del primer certificado
+        const firstCert = certificates[0];
+        const path = `certificados/${doctorUserId}/${firstCert.name}`;
+        const { data } = supabase.storage.from('docsDoctor').getPublicUrl(path);
+        setCertificateUrl(data?.publicUrl);
+      } else {
+        setHasCertificate(false);
+      }
+    } catch (err) {
+      console.log('Error verificando certificados:', err);
+      setHasCertificate(false);
+    }
+  };
 
   const pickAndUpload = async () => {
     try {
@@ -111,6 +137,11 @@ export default function DoctorCertificates() {
       } else {
         setUploadedUrl(publicUrl);
         setStatus('✓ Archivo subido correctamente');
+        // Actualizar estado para mostrar que ya tiene certificado
+        setTimeout(() => {
+          setHasCertificate(true);
+          setCertificateUrl(publicUrl);
+        }, 1500);
       }
     } catch (e) {
       console.error('Catch error:', e);
@@ -189,36 +220,54 @@ export default function DoctorCertificates() {
         {/* Sección de certificados */}
         <View style={styles.certificateCard}>
           <Text style={styles.cardTitle}>Mis Certificados</Text>
-          <Text style={styles.cardSubtitle}>Sube tus certificados profesionales (PDF, máx 5 MB)</Text>
           
-          <TouchableOpacity
-            style={[styles.uploadButton, uploading && styles.uploadButtonDisabled]}
-            onPress={pickAndUpload}
-            disabled={uploading}
-          >
-            <Text style={styles.uploadButtonText}>
-              {uploading ? 'Subiendo...' : 'Seleccionar y subir PDF'}
-            </Text>
-          </TouchableOpacity>
-
-          {uploading && <ActivityIndicator style={{ marginTop: 12 }} color="#2196F3" />}
-          
-          {status && (
-            <View style={[styles.statusBox, status.includes('Error') && styles.statusBoxError]}>
-              <Text style={[styles.statusText, status.includes('Error') && styles.statusTextError]}>
-                {status}
-              </Text>
+          {hasCertificate ? (
+            <View>
+              <Text style={styles.successMessage}>✓ Certificado subido correctamente</Text>
+              {certificateUrl && (
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(certificateUrl)}
+                  style={styles.urlBox}
+                >
+                  <Text style={styles.urlLabel}>Ver certificado</Text>
+                  <Text style={styles.url} numberOfLines={2}>{certificateUrl}</Text>
+                </TouchableOpacity>
+              )}
             </View>
-          )}
+          ) : (
+            <View>
+              <Text style={styles.cardSubtitle}>Sube tu certificado profesional (PDF, máx 5 MB)</Text>
+              
+              <TouchableOpacity
+                style={[styles.uploadButton, uploading && styles.uploadButtonDisabled]}
+                onPress={pickAndUpload}
+                disabled={uploading}
+              >
+                <Text style={styles.uploadButtonText}>
+                  {uploading ? 'Subiendo...' : 'Seleccionar y subir PDF'}
+                </Text>
+              </TouchableOpacity>
 
-          {uploadedUrl && (
-            <TouchableOpacity
-              onPress={() => Linking.openURL(uploadedUrl)}
-              style={styles.urlBox}
-            >
-              <Text style={styles.urlLabel}>✓ Ver archivo subido:</Text>
-              <Text style={styles.url} numberOfLines={2}>{uploadedUrl}</Text>
-            </TouchableOpacity>
+              {uploading && <ActivityIndicator style={{ marginTop: 12 }} color="#2196F3" />}
+              
+              {status && (
+                <View style={[styles.statusBox, status.includes('Error') && styles.statusBoxError]}>
+                  <Text style={[styles.statusText, status.includes('Error') && styles.statusTextError]}>
+                    {status}
+                  </Text>
+                </View>
+              )}
+
+              {uploadedUrl && (
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(uploadedUrl)}
+                  style={styles.urlBox}
+                >
+                  <Text style={styles.urlLabel}>✓ Ver archivo subido:</Text>
+                  <Text style={styles.url} numberOfLines={2}>{uploadedUrl}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
         </View>
 
@@ -339,6 +388,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#666',
     marginBottom: 12,
+  },
+  successMessage: {
+    fontSize: 14,
+    color: '#2e7d32',
+    fontWeight: '600',
+    marginBottom: 12,
+    padding: 12,
+    backgroundColor: '#e8f5e9',
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   profileInfo: {
     gap: 8,

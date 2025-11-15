@@ -369,3 +369,36 @@ export async function createPatientAccount({ rut, age, password, email, diabetes
 		return { error: e };
 	}
 }
+
+// Obtiene los certificados subidos por un médico en el bucket
+export async function getDoctorCertificates(doctorUserId) {
+	try {
+		const folderPath = `certificados/${doctorUserId}`;
+		const { data, error } = await supabase.storage
+			.from('docsDoctor')
+			.list(folderPath);
+
+		if (error) {
+			// Si la carpeta no existe, retornar vacío
+			return { certificates: [] };
+		}
+
+		// Filtrar solo archivos (no carpetas)
+		const files = data.filter(item => !item.metadata?.mimetype || item.metadata.mimetype.includes('pdf'));
+		return { certificates: files };
+	} catch (e) {
+		console.error('Error al obtener certificados:', e);
+		return { certificates: [] };
+	}
+}
+
+// Obtiene la URL pública de un certificado
+export async function getCertificateUrl(doctorUserId, filename) {
+	try {
+		const path = `certificados/${doctorUserId}/${filename}`;
+		const { data } = supabase.storage.from('docsDoctor').getPublicUrl(path);
+		return { publicUrl: data?.publicUrl ?? null };
+	} catch (e) {
+		return { error: e };
+	}
+}
