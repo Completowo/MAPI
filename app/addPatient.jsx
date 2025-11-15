@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput, Platform, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getSession, getDoctorByUserId, insertPatientByDoctor } from '../services/supabase';
 
 export default function AddPatient() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isWeb = width > 768;
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -136,9 +138,6 @@ export default function AddPatient() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backButton}>← Volver</Text>
-          </TouchableOpacity>
           <Text style={styles.title}>Agregar Nuevo Paciente</Text>
           <Text style={styles.subtitle}>Completa los datos del paciente</Text>
         </View>
@@ -217,14 +216,7 @@ export default function AddPatient() {
             </Text>
           </TouchableOpacity>
 
-          {/* Botón cancelar */}
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => router.back()}
-            disabled={loading}
-          >
-            <Text style={styles.cancelButtonText}>Cancelar</Text>
-          </TouchableOpacity>
+
         </View>
 
         <View style={styles.bottomSpacer} />
@@ -266,7 +258,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 80, // Espacio para el navbar
+    paddingBottom: 120, // Espacio para el navbar y botones del sistema
   },
   header: {
     marginBottom: 24,
@@ -404,7 +396,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: '#fff',
     flexDirection: 'row',
-    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 50,
     paddingTop: 8,
     paddingHorizontal: 8,
     borderTopWidth: 1,
@@ -414,13 +406,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
   navItem: {
     flex: 1,
     paddingVertical: 8,
+    paddingHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
+    minWidth: 80,
   },
   navItemText: {
     fontSize: 12,

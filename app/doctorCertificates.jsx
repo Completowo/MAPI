@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, ActivityIndicator, StyleSheet, Linking, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, Button, ActivityIndicator, StyleSheet, Linking, ScrollView, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
-import { getSession, getDoctorByUserId, uploadDoctorCertificate } from '../services/supabase';
+import { getSession, getDoctorByUserId, uploadDoctorCertificate, logout } from '../services/supabase';
 
 // Mapeo de IDs de especialidad a nombres
 const ESPECIALIDADES = {
@@ -16,6 +16,8 @@ const ESPECIALIDADES = {
 
 export default function DoctorCertificates() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isWeb = width > 768;
   const [checking, setChecking] = useState(true);
   const [allowed, setAllowed] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -23,6 +25,7 @@ export default function DoctorCertificates() {
   const [status, setStatus] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -116,6 +119,13 @@ export default function DoctorCertificates() {
     }
   };
 
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await logout();
+    setLoggingOut(false);
+    router.replace('doctorLogin');
+  };
+
   if (checking) return (
     <View style={styles.center}>
       <ActivityIndicator size="large" color="#2196F3" />
@@ -136,9 +146,6 @@ export default function DoctorCertificates() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backButton}>← Volver</Text>
-          </TouchableOpacity>
           <Text style={styles.title}>Tu Perfil</Text>
           <Text style={styles.subtitle}>Información y certificados</Text>
         </View>
@@ -214,6 +221,17 @@ export default function DoctorCertificates() {
           )}
         </View>
 
+        {/* Botón de cerrar sesión */}
+        <TouchableOpacity
+          style={[styles.logoutButton, loggingOut && styles.logoutButtonDisabled]}
+          onPress={handleLogout}
+          disabled={loggingOut}
+        >
+          <Text style={styles.logoutButtonText}>
+            {loggingOut ? 'Cerrando sesión...' : '🚪 Cerrar Sesión'}
+          </Text>
+        </TouchableOpacity>
+
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
@@ -252,7 +270,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 80, // Espacio para el navbar
+    paddingBottom: 120, // Espacio para el navbar y botones del sistema
   },
   header: {
     marginBottom: 24,
@@ -397,6 +415,22 @@ const styles = StyleSheet.create({
     color: '#2196F3',
     fontWeight: '500',
   },
+  logoutButton: {
+    backgroundColor: '#e53935',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logoutButtonDisabled: {
+    opacity: 0.6,
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
   bottomSpacer: {
     height: 40,
   },
@@ -408,7 +442,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: '#fff',
     flexDirection: 'row',
-    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 50,
     paddingTop: 8,
     paddingHorizontal: 8,
     borderTopWidth: 1,
@@ -418,13 +452,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
   navItem: {
     flex: 1,
     paddingVertical: 8,
+    paddingHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
+    minWidth: 80,
   },
   navItemText: {
     fontSize: 12,

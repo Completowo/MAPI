@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Platform, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Platform, FlatList, useWindowDimensions } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getSession, logout, getDoctorByUserId } from '../services/supabase';
 import { supabase } from '../services/supabase';
@@ -7,6 +7,8 @@ import { supabase } from '../services/supabase';
 // Pantalla principal para médicos después de iniciar sesión
 export default function DoctorView() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isWeb = width > 768;
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [profile, setProfile] = useState(null);
@@ -184,7 +186,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingHorizontal: 16,
-    paddingBottom: 80, // Espacio para el navbar
+    paddingBottom: 120, // Espacio para el navbar y botones del sistema
   },
   header: {
     marginBottom: 24,
@@ -347,7 +349,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: '#fff',
     flexDirection: 'row',
-    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 50,
     paddingTop: 8,
     paddingHorizontal: 8,
     borderTopWidth: 1,
@@ -357,13 +359,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
   navItem: {
     flex: 1,
     paddingVertical: 8,
+    paddingHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
+    minWidth: 80,
   },
   navItemText: {
     fontSize: 12,
