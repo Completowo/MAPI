@@ -46,7 +46,10 @@ export default function DoctorCertificates({ navigation }) {
   const pickAndUpload = async () => {
     try {
       setStatus('Seleccionando archivo...');
-      const res = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: false });
+      const res = await DocumentPicker.getDocumentAsync({ 
+        copyToCacheDirectory: false,
+        type: 'application/pdf' // Solo permite PDFs
+      });
       if (res.type === 'cancel') {
         setStatus('Selección cancelada');
         return;
@@ -55,15 +58,30 @@ export default function DoctorCertificates({ navigation }) {
       // Extraer información del archivo desde la respuesta de DocumentPicker
       // Soporta diferentes formatos según la plataforma (assets, documentos, etc.)
       const file = res.assets?.[0] ?? res;
-      const filename = file.name || file.fileName || file.uri?.split('/').pop() || 'documento';
+      const filename = file.name || file.fileName || file.uri?.split('/').pop() || 'documento.pdf';
       const fileUri = file.uri;
+      const fileSize = file.size; // Tamaño en bytes
 
       if (!fileUri) {
         setStatus('Error: No se pudo obtener la URI del archivo');
         return;
       }
 
-      setStatus(`Archivo seleccionado: ${filename}`);
+      // Validar que sea PDF
+      if (!filename.toLowerCase().endsWith('.pdf')) {
+        setStatus('Error: Solo se permiten archivos PDF');
+        return;
+      }
+
+      // Validar tamaño máximo (5 MB = 5242880 bytes)
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB en bytes
+      if (fileSize && fileSize > MAX_FILE_SIZE) {
+        const sizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+        setStatus(`Error: El archivo es demasiado grande (${sizeMB} MB). Máximo permitido: 5 MB`);
+        return;
+      }
+
+      setStatus(`Archivo seleccionado: ${filename} (${fileSize ? (fileSize / 1024).toFixed(2) : '?'} KB)`);
       setUploading(true);
       setUploadedUrl(null);
 
