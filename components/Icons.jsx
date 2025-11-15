@@ -1,6 +1,7 @@
 //Los iconos usados en la app se encuentran aquí expo-vector-icons
 import Fontisto from "@expo/vector-icons/Fontisto";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Feather from "@expo/vector-icons/Feather";
 
 export function SettingIcon(props) {
   return <Fontisto name="player-settings" size={24} color="black" {...props} />;
@@ -18,4 +19,8 @@ export function BackIcon(props) {
   return (
     <Ionicons name="chevron-back-outline" size={24} color="black" {...props} />
   );
+}
+
+export function ShopIcon(props) {
+  return <Feather name="shopping-bag" size={24} color="black" {...props} />;
 }
