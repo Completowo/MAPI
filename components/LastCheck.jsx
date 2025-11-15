@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { supabase } from "../services/supabase";
+import ModalGlucose from "./ModalGlucose";
 
 export function LastCheck({ lastCheck }) {
   const [modal, setModal] = useState(false);
@@ -59,53 +60,20 @@ export function LastCheck({ lastCheck }) {
         <Text style={styles.mgdl}>{glucose}</Text>
         <Text style={styles.unit}>mg/dL</Text>
       </View>
+
       <Text style={styles.lastCheck}>Último Check: hace {lastCheck} min</Text>
 
       <TouchableOpacity style={styles.mainButton} onPress={toggleModal}>
         <Text style={styles.mainButtonText}>Tomar Glucosa</Text>
       </TouchableOpacity>
 
-      <Modal animationType="fade" visible={modal} transparent>
-        <View style={styles.modalBackground}>
-          <View style={styles.modalCard}>
-            {/* Imagen mapi */}
-            <Image
-              source={require("../assets/mapiGlucose.png")}
-              style={{
-                width: 200,
-                height: 200,
-                marginBottom: 1,
-                position: "absolute",
-                right: -80,
-                top: -100,
-              }}
-              resizeMode="contain"
-            />
-            <Text style={styles.modalTitle}>Nuevo valor de glucosa</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Ej: 120"
-              placeholderTextColor="#ccc"
-              keyboardType="numeric"
-              onChangeText={setTempGlucose}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleConfirm}
-              >
-                <Text style={styles.saveButtonText}>Guardar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={toggleModal}
-              >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <ModalGlucose
+        visible={modal}
+        onClose={toggleModal}
+        onSave={handleConfirm}
+        tempGlucose={tempGlucose}
+        setTempGlucose={setTempGlucose}
+      />
 
       <View style={styles.line} />
     </View>
