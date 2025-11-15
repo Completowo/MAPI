@@ -2,15 +2,23 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import MissionModal from "./MissionModal";
 
-export function Missions({ title, progress = 0 }) {
+export function Missions({
+  title,
+  progress = 0,
+  points = 0,
+  completed,
+  onComplete,
+}) {
   const [visible, setVisible] = useState(false);
-
-  // Estado de completado
-  const [completed, setCompleted] = useState(false);
 
   return (
     <>
-      <TouchableOpacity style={styles.card} onPress={() => setVisible(true)}>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => {
+          if (!completed) setVisible(true); // No abrir si ya está completada
+        }}
+      >
         {/* Título */}
         <Text style={styles.title}>{title}</Text>
 
@@ -22,7 +30,6 @@ export function Missions({ title, progress = 0 }) {
               completed ? { width: "100%" } : { width: `${progress * 100}%` },
             ]}
           />
-
           {/* Texto sobre la barra */}
           <Text style={styles.progressText}>
             {completed ? "¡Completada!" : `${Math.round(progress * 100)}%`}
@@ -34,14 +41,12 @@ export function Missions({ title, progress = 0 }) {
         visible={visible}
         onClose={() => setVisible(false)}
         title={title}
+        points={points}
         onComplete={() => {
-          setCompleted(true);
+          onComplete();
           setVisible(false);
         }}
-        onNotComplete={() => {
-          setCompleted(false);
-          setVisible(false);
-        }}
+        onNotComplete={() => setVisible(false)}
       />
     </>
   );

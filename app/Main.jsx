@@ -59,7 +59,7 @@ export function Main() {
   const fetchChatHistory = async () => {
     const { data, error } = await supabase
       .from("chats")
-      .select("messages", "emotion")
+      .select("messages", "emotion", "points")
       .eq("id", id)
       .single();
 
@@ -71,6 +71,7 @@ export function Main() {
     return {
       messages: data?.messages || [],
       emotion: data?.emotion || "neutral",
+      points: data?.points || 0,
     };
   };
 
@@ -230,11 +231,13 @@ export function Main() {
           }
         }
 
-        //Cargar nuevas misiones aleatorias
+        //Cargar nuevas misiones aleatorias y agregar el campo completed
         const newMissions = [...missions]
           .sort(() => Math.random() - 0.5)
-          .slice(0, 2);
+          .slice(0, 2)
+          .map((m) => ({ ...m, completed: false }));
 
+        // Guardar en AsyncStorage
         await AsyncStorage.setItem(
           "dailyMissions",
           JSON.stringify({ date: today, missions: newMissions })
@@ -245,12 +248,12 @@ export function Main() {
       }
     };
     loadMissions();
-  }, [Missions]);
+  }, []);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "white" }}>
       <View style={[styles.header]}>
-        <Points points={210} />
+        <Points points={120} />
         <View style={styles.icons}>
           <ShopIcon onPress={() => router.push("/Shop")} />
           <BellIcon />
@@ -265,6 +268,22 @@ export function Main() {
           key={index}
           title={mission.title}
           progress={mission.progress}
+          completed={mission.completed}
+          points={mission.points} // <-- agregar puntos
+          onComplete={() => {
+            const updatedMissions = [...dailyMissions];
+            updatedMissions[index].completed = true;
+
+            // Guardar nuevo estado
+            setDailyMissions(updatedMissions);
+            AsyncStorage.setItem(
+              "dailyMissions",
+              JSON.stringify({
+                date: new Date().toDateString(),
+                missions: updatedMissions,
+              })
+            );
+          }}
         />
       ))}
 

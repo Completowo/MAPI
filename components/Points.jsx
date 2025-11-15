@@ -1,6 +1,39 @@
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
+import { supabase } from "../services/supabase";
 
-export function Points({ points }) {
+export function Points() {
+  const [points, setPoints] = useState(0);
+
+  const id = "2";
+  //Traer puntos desde supabase
+  const fecthPoints = async () => {
+    const { data, error } = await supabase
+      .from("chats")
+      .select("points")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.log("Error al obtener el chat", error);
+      return [];
+    }
+
+    return {
+      points: data?.points || 0,
+    };
+  };
+
+  //Actualizar puntos
+  useEffect(() => {
+    const loadPoints = async () => {
+      const { points } = await fecthPoints();
+      setPoints(points);
+    };
+
+    loadPoints();
+  }, []);
+
   return (
     <View style={styles.points}>
       <Text style={styles.text}>Mis puntos:</Text>
