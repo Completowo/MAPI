@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Text,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { supabase } from "../services/supabase";
 
@@ -29,6 +28,11 @@ import { getGeminiResponse } from "../services/gemini";
 //Import misiones
 import missions from "../assets/missions.json";
 
+//Import zustand store: Sirve para manejar el estado global de la vestimenta
+import { useUserStore } from "../store/useUserStore";
+//Import imagenes de emociones
+import { emotionImages } from "../config/emotionImages";
+
 export function Main() {
   const scrollViewRef = useRef();
   const [messages, setMessages] = useState([]);
@@ -40,7 +44,13 @@ export function Main() {
   const router = useRouter();
 
   //Ropa de MAPI
-  const dress = "elegante";
+  const dress = useUserStore((s) => s.vestimenta)?.toLowerCase();
+
+  const cambiarImagenEmocion = (emotion) => {
+    if (!dress || !emotionImages[dress]) return null;
+    console.log("Cambiando imagen a:", dress, emotion); //Console log, despues hay que quitarlo
+    return emotionImages[dress][emotion] ?? emotionImages[dress].neutral;
+  };
 
   //Id del chat en Supabase(Para pruebas)
   const id = "2";
@@ -64,7 +74,7 @@ export function Main() {
     };
   };
 
-  //Trae el historial devuelva
+  //Trae el historial devuelva y setea los mensajes del chat
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -204,24 +214,6 @@ export function Main() {
 
   //Función para cambiar la imagen de MAPI según la emoción
 
-  const cambiarImagenEmocion = (Emotion) => {
-    switch (Emotion) {
-      case "saludo":
-        return require(`../assets/MAPI-emociones/${dress}/Saludo.png`);
-      case "neutral":
-        return require(`../assets/MAPI-emociones/${dress}/Neutral.png`);
-      case "feliz":
-        return require(`../assets/MAPI-emociones/${dress}/Feliz.png`);
-      case "preocupado":
-        return require(`../assets/MAPI-emociones/${dress}/Preocupado-2.png`);
-      case "enojado":
-        return require(`../assets/MAPI-emociones/${dress}/Enojado.png`);
-      case "confusion":
-        return require(`../assets/MAPI-emociones/${dress}/Confusion.png`);
-      default:
-        return require(`../assets/MAPI-emociones/${dress}/Nose1.png`);
-    }
-  };
   //Carga de misiones diarias
   useEffect(() => {
     const loadMissions = async () => {

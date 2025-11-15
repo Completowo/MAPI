@@ -2,41 +2,42 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import MissionModal from "./MissionModal";
 
-export function Missions({ title }) {
+export function Missions({ title, progress = 0 }) {
   const [visible, setVisible] = useState(false);
 
-  //Estado para saber si la misión está completada
+  // Estado de completado
   const [completed, setCompleted] = useState(false);
 
   return (
     <>
-      <TouchableOpacity
-        style={[
-          styles.card,
-          completed && { backgroundColor: "#A5D6A7" }, //Si está completada, se pone verde
-        ]}
-        onPress={() => setVisible(true)}
-      >
-        <Text
-          style={[
-            styles.title,
-            completed && { color: "#1B5E20", fontWeight: "bold" }, //Texto verde oscuro para las letras
-          ]}
-        >
-          {title}
-        </Text>
+      <TouchableOpacity style={styles.card} onPress={() => setVisible(true)}>
+        {/* Título */}
+        <Text style={styles.title}>{title}</Text>
+
+        {/* Barra de progreso */}
+        <View style={styles.progressBar}>
+          <View
+            style={[
+              styles.progressFill,
+              completed ? { width: "100%" } : { width: `${progress * 100}%` },
+            ]}
+          />
+
+          {/* Texto sobre la barra */}
+          <Text style={styles.progressText}>
+            {completed ? "¡Completada!" : `${Math.round(progress * 100)}%`}
+          </Text>
+        </View>
       </TouchableOpacity>
 
       <MissionModal
         visible={visible}
         onClose={() => setVisible(false)}
         title={title}
-        //Le pasamos esta función al modal para que actualice el estado a completada
         onComplete={() => {
           setCompleted(true);
           setVisible(false);
         }}
-        // Le pasamos esta función al modal para que actualice el estado a no completada
         onNotComplete={() => {
           setCompleted(false);
           setVisible(false);
@@ -49,16 +50,41 @@ export function Missions({ title }) {
 const styles = StyleSheet.create({
   card: {
     width: "90%",
-    backgroundColor: "#E9F4FF",
+    backgroundColor: "#d3e6f8ff",
     borderRadius: 12,
     paddingVertical: 12,
     marginVertical: 8,
     alignSelf: "center",
     alignItems: "center",
   },
+
   title: {
     fontSize: 14,
     color: "#6EA8FF",
     fontWeight: "500",
+    marginBottom: 6,
+  },
+
+  progressBar: {
+    width: "85%",
+    height: 30,
+    backgroundColor: "#ffffffff",
+    borderRadius: 10,
+    overflow: "hidden",
+    justifyContent: "center",
+  },
+
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#6EA8FF",
+  },
+
+  progressText: {
+    position: "absolute",
+    width: "100%",
+    textAlign: "center",
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#bad0f1ff",
   },
 });
