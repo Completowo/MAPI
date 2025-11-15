@@ -154,72 +154,145 @@ export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId 
 			return { error: new Error('Nombre de archivo inválido. Por favor selecciona un archivo válido.') };
 		}
 
-		// Sanitizar el nombre del archivo para que sea una clave válida en Supabase
-		// Reemplaza espacios, caracteres especiales por guiones bajos o guiones
+		// Sanitizar el nombre del archivo
 		const sanitizedFilename = filename
-			.replace(/[^\w\s.-]/g, '_') // Reemplaza caracteres especiales por guiones bajos
-			.replace(/\s+/g, '_') // Reemplaza espacios por guiones bajos
-			.replace(/_+/g, '_') // Colapsa múltiples guiones bajos en uno
-			.toLowerCase() // Convierte a minúsculas para consistencia
+			.replace(/[^\w\s.-]/g, '_')
+			.replace(/\s+/g, '_')
+			.replace(/_+/g, '_')
+			.toLowerCase()
 			.trim();
 
 		if (!sanitizedFilename || sanitizedFilename === '_') {
 			return { error: new Error('El nombre del archivo no es válido después de sanitizar.') };
 		}
 
-		// Obtener la sesión actual para validar que el usuario esté autenticado
+		// Obtener la sesión actual
 		const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
 		if (sessionErr || !sessionData?.session?.user?.id) {
 			return { error: new Error('No autenticado. Por favor inicia sesión primero.') };
 		}
 		
-		// Usar el ID del usuario autenticado
 		const currentUserId = sessionData.session.user.id;
 		const userIdToUse = doctorUserId || currentUserId;
 
-		// Construir ruta dentro del bucket: certificados/<doctorUserId>/<filename>
+		// Construir ruta
 		const folder = `certificados/${userIdToUse}`;
 		const path = `${folder}/${sanitizedFilename}`;
 
-		// Si nos pasan un Blob/File, lo usamos directamente, si nos pasan un URI (string) lo fetch-eamos
+		// Obtener el blob del archivo
 		let uploadBody = fileUri;
+		
 		if (typeof fileUri === 'string') {
+			console.log('Intentando fetch de URI:', fileUri);
 			const response = await fetch(fileUri);
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
 			uploadBody = await response.blob();
+			console.log('Blob obtenido del fetch, tamaño:', uploadBody.size);
+		} else {
+			console.log('fileUri no es string, tipo:', typeof fileUri);
 		}
 
+		if (!uploadBody) {
+			return { error: new Error('El archivo está vacío o no se pudo procesar.') };
+		}
+		
+		console.log('Listos para subir, tipo:', uploadBody.constructor?.name, 'tamaño:', uploadBody.size);
+
+		// Convertir Blob a base64 para compatibilidad con Supabase en Expo
+		let base64Data = null;
+		
+		if (uploadBody.uri) {
+			// Expo Blob tiene uri
+			console.log('Leyendo archivo desde URI:', uploadBody.uri);
+			const response = await fetch(uploadBody.uri);
+			const blob = await response.blob();
+			const reader = new FileReader();
+			base64Data = await new Promise((resolve, reject) => {
+				reader.onload = () => {
+					const base64 = reader.result.split(',')[1];
+					resolve(base64);
+				};
+				reader.onerror = reject;
+				reader.readAsDataURL(blob);
+			});
+		} else if (uploadBody instanceof Blob) {
+			// Blob estándar
+			const reader = new FileReader();
+			base64Data = await new Promise((resolve, reject) => {
+				reader.onload = () => {
+					const base64 = reader.result.split(',')[1];
+					resolve(base64);
+				};
+				reader.onerror = reject;
+				reader.readAsDataURL(uploadBody);
+			});
+		}
+		
+		if (!base64Data) {
+			return { error: new Error('No se pudo convertir el archivo a base64.') };
+		}
+		
+		console.log('Base64 listo, tamaño:', base64Data.length);
+		
+		// Convertir base64 a Uint8Array
+		const binaryString = atob(base64Data);
+		const bytes = new Uint8Array(binaryString.length);
+		for (let i = 0; i < binaryString.length; i++) {
+			bytes[i] = binaryString.charCodeAt(i);
+		}
+		
+		// Upload
+		return await uploadToSupabase(path, bytes, sanitizedFilename, userIdToUse, filename);
+		
+	} catch (e) {
+		console.error('Error en uploadDoctorCertificate:', e);
+		return { error: e };
+	}
+}
+
+async function uploadToSupabase(path, fileBytes, sanitizedFilename, userIdToUse, filename) {
+	try {
+		console.log('Iniciando upload a:', path, 'tamaño:', fileBytes.length);
+		
 		const { data, error: uploadError } = await supabase.storage
 			.from('docsDoctor')
-			.upload(path, uploadBody, { upsert: true });
+			.upload(path, fileBytes, { 
+				upsert: true,
+				contentType: 'application/pdf'
+			});
 
 		if (uploadError) {
+			console.error('Error de upload:', uploadError);
 			return { error: uploadError };
 		}
 
-		// Obtener URL pública (bucket público)
-		const { data: publicData } = supabase.storage.from('docsDoctor').getPublicUrl(path);
-		
-		// Intentar registrar el certificado en la tabla doctor_certificates si existe
-		try {
-			await supabase.from('doctor_certificates').insert([{
-				doctor_user_id: userIdToUse,
-				file_path: path,
-				file_name: filename, // Guardar el nombre original en la BD
-				sanitized_name: sanitizedFilename, // Guardar el nombre sanitizado
-				uploaded_at: new Date().toISOString(),
-			}]).then(res => {
-				// Si la tabla no existe o hay error, lo ignoramos
-				if (res.error) {
-					console.warn('No se pudo registrar el certificado en la BD:', res.error.message);
-				}
-			});
-		} catch (dbErr) {
-			// Si falla el registro en BD pero la subida fue exitosa, continuamos
-			console.warn('Error al registrar certificado en BD:', dbErr);
+		console.log('Upload exitoso, data:', data);
+
+		// Verificar que el archivo existe en el bucket
+		const { data: fileList, error: listError } = await supabase.storage
+			.from('docsDoctor')
+			.list(`certificados/${userIdToUse}`);
+
+		if (listError) {
+			console.warn('No se pudo verificar archivo en lista:', listError.message);
+		} else {
+			const fileExists = fileList.some(f => f.name === sanitizedFilename);
+			if (fileExists) {
+				console.log('✓ Archivo verificado en bucket:', sanitizedFilename);
+			} else {
+				console.warn('Archivo no encontrado en lista del bucket');
+			}
 		}
+
+		// Obtener URL pública
+		const { data: publicData } = supabase.storage.from('docsDoctor').getPublicUrl(path);
+		console.log('✓ URL pública generada:', publicData?.publicUrl);
 		
 		return { publicUrl: publicData?.publicUrl ?? null };
 	} catch (e) {
+		console.error('Error en uploadToSupabase:', e);
 		return { error: e };
 	}
 }

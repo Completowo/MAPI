@@ -65,40 +65,38 @@ export default function DoctorCertificates() {
       setStatus('Seleccionando archivo...');
       const res = await DocumentPicker.getDocumentAsync({ 
         copyToCacheDirectory: false,
-        type: 'application/pdf' // Solo permite PDFs
+        type: 'application/pdf'
       });
+      
+      console.log('DocumentPicker response:', res);
+      
       if (res.type === 'cancel') {
         setStatus('Selección cancelada');
         return;
       }
 
-      // Extraer información del archivo desde la respuesta de DocumentPicker
-      // Soporta diferentes formatos según la plataforma (assets, documentos, etc.)
-      const file = res.assets?.[0] ?? res;
-      const filename = file.name || file.fileName || file.uri?.split('/').pop() || 'documento.pdf';
-      const fileUri = file.uri;
-      const fileSize = file.size; // Tamaño en bytes
+      // Obtener el archivo - puede estar en res directamente o en res.assets[0]
+      let selectedFile = res;
+      if (res.assets && res.assets.length > 0) {
+        selectedFile = res.assets[0];
+      }
+      
+      console.log('Selected file:', selectedFile);
 
-      if (!fileUri) {
-        setStatus('Error: No se pudo obtener la URI del archivo');
+      if (!selectedFile || !selectedFile.uri) {
+        setStatus('Error: No se obtuvo el archivo correctamente');
         return;
       }
 
-      // Validar que sea PDF
+      const filename = selectedFile.name || selectedFile.fileName || selectedFile.uri.split('/').pop() || 'documento.pdf';
+      const fileUri = selectedFile.uri;
+
       if (!filename.toLowerCase().endsWith('.pdf')) {
         setStatus('Error: Solo se permiten archivos PDF');
         return;
       }
 
-      // Validar tamaño máximo (5 MB = 5242880 bytes)
-      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB en bytes
-      if (fileSize && fileSize > MAX_FILE_SIZE) {
-        const sizeMB = (fileSize / (1024 * 1024)).toFixed(2);
-        setStatus(`Error: El archivo es demasiado grande (${sizeMB} MB). Máximo permitido: 5 MB`);
-        return;
-      }
-
-      setStatus(`Archivo seleccionado: ${filename} (${fileSize ? (fileSize / 1024).toFixed(2) : '?'} KB)`);
+      setStatus(`Cargando archivo: ${filename}...`);
       setUploading(true);
       setUploadedUrl(null);
 
@@ -106,13 +104,16 @@ export default function DoctorCertificates() {
         fileUri: fileUri,
         filename: filename,
       });
+      
       if (error) {
-        setStatus(`Error subida: ${String(error.message || error)}`);
+        console.error('Upload error:', error);
+        setStatus(`Error: ${String(error.message || error)}`);
       } else {
         setUploadedUrl(publicUrl);
-        setStatus('✓ Subida completada');
+        setStatus('✓ Archivo subido correctamente');
       }
     } catch (e) {
+      console.error('Catch error:', e);
       setStatus(`Error: ${String(e.message || e)}`);
     } finally {
       setUploading(false);
@@ -152,7 +153,7 @@ export default function DoctorCertificates() {
 
         {/* Información del perfil */}
         <View style={styles.profileCard}>
-          <Text style={styles.cardTitle}>👤 Información Personal</Text>
+          <Text style={styles.cardTitle}>Información Personal</Text>
           <View style={styles.profileInfo}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Nombre:</Text>
@@ -187,7 +188,7 @@ export default function DoctorCertificates() {
 
         {/* Sección de certificados */}
         <View style={styles.certificateCard}>
-          <Text style={styles.cardTitle}>📄 Mis Certificados</Text>
+          <Text style={styles.cardTitle}>Mis Certificados</Text>
           <Text style={styles.cardSubtitle}>Sube tus certificados profesionales (PDF, máx 5 MB)</Text>
           
           <TouchableOpacity
@@ -196,7 +197,7 @@ export default function DoctorCertificates() {
             disabled={uploading}
           >
             <Text style={styles.uploadButtonText}>
-              {uploading ? 'Subiendo...' : '📤 Seleccionar y subir PDF'}
+              {uploading ? 'Subiendo...' : 'Seleccionar y subir PDF'}
             </Text>
           </TouchableOpacity>
 
@@ -228,7 +229,7 @@ export default function DoctorCertificates() {
           disabled={loggingOut}
         >
           <Text style={styles.logoutButtonText}>
-            {loggingOut ? 'Cerrando sesión...' : '🚪 Cerrar Sesión'}
+            {loggingOut ? 'Cerrando sesión...' : 'Cerrar Sesión'}
           </Text>
         </TouchableOpacity>
 
