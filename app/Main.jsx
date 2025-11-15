@@ -9,14 +9,14 @@ import {
   Text,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import { supabase } from "../services/supabase";
 
 //Async Storage Para guardar las misiones y que se cambien cada 24Horas
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Imports de Iconos
-import { SettingIcon, BellIcon } from "../components/Icons";
+import { SettingIcon, BellIcon, ShopIcon } from "../components/Icons";
 
 // Imports de Componentes
 import { Points } from "../components/Points";
@@ -35,6 +35,9 @@ export function Main() {
   const [isLoading, setIsLoading] = useState(false);
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
   const [dailyMissions, setDailyMissions] = useState([]);
+
+  //Router para navegación
+  const router = useRouter();
 
   //Ropa de MAPI
   const dress = "elegante";
@@ -257,11 +260,9 @@ export function Main() {
       <View style={[styles.header]}>
         <Points points={210} />
         <View style={styles.icons}>
+          <ShopIcon onPress={() => router.push("/Shop")} />
           <BellIcon />
-          <SettingIcon />
-          <Link href="/RoleSelection">
-            <Text>BotonPruebas</Text>
-          </Link>
+          <SettingIcon onPress={() => router.push("/Setting")} />
         </View>
       </View>
 
