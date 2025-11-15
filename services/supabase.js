@@ -149,9 +149,37 @@ export async function getDoctorByUserId(userId) {
 // Retorna: { publicUrl } o { error }
 export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId }) {
 	try {
+		// Validar que el filename no sea undefined o vacío
+		if (!filename || filename === 'undefined' || typeof filename !== 'string') {
+			return { error: new Error('Nombre de archivo inválido. Por favor selecciona un archivo válido.') };
+		}
+
+		// Sanitizar el nombre del archivo para que sea una clave válida en Supabase
+		// Reemplaza espacios, caracteres especiales por guiones bajos o guiones
+		const sanitizedFilename = filename
+			.replace(/[^\w\s.-]/g, '_') // Reemplaza caracteres especiales por guiones bajos
+			.replace(/\s+/g, '_') // Reemplaza espacios por guiones bajos
+			.replace(/_+/g, '_') // Colapsa múltiples guiones bajos en uno
+			.toLowerCase() // Convierte a minúsculas para consistencia
+			.trim();
+
+		if (!sanitizedFilename || sanitizedFilename === '_') {
+			return { error: new Error('El nombre del archivo no es válido después de sanitizar.') };
+		}
+
+		// Obtener la sesión actual para validar que el usuario esté autenticado
+		const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+		if (sessionErr || !sessionData?.session?.user?.id) {
+			return { error: new Error('No autenticado. Por favor inicia sesión primero.') };
+		}
+		
+		// Usar el ID del usuario autenticado
+		const currentUserId = sessionData.session.user.id;
+		const userIdToUse = doctorUserId || currentUserId;
+
 		// Construir ruta dentro del bucket: certificados/<doctorUserId>/<filename>
-		const folder = doctorUserId ? `certificados/${doctorUserId}` : `certificados`;
-		const path = `${folder}/${filename}`;
+		const folder = `certificados/${userIdToUse}`;
+		const path = `${folder}/${sanitizedFilename}`;
 
 		// Si nos pasan un Blob/File, lo usamos directamente, si nos pasan un URI (string) lo fetch-eamos
 		let uploadBody = fileUri;
@@ -170,6 +198,26 @@ export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId 
 
 		// Obtener URL pública (bucket público)
 		const { data: publicData } = supabase.storage.from('docsDoctor').getPublicUrl(path);
+		
+		// Intentar registrar el certificado en la tabla doctor_certificates si existe
+		try {
+			await supabase.from('doctor_certificates').insert([{
+				doctor_user_id: userIdToUse,
+				file_path: path,
+				file_name: filename, // Guardar el nombre original en la BD
+				sanitized_name: sanitizedFilename, // Guardar el nombre sanitizado
+				uploaded_at: new Date().toISOString(),
+			}]).then(res => {
+				// Si la tabla no existe o hay error, lo ignoramos
+				if (res.error) {
+					console.warn('No se pudo registrar el certificado en la BD:', res.error.message);
+				}
+			});
+		} catch (dbErr) {
+			// Si falla el registro en BD pero la subida fue exitosa, continuamos
+			console.warn('Error al registrar certificado en BD:', dbErr);
+		}
+		
 		return { publicUrl: publicData?.publicUrl ?? null };
 	} catch (e) {
 		return { error: e };

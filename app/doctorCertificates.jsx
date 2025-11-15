@@ -51,14 +51,25 @@ export default function DoctorCertificates({ navigation }) {
         setStatus('Selección cancelada');
         return;
       }
-      setStatus(`Archivo seleccionado: ${res.name}`);
+
+      // Extraer información del archivo desde la respuesta de DocumentPicker
+      // Soporta diferentes formatos según la plataforma (assets, documentos, etc.)
+      const file = res.assets?.[0] ?? res;
+      const filename = file.name || file.fileName || file.uri?.split('/').pop() || 'documento';
+      const fileUri = file.uri;
+
+      if (!fileUri) {
+        setStatus('Error: No se pudo obtener la URI del archivo');
+        return;
+      }
+
+      setStatus(`Archivo seleccionado: ${filename}`);
       setUploading(true);
       setUploadedUrl(null);
 
       const { publicUrl, error } = await uploadDoctorCertificate({
-        fileUri: res.uri,
-        filename: res.name,
-        doctorUserId: userId,
+        fileUri: fileUri,
+        filename: filename,
       });
       if (error) {
         setStatus(`Error subida: ${String(error.message || error)}`);
