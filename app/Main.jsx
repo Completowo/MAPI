@@ -30,12 +30,14 @@ import { getGeminiResponse } from "../services/gemini";
 import missions from "../assets/missions.json";
 
 export function Main() {
-  const insets = useSafeAreaInsets();
   const scrollViewRef = useRef();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
   const [dailyMissions, setDailyMissions] = useState([]);
+
+  //Ropa de MAPI
+  const dress = "elegante";
 
   //Id del chat en Supabase(Para pruebas)
   const id = "2";
@@ -197,26 +199,24 @@ export function Main() {
     console.log("Emocion: ", emotion);
   };
 
+  //Función para cambiar la imagen de MAPI según la emoción
+
   const cambiarImagenEmocion = (Emotion) => {
     switch (Emotion) {
       case "saludo":
-        return require("../assets/MAPI-emociones/Saludo.png");
+        return require(`../assets/MAPI-emociones/${dress}/Saludo.png`);
       case "neutral":
-        return require("../assets/MAPI-emociones/Neutral.png");
+        return require(`../assets/MAPI-emociones/${dress}/Neutral.png`);
       case "feliz":
-        return require("../assets/MAPI-emociones/Feliz.png");
+        return require(`../assets/MAPI-emociones/${dress}/Feliz.png`);
       case "preocupado":
-        return require("../assets/MAPI-emociones/Preocupado-2.png");
+        return require(`../assets/MAPI-emociones/${dress}/Preocupado-2.png`);
       case "enojado":
-        return require("../assets/MAPI-emociones/Enojado.png");
-      case "durmiendo":
-        return require("../assets/MAPI-emociones/Durmiendo.png");
-      case "shock":
-        return require("../assets/MAPI-emociones/Shock.png");
+        return require(`../assets/MAPI-emociones/${dress}/Enojado.png`);
       case "confusion":
-        return require("../assets/MAPI-emociones/Confusion.png");
+        return require(`../assets/MAPI-emociones/${dress}/Confusion.png`);
       default:
-        return require("../assets/MAPI-emociones/Nose1.png");
+        return require(`../assets/MAPI-emociones/${dress}/Nose1.png`);
     }
   };
   //Carga de misiones diarias
