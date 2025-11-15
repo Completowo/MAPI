@@ -1,48 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
-import { useRouter } from 'expo-router';
-import { getSession, logout, getDoctorByUserId, insertPatientByDoctor } from '../services/supabase';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Platform, FlatList } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { getSession, logout, getDoctorByUserId } from '../services/supabase';
+import { supabase } from '../services/supabase';
 
 // Pantalla principal para médicos después de iniciar sesión
-// Permite ver información del médico y registrar nuevos pacientes
 export default function DoctorView() {
   const router = useRouter();
-  // Estados para mostrar datos del médico y manejar el registro de pacientes
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [profile, setProfile] = useState(null);
+  const [patients, setPatients] = useState([]);
 
-  // Estados para el formulario de registro de paciente
-  const [patientName, setPatientName] = useState('');
-  const [patientRut, setPatientRut] = useState('');
-  const [patientDiabetesType, setPatientDiabetesType] = useState('1');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-
-  // Efecto para cargar datos del médico al montar el componente
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoading(true);
-      // Obtener sesión actual del usuario autenticado
+  // Cargar datos del médico y pacientes
+  const loadDoctorData = async () => {
+    setLoading(true);
+    try {
       const { session, error: sessErr } = await getSession();
-      if (sessErr) {
-        if (mounted) router.replace('doctorLogin');
-        return;
-      }
-      if (!session) {
-        if (mounted) router.replace('doctorLogin');
+      if (sessErr || !session) {
+        router.replace('doctorLogin');
         return;
       }
 
-      // Obtener ID del usuario de la sesión
       const userId = session.user?.id;
       if (!userId) {
-        if (mounted) router.replace('doctorLogin');
+        router.replace('doctorLogin');
         return;
       }
 
-      // Obtener perfil completo del médico desde la base de datos
+      // Obtener perfil del médico
       const { profile, error: profErr } = await getDoctorByUserId(userId);
       if (profErr) {
         setName(session.user?.email ?? '');
@@ -51,13 +37,40 @@ export default function DoctorView() {
         setName(profile?.nombre ?? session.user?.email ?? '');
       }
 
-      if (mounted) setLoading(false);
-    })();
+      // Obtener lista de pacientes registrados por este médico
+      const { data: patientsData, error: patientsErr } = await supabase
+        .from('pacientes')
+        .select('*')
+        .eq('doctor_user_id', userId)
+        .order('created_at', { ascending: false });
 
+      if (!patientsErr && patientsData) {
+        setPatients(patientsData);
+      }
+    } catch (err) {
+      console.error('Error al cargar datos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar datos al montar y cuando se enfoca la pantalla
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      loadDoctorData();
+    }
     return () => { mounted = false; };
-  }, [router]);
+  }, []);
 
-  // Función para cerrar sesión del médico
+  // Recargar pacientes cuando vuelve a esta pantalla
+  useFocusEffect(
+    React.useCallback(() => {
+      loadDoctorData();
+    }, [])
+  );
+
+  // Función para cerrar sesión
   const handleLogout = async () => {
     setLoading(true);
     await logout();
@@ -65,148 +78,99 @@ export default function DoctorView() {
     router.replace('doctorLogin');
   };
 
-  // Función para limpiar el RUT (eliminar puntos, guiones y espacios)
-  function cleanRut(value) {
-    if (!value) return '';
-    return value.replace(/\.|\-|\s/g, '').toUpperCase();
-  }
-
-  // Función para validar RUT chileno usando el algoritmo del dígito verificador
-  function validateRut(value) {
-    const cleaned = cleanRut(value);
-    if (!cleaned || cleaned.length < 2) return false;
-    const body = cleaned.slice(0, -1);
-    let dv = cleaned.slice(-1);
-    dv = dv === 'K' ? 'K' : dv;
-    if (!/^\d{7,8}$/.test(body)) return false;
-    let sum = 0;
-    let multiplier = 2;
-    for (let i = body.length - 1; i >= 0; i--) {
-      sum += parseInt(body.charAt(i), 10) * multiplier;
-      multiplier = multiplier === 7 ? 2 : multiplier + 1;
-    }
-    const remainder = sum % 11;
-    const expected = 11 - remainder;
-    let expectedDv = '';
-    if (expected === 11) expectedDv = '0';
-    else if (expected === 10) expectedDv = 'K';
-    else expectedDv = String(expected);
-    return expectedDv === dv;
-  }
-
-  // Función para registrar un nuevo paciente asociado a este médico
-  const handleAddPatient = async () => {
-    setErrorMsg('');
-    setSuccessMsg('');
-    const cleanedRut = cleanRut(patientRut);
-    
-    // Validar que nombre y RUT no estén vacíos
-    if (!patientName || !cleanedRut) {
-      setErrorMsg('Por favor completa nombre y RUT del paciente.');
-      return;
-    }
-    
-    // Validar que el RUT sea válido
-    if (!validateRut(cleanedRut)) {
-      setErrorMsg('RUT inválido.');
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      // Obtener ID del usuario del médico para asociar el paciente
-      const doctorUserId = profile?.user_id ?? null;
-      // Insertar nuevo paciente en la base de datos
-      const { paciente, error } = await insertPatientByDoctor({ 
-        nombre: patientName, 
-        rut: cleanedRut, 
-        doctor_user_id: doctorUserId, 
-        diabetes_type: patientDiabetesType ? parseInt(patientDiabetesType, 10) : null 
-      });
-      if (error) {
-        setErrorMsg(error.message || String(error));
-      } else {
-        setSuccessMsg('Paciente agregado correctamente.');
-        // Limpiar formulario después de agregar paciente
-        setPatientName('');
-        setPatientRut('');
-        setPatientDiabetesType('1');
-      }
-    } catch (e) {
-      setErrorMsg(e.message || 'Error inesperado');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Mostrar pantalla de carga mientras se obtienen los datos
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#2196F3" />
       </View>
     );
   }
 
+  // Pantalla de inicio (home)
+  const renderHome = () => (
+    <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      {/* Saludo personalizado */}
+      <View style={styles.header}>
+        <Text style={styles.greeting}>¡Hola Dr. {name}!</Text>
+        <Text style={styles.subGreeting}>Tus pacientes registrados</Text>
+      </View>
+
+      {/* Card de resumen de pacientes */}
+      <View style={styles.statsCard}>
+        <Text style={styles.statsNumber}>{patients.length}</Text>
+        <Text style={styles.statsLabel}>Pacientes Registrados</Text>
+      </View>
+
+      {/* Lista de pacientes */}
+      {patients.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>No has registrado pacientes aún</Text>
+          <Text style={styles.emptyStateSubText}>Usa la opción "Agregar Paciente" para comenzar</Text>
+        </View>
+      ) : (
+        <View>
+          <Text style={styles.patientsListTitle}>Mis Pacientes</Text>
+          <FlatList
+            data={patients}
+            keyExtractor={(item) => item.id?.toString() || item.rut}
+            renderItem={({ item }) => (
+              <View style={styles.patientCard}>
+                <View style={styles.patientInfo}>
+                  <Text style={styles.patientName}>{item.nombre}</Text>
+                  <Text style={styles.patientRut}>RUT: {item.rut}</Text>
+                  {item.diabetes_type && (
+                    <Text style={styles.patientDiabetes}>
+                      Diabetes Tipo {item.diabetes_type}
+                    </Text>
+                  )}
+                  {item.created_at && (
+                    <Text style={styles.patientDate}>
+                      Registrado: {new Date(item.created_at).toLocaleDateString('es-CL')}
+                    </Text>
+                  )}
+                </View>
+                <View style={styles.patientBadge}>
+                  <Text style={styles.badgeText}>Paciente</Text>
+                </View>
+              </View>
+            )}
+            scrollEnabled={false}
+          />
+        </View>
+      )}
+
+      <View style={styles.bottomSpacer} />
+    </ScrollView>
+  );
+
   return (
     <View style={styles.container}>
-      {/* Encabezado con bienvenida al médico */}
-      <Text style={styles.text}>Bienvenido {name}</Text>
-      <View style={styles.divider} />
-      
-      {/* Sección para registrar un nuevo paciente */}
-      <Text style={styles.sectionTitle}>Registrar paciente</Text>
-      
-      {/* Input para nombre del paciente */}
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre paciente"
-        value={patientName}
-        onChangeText={setPatientName}
-      />
-      
-      {/* Input para RUT del paciente */}
-      <TextInput
-        style={styles.input}
-        placeholder="RUT paciente (ej: 12.345.678-9)"
-        value={patientRut}
-        onChangeText={setPatientRut}
-      />
-      
-      {/* Botones para seleccionar tipo de diabetes */}
-      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-        <TouchableOpacity 
-          onPress={() => setPatientDiabetesType('1')} 
-          style={[styles.typeBtn, patientDiabetesType === '1' && styles.typeBtnActive]}
+      {/* Contenido principal */}
+      {renderHome()}
+
+      {/* Navbar inferior */}
+      <View style={styles.navbar}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => {}}
         >
-          <Text>Diabetes 1</Text>
+          <Text style={styles.navItemText}>📊 Inicio</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={() => setPatientDiabetesType('2')} 
-          style={[styles.typeBtn, patientDiabetesType === '2' && styles.typeBtnActive]}
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('addPatient')}
         >
-          <Text>Diabetes 2</Text>
+          <Text style={styles.navItemText}>➕ Agregar Paciente</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('doctorCertificates')}
+        >
+          <Text style={styles.navItemText}>👤 Tu Perfil</Text>
         </TouchableOpacity>
       </View>
-      
-      {/* Mostrar mensajes de error y éxito */}
-      {errorMsg ? <Text style={{ color: 'red' }}>{errorMsg}</Text> : null}
-      {successMsg ? <Text style={{ color: 'green' }}>{successMsg}</Text> : null}
-      
-      {/* Botón para agregar paciente */}
-      <TouchableOpacity style={styles.addButton} onPress={handleAddPatient} disabled={loading}>
-        <Text style={styles.addButtonText}>{loading ? 'Guardando...' : 'Agregar paciente'}</Text>
-      </TouchableOpacity>
-      
-      {/* Botón para ir a certificados del médico */}
-      <TouchableOpacity style={styles.certButton} onPress={() => router.push('/doctorCertificates')}>
-        <Text style={styles.certButtonText}>Ver certificados</Text>
-      </TouchableOpacity>
-      
-      {/* Botón para cerrar sesión */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Cerrar sesión</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -214,67 +178,197 @@ export default function DoctorView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    flex: 1,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingHorizontal: 16,
+    paddingBottom: 80, // Espacio para el navbar
+  },
+  header: {
+    marginBottom: 24,
+    paddingVertical: 16,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#2196F3',
+    marginBottom: 4,
+  },
+  subGreeting: {
+    fontSize: 14,
+    color: '#666',
+  },
+  profileCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  profileInfo: {
+    gap: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  infoLabel: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
+  infoValue: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '600',
+  },
+  statsCard: {
+    backgroundColor: '#2196F3',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  statsNumber: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#fff',
+  },
+  statsLabel: {
+    fontSize: 14,
+    color: '#fff',
+    marginTop: 4,
+    opacity: 0.9,
+  },
+  // Estilos para la sección de pacientes
+  patientsListTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  emptyState: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#999',
+    marginBottom: 4,
+  },
+  emptyStateSubText: {
+    fontSize: 13,
+    color: '#bbb',
+  },
+  patientListContent: {
+    paddingBottom: 16,
+  },
+  patientCard: {
     backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  text: {
-    fontSize: 24,
+  patientInfo: {
+    flex: 1,
+  },
+  patientName: {
+    fontSize: 15,
     fontWeight: '700',
-    color: '#222',
-    marginBottom: 20,
+    color: '#333',
+    marginBottom: 2,
   },
-  logoutButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#e53935',
-    borderRadius: 8,
+  patientRut: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 2,
   },
-  logoutText: {
-    color: '#fff',
+  patientDiabetes: {
+    fontSize: 12,
+    color: '#2196F3',
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  patientDate: {
+    fontSize: 11,
+    color: '#999',
+  },
+  patientBadge: {
+    backgroundColor: '#e3f2fd',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeText: {
+    fontSize: 11,
+    color: '#2196F3',
     fontWeight: '600',
   },
-  divider: {
-    height: 1,
-    width: '80%',
-    backgroundColor: '#eee',
-    marginVertical: 16,
+  bottomSpacer: {
+    height: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
+  // Estilos del navbar
+  navbar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+    paddingTop: 8,
+    paddingHorizontal: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  input: {
-    width: '80%',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
+  navItem: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 8,
-    marginBottom: 8,
   },
-  addButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#2196F3',
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  addButtonText: {
-    color: '#fff',
+  navItemText: {
+    fontSize: 12,
     fontWeight: '600',
-  },
-  typeBtn: { padding: 8, borderWidth: 1, borderColor: '#ddd', borderRadius: 6, marginRight: 8 },
-  typeBtnActive: { backgroundColor: '#cfe8ff' },
-  certButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#4CAF50',
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  certButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: '#666',
+    textAlign: 'center',
   },
 });
