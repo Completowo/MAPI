@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput, Platform, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { getSession, getDoctorByUserId, insertPatientByDoctor } from '../services/supabase';
+import { getSession, getDoctorByUserId, insertPatientByDoctor, findPatientByRut } from '../services/supabase';
 
 export default function AddPatient() {
   const router = useRouter();
@@ -17,6 +17,7 @@ export default function AddPatient() {
   const [patientDiabetesType, setPatientDiabetesType] = useState('1');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [rutStatus, setRutStatus] = useState(null); // null, 'registered', 'not-registered', 'invalid'
 
   // Verificar que el usuario está autenticado
   useEffect(() => {
@@ -54,6 +55,17 @@ export default function AddPatient() {
   function cleanRut(value) {
     if (!value) return '';
     return value.replace(/\.|\-|\s/g, '').toUpperCase();
+  }
+
+  // Función para formatear el RUT
+  function formatRut(value) {
+    const cleaned = cleanRut(value);
+    if (cleaned.length === 0) return '';
+    const body = cleaned.slice(0, -1);
+    const dv = cleaned.slice(-1);
+    if (!body) return cleaned;
+    const withDots = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${withDots}-${dv}`;
   }
 
   // Función para validar RUT
@@ -106,9 +118,9 @@ export default function AddPatient() {
       });
 
       if (error) {
-        setErrorMsg(error.message || String(error));
+        setErrorMsg('Error al agregar paciente. Intenta de nuevo.');
       } else {
-        setSuccessMsg('✓ Paciente agregado correctamente');
+        setSuccessMsg('Paciente agregado correctamente');
         setTimeout(() => {
           setPatientName('');
           setPatientRut('');
@@ -163,10 +175,41 @@ export default function AddPatient() {
               style={styles.input}
               placeholder="Ej: 12.345.678-9"
               value={patientRut}
-              onChangeText={setPatientRut}
+              onChangeText={(text) => {
+                const filtered = text.replace(/[^0-9kK\.\-\s]/g, '');
+                const cleaned = cleanRut(filtered);
+                if (/^\d{7,8}[0-9Kk]$/.test(cleaned)) {
+                  setPatientRut(formatRut(cleaned));
+                  
+                  // Verificar si el RUT está registrado
+                  if (validateRut(cleaned)) {
+                    (async () => {
+                      const { paciente } = await findPatientByRut(cleaned);
+                      if (paciente) {
+                        setRutStatus('registered');
+                      } else {
+                        setRutStatus('not-registered');
+                      }
+                    })();
+                  } else {
+                    setRutStatus('invalid');
+                  }
+                } else {
+                  setPatientRut(filtered);
+                  setRutStatus(null);
+                }
+              }}
               keyboardType="default"
               placeholderTextColor="#ccc"
             />
+            {/* Mostrar estado del RUT */}
+            {rutStatus === 'registered' ? (
+              <Text style={[styles.helperText, { color: '#2e7d32' }]}>RUT registrado en el sistema</Text>
+            ) : rutStatus === 'not-registered' ? (
+              <Text style={[styles.helperText, { color: '#d32f2f' }]}>RUT no registrado por ningún doctor</Text>
+            ) : rutStatus === 'invalid' ? (
+              <Text style={[styles.helperText, { color: '#d32f2f' }]}>RUT inválido</Text>
+            ) : null}
           </View>
 
           {/* Tipo de diabetes */}
@@ -307,6 +350,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     backgroundColor: '#fafafa',
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
   },
   diabetesOptions: {
     flexDirection: 'row',

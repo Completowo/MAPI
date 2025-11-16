@@ -137,7 +137,7 @@ export default function DoctorCertificates() {
         setStatus(`Error: ${String(error.message || error)}`);
       } else {
         setUploadedUrl(publicUrl);
-        setStatus('✓ Archivo subido correctamente');
+        setStatus('Archivo subido correctamente');
         
         // Guardar la URL en el campo certificado_url de la tabla doctores
         await updateDoctorCertificateUrl(userId, publicUrl);
@@ -255,7 +255,7 @@ export default function DoctorCertificates() {
           
           {hasCertificate ? (
             <View>
-              <Text style={styles.successMessage}>✓ Certificado subido correctamente</Text>
+              <Text style={styles.successMessage}>Certificado subido correctamente</Text>
               {certificateUrl && (
                 <TouchableOpacity
                   onPress={() => Linking.openURL(certificateUrl)}
@@ -280,13 +280,16 @@ export default function DoctorCertificates() {
                 disabled={deleting}
               >
                 <Text style={styles.deleteButtonText}>
-                  {deleting ? 'Eliminando...' : '🗑️ Eliminar certificado'}
+                  {deleting ? 'Eliminando...' : 'Eliminar certificado'}
                 </Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View>
-              <Text style={styles.cardSubtitle}>Sube tu certificado profesional (PDF, máx 5 MB)</Text>
+              <View style={styles.alertBox}>
+                <Text style={styles.alertIcon}>⚠️</Text>
+                <Text style={styles.alertText}>¡Sube tu certificado profesional!</Text>
+              </View>
               
               <TouchableOpacity
                 style={[styles.uploadButton, uploading && styles.uploadButtonDisabled]}
@@ -313,7 +316,7 @@ export default function DoctorCertificates() {
                   onPress={() => Linking.openURL(uploadedUrl)}
                   style={styles.urlBox}
                 >
-                  <Text style={styles.urlLabel}>✓ Ver archivo subido:</Text>
+                  <Text style={styles.urlLabel}>Ver archivo subido:</Text>
                   <Text style={styles.url} numberOfLines={2}>{uploadedUrl}</Text>
                 </TouchableOpacity>
               )}
@@ -328,7 +331,7 @@ export default function DoctorCertificates() {
           disabled={loggingOut}
         >
           <Text style={styles.logoutButtonText}>
-            {loggingOut ? 'Cerrando sesión...' : 'Cerrar Sesión'}
+            {loggingOut ? 'Cerrando...' : 'Cerrar Sesión'}
           </Text>
         </TouchableOpacity>
 
@@ -439,6 +442,23 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 12,
   },
+  alertBox: {
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  alertIcon: {
+    fontSize: 20,
+    marginRight: 10,
+  },
+  alertText: {
+    fontSize: 13,
+    color: '#d32f2f',
+    fontWeight: '600',
+    flex: 1,
+  },
   successMessage: {
     fontSize: 14,
     color: '#2e7d32',
@@ -450,25 +470,23 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   infoBox: {
-    backgroundColor: '#fff3e0',
     borderRadius: 8,
     padding: 12,
-    marginVertical: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#ff9800',
+    marginVertical: 6,
   },
   infoBoxText: {
     fontSize: 13,
-    color: '#e65100',
+    color: '#666',
     fontWeight: '500',
   },
   deleteButton: {
     backgroundColor: '#ff5252',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     alignItems: 'center',
     marginTop: 12,
+    alignSelf: 'flex-start',
   },
   deleteButtonDisabled: {
     opacity: 0.6,
@@ -476,7 +494,7 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 12,
   },
   profileInfo: {
     gap: 8,
@@ -561,6 +579,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
     marginBottom: 16,
+    marginTop: 24,
   },
   logoutButtonDisabled: {
     opacity: 0.6,
