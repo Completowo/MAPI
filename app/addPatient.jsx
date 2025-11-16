@@ -167,6 +167,13 @@ export default function AddPatient() {
       return;
     }
 
+    // Validar que el RUT del paciente no sea igual al RUT del doctor
+    const doctorRutCleaned = cleanRut(profile?.rut || '');
+    if (cleanedRut === doctorRutCleaned) {
+      setErrorMsg('No puedes registrar a un paciente con tu propio RUT.');
+      return;
+    }
+
     setLoading(true);
     try {
       const doctorUserId = profile?.user_id ?? null;

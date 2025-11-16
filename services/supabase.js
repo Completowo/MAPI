@@ -1,9 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-// URL del backend de Supabase donde se almacenan los datos
+
 const SUPABASE_URL = 'https://zmmtdshapymhnfywolln.supabase.co';
-// Clave anonima para autenticar solicitudes desde la aplicación cliente
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptbXRkc2hhcHltaG5meXdvbGxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NDU4NzcsImV4cCI6MjA3ODAyMTg3N30.jZ3FI2_RyFapA-c1XK5V84FaTaZSwfPvWd2ngXefj0M';
-// Crear cliente de Supabase para comunicarse con la base de datos
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Registra un nuevo médico en la aplicación
@@ -44,7 +42,6 @@ export async function registerDoctor(formData) {
 	};
 
 	// Intentar normalizar el ID de especialidad a número
-	// Si es un número, usarlo directamente; si es string numérico, convertir; si no, dejar como null
 	const variants = [];
 	let parsedEspecialidad = null;
 	if (id_especialidad !== undefined && id_especialidad !== '') {
@@ -55,7 +52,7 @@ export async function registerDoctor(formData) {
 		}
 	}
 	
-	// Crear variantes del registro: con especialidad y sin especialidad (en caso que falle una)
+	// Crear variantes del registro: con especialidad
 	if (parsedEspecialidad !== null) {
 		variants.push({ ...baseRow, id_especialidad: parsedEspecialidad });
 	} else {
@@ -64,7 +61,6 @@ export async function registerDoctor(formData) {
 	}
 
 	// Intentar insertar el registro médico en la tabla 'doctores' con diferentes variantes
-	// Si una falla, intenta con la siguiente
 	let lastError = null;
 	for (const row of variants) {
 		try {
@@ -107,7 +103,7 @@ export async function registerDoctor(formData) {
 export async function loginDoctor({ email, password }) {
 	const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 	if (signInError) {
-		return { error: true }; // Solo retorna que hubo error, sin el mensaje de Supabase
+		return { error: true };
 	}
 	const user = data?.user || null;
 	if (!user) {
@@ -168,11 +164,7 @@ export async function getDoctorByUserId(userId) {
 	}
 }
 
-// Sube un certificado de un médico al bucket público `docsDoctor` dentro de la carpeta `certificados`
-// Parámetros:
-// - fileUri: URI local (por ejemplo DocumentPicker) o Blob/File
-// - filename: nombre que se desea guardar (p. ej. 'certificado.pdf')
-// - doctorUserId: id del usuario médico para organizar en subcarpeta (opcional)
+// Sube un certificado de un médico al bucket `docsDoctor` dentro de la carpeta `certificados`
 // Retorna: { publicUrl } o { error }
 export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId, doctorName }) {
 	try {
@@ -335,9 +327,12 @@ async function uploadToSupabase(path, fileBytes, sanitizedFilename, userIdToUse,
 // El médico puede registrar pacientes en el sistema especificando sus datos
 export async function insertPatientByDoctor({ nombre, rut, doctor_user_id, diabetes_type }) {
 	try {
+		// Limpiar el RUT antes de guardar
+		const cleanedRut = rut.replace(/\.|\-|\s/g, '').toUpperCase();
+		
 		const row = {
 			nombre,
-			rut,
+			rut: cleanedRut,
 			doctor_user_id: doctor_user_id || null,
 			email: null,
 			diabetes_type: diabetes_type ?? null,
@@ -367,7 +362,6 @@ export async function findPatientByRut(rut) {
 
 // Crea una cuenta de usuario para un paciente existente
 // El paciente debe estar previamente registrado por un médico para usar esta función
-// Requiere: RUT (para identificar al paciente), edad, contraseña y email
 export async function createPatientAccount({ rut, age, password, email, diabetes_type }) {
 	try {
 		// Buscar si el paciente ya existe en el sistema (registrado por médico)
@@ -376,7 +370,7 @@ export async function createPatientAccount({ rut, age, password, email, diabetes
 		if (!paciente) return { error: new Error('RUT no registrado por ningún médico') };
 		if (paciente.user_id) return { error: new Error('Paciente ya tiene cuenta') };
 
-		// Definir email: usar el proporcionado o el registrado, o generar uno por defecto
+		// Definir email
 		const emailToUse = (email && email.length > 3) ? email : (paciente.email && paciente.email.length > 3 ? paciente.email : `${rut}@mapi.local`);
 
 		// Crear usuario de autenticación para el paciente
@@ -515,8 +509,7 @@ export async function updateDoctorCertificateUrl(doctorUserId, certificateUrl) {
 	}
 }
 
-// Sube un documento de un paciente al bucket público `docsPatient`
-// Los documentos se organizan en: documentos/{patientNombre}/{filename}
+// Sube un documento de un paciente al bucket `docsPatient`
 // Solo los médicos pueden subir documentos de sus pacientes
 export async function uploadPatientDocument({ fileUri, filename, patientId, patientName }) {
 	try {
@@ -529,7 +522,7 @@ export async function uploadPatientDocument({ fileUri, filename, patientId, pati
 			return { error: new Error('ID del paciente requerido.') };
 		}
 
-		// Usar patientName si se proporciona, si no usar patientId
+		// Usar nombre del paciente si se proporciona, si no usar patientId
 		const folderName = patientName || patientId;
 
 		// Sanitizar el nombre del archivo
@@ -550,7 +543,7 @@ export async function uploadPatientDocument({ fileUri, filename, patientId, pati
 			return { error: new Error('No autenticado. Por favor inicia sesión primero.') };
 		}
 
-		// Construir ruta: documentos/{patientName}/{filename}
+		// Construir ruta
 		const path = `documentos/${folderName}/${sanitizedFilename}`;
 
 		// Obtener el blob del archivo
@@ -572,7 +565,7 @@ export async function uploadPatientDocument({ fileUri, filename, patientId, pati
 		
 		console.log('Listos para subir, tipo:', uploadBody.constructor?.name, 'tamaño:', uploadBody.size);
 
-		// Convertir Blob a base64 para compatibilidad con Supabase en Expo
+		// Convertir Blob a base64 para compatibilidad con Supabase en Expo (Mobile)
 		let base64Data = null;
 		
 		if (uploadBody.uri) {
