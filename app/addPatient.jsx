@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput, Platform, useWindowDimensions, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
-import { getSession, getDoctorByUserId, insertPatientByDoctor, uploadPatientDocument } from '../services/supabase';
+import { getSession, getDoctorByUserId, insertPatientByDoctor, uploadPatientDocument, getPatientDocumentUrl } from '../services/supabase';
 import * as DocumentPicker from 'expo-document-picker';
 
 export default function AddPatient() {
@@ -294,7 +294,7 @@ export default function AddPatient() {
               disabled={uploadingDoc}
             >
               <Text style={styles.uploadDocButtonText}>
-                {uploadingDoc ? 'Cargando...' : '📎 Seleccionar Documento'}
+                {uploadingDoc ? 'Cargando...' : 'Seleccionar Documento'}
               </Text>
             </TouchableOpacity>
             
@@ -310,9 +310,17 @@ export default function AddPatient() {
               <View style={styles.documentsListContainer}>
                 <Text style={styles.documentsListTitle}>Documentos Cargados:</Text>
                 {patientDocuments.map((doc, index) => (
-                  <View key={index} style={styles.documentItem}>
-                    <Text style={styles.documentName}>{doc.name}</Text>
-                  </View>
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.documentItem}
+                    onPress={() => {
+                      if (doc.url) {
+                        Linking.openURL(doc.url);
+                      }
+                    }}
+                  >
+                    <Text style={styles.documentName}>📄 {doc.name}</Text>
+                  </TouchableOpacity>
                 ))}
               </View>
             )}
@@ -554,13 +562,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   documentItem: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f0f7ff',
     borderRadius: 6,
     padding: 10,
     marginBottom: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderLeftWidth: 3,
+    borderLeftColor: '#2196F3',
   },
   documentName: {
     fontSize: 12,

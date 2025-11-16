@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Platform, FlatList, useWindowDimensions, Linking } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { getSession, logout, getDoctorByUserId, getPatientDocuments, uploadPatientDocument, deletePatientDocument } from '../services/supabase';
+import { getSession, logout, getDoctorByUserId, getPatientDocuments, uploadPatientDocument, deletePatientDocument, getPatientDocumentUrl } from '../services/supabase';
 import { supabase } from '../services/supabase';
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -204,6 +204,27 @@ export default function DoctorView() {
     }
   };
 
+  // Abrir/Descargar documento
+  const handleOpenDocument = async (filename) => {
+    if (!selectedPatient) return;
+
+    try {
+      const { publicUrl, error } = await getPatientDocumentUrl(selectedPatient.nombre, filename);
+      
+      if (error || !publicUrl) {
+        setDocStatus('Error al obtener el link del documento');
+        return;
+      }
+
+      // Abrir el documento en el navegador
+      Linking.openURL(publicUrl);
+    } catch (e) {
+      console.error('Error al abrir documento:', e);
+      setDocStatus(`Error: ${e.message}`);
+    }
+  };
+
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -245,7 +266,7 @@ export default function DoctorView() {
         disabled={uploadingDoc}
       >
         <Text style={styles.uploadDocButtonText}>
-          {uploadingDoc ? 'Cargando...' : '📎 Cargar Documento'}
+          {uploadingDoc ? 'Cargando...' : 'Seleccionar y cargar Documento'}
         </Text>
       </TouchableOpacity>
 
@@ -273,10 +294,7 @@ export default function DoctorView() {
             <View key={index} style={styles.documentItemContainer}>
               <TouchableOpacity
                 style={styles.documentItemContent}
-                onPress={() => {
-                  // Aquí se puede abrir el documento si se desea
-                  // Por ahora solo mostramos el nombre
-                }}
+                onPress={() => handleOpenDocument(doc.name)}
               >
                 <Text style={styles.documentItemName} numberOfLines={2}>
                   📄 {doc.name}
