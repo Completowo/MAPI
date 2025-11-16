@@ -1,16 +1,60 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
-
+import { supabase } from "../services/supabase";
 export default function MissionModal({
   visible,
   onClose,
   title,
+  points,
   onComplete,
   onNotComplete,
 }) {
-  const handleComplete = () => {
-    onComplete();
-    onClose();
+  // Estado de puntos desde supabase
+  const [pointsSupabase, setPointsSupabase] = useState(0);
+
+  const id = "2";
+  //Traer puntos desde supabase
+  const fecthPoints = async () => {
+    const { data, error } = await supabase
+      .from("chats")
+      .select("points")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.log("Error al obtener el chat", error);
+      return [];
+    }
+
+    if (!error && data?.points != null) {
+      setPointsSupabase(data.points);
+    }
+  };
+
+  useEffect(() => {
+    fecthPoints();
+  }, []);
+
+  //Actualizar puntos
+  const handleComplete = async () => {
+    const sumPoints = pointsSupabase + points;
+
+    try {
+      const { error } = await supabase
+        .from("chats")
+        .update({ points: sumPoints })
+        .eq("id", id);
+
+      if (error) {
+        console.log("Error al actualizar puntos", error);
+        return;
+      }
+
+      onComplete();
+      onClose();
+    } catch (err) {
+      console.error("Error al actualizar puntos:", err);
+    }
   };
 
   const handleReject = () => {
@@ -24,6 +68,9 @@ export default function MissionModal({
         <View style={styles.card}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>¿Completaste esta misión?</Text>
+          <Text style={styles.subtitle}>
+            Esta mision te dará {points} puntos
+          </Text>
 
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.yesBtn} onPress={handleComplete}>
