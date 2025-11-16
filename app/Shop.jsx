@@ -10,13 +10,46 @@ import {
   Modal,
 } from "react-native";
 
+import { supabase } from "../services/supabase";
+
 // Import de componentes
 import { Points } from "../components/Points";
 import { ItemShop } from "../components/ItemShop";
-import { SettingIcon, BellIcon, ShopIcon } from "../components/Icons";
 import { Header } from "../components/Header";
+import itemsData from "../itemsInShop.json";
 
 export default function Shop() {
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    const loadShop = async () => {
+      // Traer skins comprados desde Supabase
+      const { data, error } = await supabase
+        .from("chats")
+        .select("Skins")
+        .eq("id", 2)
+        .single();
+
+      const skinsComprados = data?.Skins || [];
+
+      // Combinar JSON + estado comprado
+      const procesados = itemsData.map((item) => ({
+        ...item,
+        status: skinsComprados.includes(item.nombre) ? 0 : 1,
+      }));
+
+      setItems(procesados);
+    };
+
+    loadShop();
+  }, []);
+
+  const markAsBought = (id) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status: 0 } : item))
+    );
+  };
+
   return (
     <View style={[styles.content]}>
       <Header title="Tienda" />
@@ -29,8 +62,17 @@ export default function Shop() {
 
       <ScrollView style={[styles.scroll]} showsVerticalScrollIndicator={false}>
         <View style={[styles.c_Items]}>
-          <ItemShop pStatus={0} pPrecio={0} pItem={0}></ItemShop>
-          <ItemShop pStatus={1} pPrecio={500} pItem={1}></ItemShop>
+          {items.map((item) => {
+            return (
+              <ItemShop
+                key={item.id}
+                pStatus={item.status}
+                pPrecio={item.precio}
+                pItem={item.id}
+                onBought={() => markAsBought(item.id)}
+              />
+            );
+          })}
           <View style={{ height: 100, width: "100%" }}></View>
         </View>
       </ScrollView>
