@@ -16,23 +16,46 @@ export function LastCheck({ lastCheck }) {
   const [glucose, setGlucose] = useState("0");
   const [tempGlucose, setTempGlucose] = useState("");
 
+  //Para calcular ultimo check de glucosa
+  const [lastCheckTime, setLastCheckTime] = useState(null);
+  const [minutesAgo, setMinutesAgo] = useState(0);
+
+  //Constante para abrir modal
   const toggleModal = () => setModal(!modal);
 
   //Cargar el valor desde Supabase al iniciar
   useEffect(() => {
+    //LLamar a mgdl y fecha para el lastCheck
     const fetchGlucose = async () => {
       const { data, error } = await supabase
         .from("chats")
-        .select("mgdl")
+        .select("mgdl, last_Check")
         .eq("id", 2)
         .single();
 
-      if (error) console.error("Error cargando glucosa:", error);
-      else setGlucose(data?.mgdl || "0");
+      if (!error) {
+        setGlucose(data?.mgdl || "0");
+        setLastCheckTime(data?.last_Check);
+      }
     };
 
     fetchGlucose();
   }, []);
+
+  useEffect(() => {
+    if (!lastCheckTime) return;
+
+    const interval = setInterval(() => {
+      const now = new Date();
+      const last = new Date(lastCheckTime);
+      const diffMs = now - last;
+      const diffMin = Math.floor(diffMs / 60000);
+
+      setMinutesAgo(diffMin);
+    }, 1000); // si quieres cada minuto pon 60000
+
+    return () => clearInterval(interval);
+  }, [lastCheckTime]);
 
   //Guardar en Supabase
   const handleConfirm = async () => {
@@ -42,12 +65,12 @@ export function LastCheck({ lastCheck }) {
 
       const { error } = await supabase
         .from("chats")
-        .update({ mgdl: tempGlucose })
+        .update({ mgdl: tempGlucose, last_Check: new Date() })
         .eq("id", 2);
 
       if (error) console.error("Error guardando glucosa:", error);
       else console.log("✅ Glucosa guardada correctamente:", tempGlucose);
-
+      setLastCheckTime(new Date());
       setTempGlucose("");
     } catch (err) {
       console.error("Error al guardar en Supabase:", err);
@@ -61,7 +84,7 @@ export function LastCheck({ lastCheck }) {
         <Text style={styles.unit}>mg/dL</Text>
       </View>
 
-      <Text style={styles.lastCheck}>Último Check: hace {lastCheck} min</Text>
+      <Text style={styles.lastCheck}>Último Check: hace {minutesAgo} min</Text>
 
       <TouchableOpacity style={styles.mainButton} onPress={toggleModal}>
         <Text style={styles.mainButtonText}>Tomar Glucosa</Text>
