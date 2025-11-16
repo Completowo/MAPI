@@ -8,7 +8,6 @@ import postalCodes from '../assets/cl_cods_post.json';
 export default function DoctorRegister() {
   const router = useRouter();
   const [focusedInput, setFocusedInput] = useState(null);
-  // Estado del formulario con todos los campos necesarios para registrar un médico
   const [formData, setFormData] = useState({
     nombre: '',
     rut: '',
@@ -219,7 +218,6 @@ export default function DoctorRegister() {
               onBlur={() => setFocusedInput(null)}
               keyboardType="default"
             />
-            {/* Mostrar validación del RUT */}
             {formData.rut ? (
               validateRut(formData.rut) ? (
                 <Text style={[styles.helperText, { color: '#2e7d32' }]}>✔ RUT válido</Text>
@@ -302,7 +300,6 @@ export default function DoctorRegister() {
               }}
               keyboardType="numeric"
             />
-            {/* Mostrar validación del código postal */}
             {formData.codigoPostalInstitucion ? (
               postalValid === null ? (
                 <Text style={styles.helperText}>Verificando código postal...</Text>
@@ -355,7 +352,6 @@ export default function DoctorRegister() {
             )}
           </TouchableOpacity>
 
-          {/* Link para ir a login si ya tiene cuenta */}
           <TouchableOpacity 
             style={styles.loginLink}
             onPress={() => router.push('doctorLogin')}

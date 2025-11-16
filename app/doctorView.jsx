@@ -241,7 +241,6 @@ export default function DoctorView() {
   // Pantalla de detalles del paciente
   const renderPatientDetails = () => (
     <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-      {/* Header con botón atrás */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBackToList} style={styles.backButtonContainer}>
           <Text style={styles.backButton}>← Volver</Text>
@@ -249,7 +248,6 @@ export default function DoctorView() {
         <Text style={styles.title}>Documentos del Paciente</Text>
       </View>
 
-      {/* Información del paciente */}
       <View style={styles.patientDetailCard}>
         <Text style={styles.cardTitle}>{selectedPatient?.nombre}</Text>
         <View style={styles.detailRow}>
@@ -264,7 +262,6 @@ export default function DoctorView() {
         )}
       </View>
 
-      {/* Botón para cargar documento */}
       <TouchableOpacity
         style={[styles.uploadDocButton, uploadingDoc && styles.uploadDocButtonDisabled]}
         onPress={handleSelectDocument}
@@ -275,7 +272,6 @@ export default function DoctorView() {
         </Text>
       </TouchableOpacity>
 
-      {/* Mensaje de estado */}
       {docStatus ? (
         <View style={[styles.docStatusBox, docStatus.includes('Error') && styles.docStatusError]}>
           <Text style={[styles.docStatusText, docStatus.includes('Error') && styles.docStatusErrorText]}>
@@ -284,7 +280,6 @@ export default function DoctorView() {
         </View>
       ) : null}
 
-      {/* Lista de documentos */}
       <View style={styles.documentsSection}>
         <Text style={styles.documentsTitle}>
           Documentos ({patientDocuments.length})
@@ -320,22 +315,18 @@ export default function DoctorView() {
     </ScrollView>
   );
 
-  // Pantalla de inicio (home)
   const renderHome = () => (
     <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-      {/* Saludo personalizado */}
       <View style={styles.header}>
         <Text style={styles.greeting}>¡Hola Dr. {name}!</Text>
         <Text style={styles.subGreeting}>Tus pacientes registrados</Text>
       </View>
 
-      {/* Card de resumen de pacientes */}
       <View style={styles.statsCard}>
         <Text style={styles.statsNumber}>{patients.length}</Text>
         <Text style={styles.statsLabel}>Pacientes Registrados</Text>
       </View>
 
-      {/* Lista de pacientes */}
       {patients.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyStateText}>No has registrado pacientes aún</Text>
@@ -382,10 +373,8 @@ export default function DoctorView() {
 
   return (
     <View style={styles.container}>
-      {/* Mostrar vista de detalles o lista principal */}
       {selectedPatient ? renderPatientDetails() : renderHome()}
 
-      {/* Navbar inferior */}
       <View style={styles.navbar}>
         <TouchableOpacity
           style={styles.navItem}

@@ -19,8 +19,8 @@ export default function AddPatient() {
   const [patientDiabetesType, setPatientDiabetesType] = useState('1');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [rutStatus, setRutStatus] = useState(null); // null, 'valid', 'invalid'
-  const [patientDocuments, setPatientDocuments] = useState([]); // Documentos subidos del paciente
+  const [rutStatus, setRutStatus] = useState(null);
+  const [patientDocuments, setPatientDocuments] = useState([]);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [docStatus, setDocStatus] = useState('');
 
@@ -221,15 +221,12 @@ export default function AddPatient() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Agregar Nuevo Paciente</Text>
           <Text style={styles.subtitle}>Completa los datos del paciente</Text>
         </View>
 
-        {/* Formulario */}
         <View style={styles.form}>
-          {/* Nombre del paciente */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>Nombre Completo *</Text>
             <TextInput
@@ -243,7 +240,6 @@ export default function AddPatient() {
             />
           </View>
 
-          {/* RUT del paciente */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>RUT *</Text>
             <TextInput
@@ -272,7 +268,7 @@ export default function AddPatient() {
               keyboardType="default"
               placeholderTextColor="#ccc"
             />
-            {/* Mostrar estado del RUT */}
+
             {patientRut ? (
               validateRut(cleanRut(patientRut)) ? (
                 <Text style={[styles.helperText, { color: '#2e7d32' }]}>✔ RUT válido</Text>
@@ -282,7 +278,6 @@ export default function AddPatient() {
             ) : null}
           </View>
 
-          {/* Tipo de diabetes */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>Tipo de Diabetes</Text>
             <View style={styles.diabetesOptions}>
@@ -305,7 +300,6 @@ export default function AddPatient() {
             </View>
           </View>
 
-          {/* Sección de documentos del paciente */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>Documentos del Paciente</Text>
             <TouchableOpacity
@@ -346,7 +340,6 @@ export default function AddPatient() {
             )}
           </View>
 
-          {/* Mensajes */}
           {errorMsg ? (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>{errorMsg}</Text>
@@ -359,7 +352,6 @@ export default function AddPatient() {
             </View>
           ) : null}
 
-          {/* Botón enviar */}
           <TouchableOpacity
             style={[styles.submitButton, loading && styles.submitButtonDisabled]}
             onPress={handleAddPatient}
@@ -376,7 +368,6 @@ export default function AddPatient() {
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      {/* Navbar inferior */}
       <View style={styles.navbar}>
         <TouchableOpacity
           style={styles.navItem}
@@ -412,7 +403,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 120, // Espacio para el navbar y botones del sistema
+    paddingBottom: 120,
   },
   header: {
     marginBottom: 24,

@@ -104,7 +104,7 @@ export default function DoctorCertificates() {
         return;
       }
 
-      // Obtener el archivo - puede estar en res directamente o en res.assets[0]
+      // Obtener el archivo
       let selectedFile = res;
       if (res.assets && res.assets.length > 0) {
         selectedFile = res.assets[0];
@@ -212,13 +212,11 @@ export default function DoctorCertificates() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false} scrollEnabled={true} nestedScrollEnabled={true}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Tu Perfil</Text>
           <Text style={styles.subtitle}>Información y certificados</Text>
         </View>
 
-        {/* Información del perfil */}
         <View style={styles.profileCard}>
           <Text style={styles.cardTitle}>Información Personal</Text>
           <View style={styles.profileInfo}>
@@ -253,7 +251,6 @@ export default function DoctorCertificates() {
           </View>
         </View>
 
-        {/* Sección de certificados */}
         <View style={styles.certificateCard}>
           <Text style={styles.cardTitle}>Mis Certificados</Text>
           
@@ -269,14 +266,12 @@ export default function DoctorCertificates() {
                 </TouchableOpacity>
               )}
               
-              {/* Mensaje explicativo */}
               <View style={styles.infoBox}>
                 <Text style={styles.infoBoxText}>
                   Para actualizar tu certificado, elimínalo y sube el nuevo.
                 </Text>
               </View>
               
-              {/* Botón de eliminar */}
               <TouchableOpacity
                 style={[styles.deleteButton, deleting && styles.deleteButtonDisabled]}
                 onPress={handleDeleteCertificate}
@@ -327,7 +322,6 @@ export default function DoctorCertificates() {
           )}
         </View>
 
-        {/* Botón de cerrar sesión dentro del ScrollView */}
         <View style={styles.logoutButtonWrapper}>
           <TouchableOpacity
             style={[styles.logoutButton, loggingOut && styles.logoutButtonDisabled]}
@@ -342,8 +336,7 @@ export default function DoctorCertificates() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
-
-      {/* Navbar inferior */}
+      
       <View style={styles.navbar}>
         <TouchableOpacity
           style={styles.navItem}

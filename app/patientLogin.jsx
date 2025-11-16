@@ -28,7 +28,7 @@ export default function PatientLogin() {
     return `${withDots}-${dv}`;
   }
 
-  // Función para validar RUT chileno
+  // Función para validar RUT
   function validateRut(value) {
     const cleaned = cleanRut(value);
     if (!cleaned || cleaned.length < 2) return false;
@@ -126,12 +126,10 @@ export default function PatientLogin() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        {/* Título y subtítulo */}
         <Text style={styles.title}>Acceso Paciente</Text>
         <Text style={styles.subtitle}>Ingresa tus credenciales</Text>
 
         <View style={styles.form}>
-          {/* RUT Input */}
           <TextInput
             style={[styles.input, focusedInput === 'rut' && styles.inputFocused]}
             placeholder="RUT"
@@ -152,7 +150,6 @@ export default function PatientLogin() {
             keyboardType="default"
           />
 
-          {/* Contraseña Input */}
           <TextInput
             style={[styles.input, focusedInput === 'password' && styles.inputFocused]}
             placeholder="Contraseña"
@@ -165,7 +162,6 @@ export default function PatientLogin() {
             placeholderTextColor="#ccc"
           />
 
-          {/* Botón Login */}
           <TouchableOpacity
             style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
@@ -178,17 +174,14 @@ export default function PatientLogin() {
             )}
           </TouchableOpacity>
 
-          {/* Error message */}
           {error ? (
             <Text style={styles.errorText}>{error}</Text>
           ) : null}
 
-          {/* Link to Register */}
           <TouchableOpacity onPress={() => router.push('patientRegister')}>
             <Text style={styles.registerButtonText}>¿Aún no tienes cuenta? ¡Activa tu cuenta aquí!</Text>
           </TouchableOpacity>
 
-          {/* Botón Volver */}
           <TouchableOpacity 
             style={styles.backButtonContainer}
             onPress={() => router.push('RoleSelection')}

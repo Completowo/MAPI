@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { loginDoctor } from '../services/supabase';
 
 // Pantalla de inicio de sesión para médicos
-// Permite que un médico registrado inicie sesión con email y contraseña
 export default function DoctorLogin() {
   const router = useRouter();
   // Estados para almacenar email, contraseña y estado de carga
@@ -51,12 +50,10 @@ export default function DoctorLogin() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        {/* Título y subtítulo de bienvenida */}
         <Text style={styles.title}>Acceso Médico</Text>
         <Text style={styles.subtitle}>Ingresa tus credenciales</Text>
 
         <View style={styles.form}>
-          {/* Campo de entrada para email */}
           <TextInput
             style={[styles.input, focusedInput === 'email' && styles.inputFocused]}
             placeholder="Correo electrónico"
@@ -68,7 +65,6 @@ export default function DoctorLogin() {
             autoCapitalize="none"
           />
 
-          {/* Campo de entrada para contraseña */}
           <TextInput
             style={[styles.input, focusedInput === 'password' && styles.inputFocused]}
             placeholder="Contraseña"
@@ -79,7 +75,6 @@ export default function DoctorLogin() {
             secureTextEntry
           />
 
-          {/* Botón para iniciar sesión */}
           <TouchableOpacity 
             style={styles.loginButton}
             onPress={handleLogin}
@@ -92,12 +87,10 @@ export default function DoctorLogin() {
             )}
           </TouchableOpacity>
 
-          {/* Mostrar mensaje de error si existe */}
           {error ? (
             <Text style={styles.errorText}>{error}</Text>
           ) : null}
 
-          {/* Botón para navegar a registro de médico */}
           <TouchableOpacity 
             style={styles.registerButton}
             onPress={() => router.push('doctorRegister')}
@@ -105,7 +98,6 @@ export default function DoctorLogin() {
             <Text style={styles.registerButtonText}>¿No tienes cuenta? Regístrate</Text>
           </TouchableOpacity>
 
-          {/* Botón Volver */}
           <TouchableOpacity 
             style={styles.backButtonContainer}
             onPress={() => router.push('RoleSelection')}

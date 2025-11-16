@@ -33,7 +33,7 @@ export default function PatientRegister() {
     return `${withDots}-${dv}`;
   }
 
-  // Función para validar RUT chileno
+  // Función para validar RUT
   function validateRut(value) {
     const cleaned = cleanRut(value);
     if (!cleaned || cleaned.length < 2) return false;
@@ -123,7 +123,7 @@ export default function PatientRegister() {
     const cleaned = cleanRut(rut);
 
     try {
-      // PASO 1: Verificar que el paciente existe en la tabla y no tiene user_id
+      // Verificar que el paciente existe en la tabla y no tiene user_id
       const { data: verifyPatient, error: verifyErr } = await supabase
         .from('pacientes')
         .select('*')
@@ -145,7 +145,7 @@ export default function PatientRegister() {
         return;
       }
 
-      // PASO 2: Crear usuario en Auth
+      // Crear usuario en Auth
       console.log('[patientRegister] Creando usuario en Auth con email:', emailInput);
       const { data: authData, error: authErr } = await supabase.auth.signUp({
         email: emailInput,
@@ -167,7 +167,7 @@ export default function PatientRegister() {
 
       console.log('[patientRegister] Usuario Auth creado:', authData.user.id);
 
-      // PASO 3: Actualizar paciente con user_id, edad y email
+      // Actualizar paciente con user_id, edad y email
       console.log('[patientRegister] Actualizando paciente ID:', verifyPatient.id);
       console.log('[patientRegister] Actualizando paciente con:', {
         user_id: authData.user.id,
@@ -212,12 +212,10 @@ export default function PatientRegister() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
       <View style={styles.content}>
-        {/* Título y subtítulo */}
         <Text style={styles.title}>Activar Cuenta</Text>
         <Text style={styles.subtitle}>Paciente</Text>
 
         <View style={styles.form}>
-          {/* RUT Input */}
           <TextInput
             style={[styles.input, focusedInput === 'rut' && styles.inputFocused]}
             placeholder="RUT"
@@ -237,7 +235,6 @@ export default function PatientRegister() {
             placeholderTextColor="#ccc"
           />
 
-          {/* Botón Verificar RUT */}
           <TouchableOpacity
             style={[styles.verifyButton, (loading || foundPatient) && styles.verifyButtonDisabled]}
             onPress={handleCheckRut}
@@ -252,7 +249,6 @@ export default function PatientRegister() {
             )}
           </TouchableOpacity>
 
-          {/* Error message */}
           {error ? (
             <Text style={styles.errorText}>{error}</Text>
           ) : null}
@@ -260,7 +256,6 @@ export default function PatientRegister() {
           {/* Si el RUT fue encontrado, mostrar formulario para crear cuenta */}
           {foundPatient ? (
             <>
-              {/* Información del paciente */}
               <View style={styles.infoSection}>
                 <Text style={styles.infoLabel}>Paciente registrado:</Text>
                 <Text style={styles.infoValue}>{foundPatient.nombre}</Text>
@@ -278,7 +273,6 @@ export default function PatientRegister() {
                 )}
               </View>
 
-              {/* Edad Input */}
               <TextInput
                 style={[styles.input, focusedInput === 'age' && styles.inputFocused]}
                 placeholder="Edad"
@@ -291,7 +285,6 @@ export default function PatientRegister() {
                 placeholderTextColor="#ccc"
               />
 
-              {/* Email Input */}
               <TextInput
                 style={[styles.input, focusedInput === 'email' && styles.inputFocused]}
                 placeholder="Email"
@@ -305,7 +298,6 @@ export default function PatientRegister() {
                 placeholderTextColor="#ccc"
               />
 
-              {/* Contraseña Input */}
               <TextInput
                 style={[styles.input, focusedInput === 'password' && styles.inputFocused]}
                 placeholder="Contraseña"
@@ -318,7 +310,6 @@ export default function PatientRegister() {
                 placeholderTextColor="#ccc"
               />
 
-              {/* Botón Crear Cuenta */}
               <TouchableOpacity
                 style={[styles.createButton, loading && styles.createButtonDisabled]}
                 onPress={handleCreateAccount}
@@ -333,7 +324,6 @@ export default function PatientRegister() {
             </>
           ) : null}
 
-          {/* Link to Login */}
           <TouchableOpacity onPress={() => router.push('patientLogin')}>
             <Text style={styles.registerButtonText}>¿Ya estás registrado? ¡Inicia sesión aquí!</Text>
           </TouchableOpacity>
