@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
 import { supabase } from "../services/supabase";
+import { usePointsStore } from "../store/pointsStore";
 
 export function Points() {
-  const [points, setPoints] = useState(0);
+  const { points, setPoints } = usePointsStore();
 
   const id = "2";
   //Traer puntos desde supabase

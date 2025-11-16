@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { supabase } from "../services/supabase";
+
+import { usePointsStore } from "../store/pointsStore";
 export default function MissionModal({
   visible,
   onClose,
@@ -11,6 +13,7 @@ export default function MissionModal({
 }) {
   // Estado de puntos desde supabase
   const [pointsSupabase, setPointsSupabase] = useState(0);
+  const { points: globalPoints, setPoints, addPoints } = usePointsStore();
 
   const id = "2";
   //Traer puntos desde supabase
@@ -38,6 +41,8 @@ export default function MissionModal({
   //Actualizar puntos
   const handleComplete = async () => {
     const sumPoints = pointsSupabase + points;
+
+    setPoints(globalPoints + points);
 
     try {
       const { error } = await supabase
