@@ -174,7 +174,7 @@ export async function getDoctorByUserId(userId) {
 // - filename: nombre que se desea guardar (p. ej. 'certificado.pdf')
 // - doctorUserId: id del usuario médico para organizar en subcarpeta (opcional)
 // Retorna: { publicUrl } o { error }
-export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId }) {
+export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId, doctorName }) {
 	try {
 		// Validar que el filename no sea undefined o vacío
 		if (!filename || filename === 'undefined' || typeof filename !== 'string') {
@@ -202,8 +202,15 @@ export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId 
 		const currentUserId = sessionData.session.user.id;
 		const userIdToUse = doctorUserId || currentUserId;
 
-		// Construir ruta
-		const folder = `certificados/${userIdToUse}`;
+		if (!userIdToUse) {
+			return { error: new Error('ID del médico requerido.') };
+		}
+
+		// Usar nombre del médico si se proporciona, si no usar ID
+		const folderName = doctorName || userIdToUse;
+
+		// Construir ruta: certificados/{doctor_name}/{filename}
+		const folder = `certificados/${folderName}`;
 		const path = `${folder}/${sanitizedFilename}`;
 
 		// Obtener el blob del archivo
@@ -271,7 +278,7 @@ export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId 
 		}
 		
 		// Upload
-		return await uploadToSupabase(path, bytes, sanitizedFilename, userIdToUse, filename);
+		return await uploadToSupabase(path, bytes, sanitizedFilename, userIdToUse, folderName, filename);
 		
 	} catch (e) {
 		console.error('Error en uploadDoctorCertificate:', e);
@@ -279,7 +286,7 @@ export async function uploadDoctorCertificate({ fileUri, filename, doctorUserId 
 	}
 }
 
-async function uploadToSupabase(path, fileBytes, sanitizedFilename, userIdToUse, filename) {
+async function uploadToSupabase(path, fileBytes, sanitizedFilename, userIdToUse, folderName, filename) {
 	try {
 		console.log('Iniciando upload a:', path, 'tamaño:', fileBytes.length);
 		
@@ -300,7 +307,7 @@ async function uploadToSupabase(path, fileBytes, sanitizedFilename, userIdToUse,
 		// Verificar que el archivo existe en el bucket
 		const { data: fileList, error: listError } = await supabase.storage
 			.from('docsDoctor')
-			.list(`certificados/${userIdToUse}`);
+			.list(`certificados/${folderName}`);
 
 		if (listError) {
 			console.warn('No se pudo verificar archivo en lista:', listError.message);
@@ -398,9 +405,13 @@ export async function createPatientAccount({ rut, age, password, email, diabetes
 }
 
 // Obtiene los certificados subidos por un médico en el bucket
-export async function getDoctorCertificates(doctorUserId) {
+export async function getDoctorCertificates(doctorUserId, doctorName) {
 	try {
-		const folderPath = `certificados/${doctorUserId}`;
+		if (!doctorName && !doctorUserId) {
+			return { certificates: [] };
+		}
+		const folderName = doctorName || doctorUserId;
+		const folderPath = `certificados/${folderName}`;
 		const { data, error } = await supabase.storage
 			.from('docsDoctor')
 			.list(folderPath);
@@ -420,9 +431,10 @@ export async function getDoctorCertificates(doctorUserId) {
 }
 
 // Obtiene la URL pública de un certificado
-export async function getCertificateUrl(doctorUserId, filename) {
+export async function getCertificateUrl(doctorUserId, filename, doctorName) {
 	try {
-		const path = `certificados/${doctorUserId}/${filename}`;
+		const folderName = doctorName || doctorUserId;
+		const path = `certificados/${folderName}/${filename}`;
 		const { data } = supabase.storage.from('docsDoctor').getPublicUrl(path);
 		return { publicUrl: data?.publicUrl ?? null };
 	} catch (e) {
@@ -431,7 +443,7 @@ export async function getCertificateUrl(doctorUserId, filename) {
 }
 
 // Elimina un certificado del bucket
-export async function deleteDoctorCertificate(doctorUserId, filename) {
+export async function deleteDoctorCertificate(doctorUserId, filename, doctorName) {
 	try {
 		// Obtener la sesión actual para verificar que es el propietario
 		const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
@@ -446,7 +458,8 @@ export async function deleteDoctorCertificate(doctorUserId, filename) {
 			return { error: new Error('No tienes permiso para eliminar este certificado.') };
 		}
 
-		const path = `certificados/${doctorUserId}/${filename}`;
+		const folderName = doctorName || doctorUserId;
+		const path = `certificados/${folderName}/${filename}`;
 		
 		console.log('Eliminando certificado:', path);
 		

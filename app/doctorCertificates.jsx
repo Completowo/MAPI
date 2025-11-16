@@ -59,7 +59,7 @@ export default function DoctorCertificates() {
         setAllowed(true);
         
         // Verificar si ya tiene certificado
-        checkForCertificate(user.id);
+        checkForCertificate(user.id, profile?.nombre);
       }
       setChecking(false);
     }
@@ -68,14 +68,15 @@ export default function DoctorCertificates() {
   }, []);
 
   // Verificar si el doctor ya tiene un certificado
-  const checkForCertificate = async (doctorUserId) => {
+  const checkForCertificate = async (doctorUserId, doctorName) => {
     try {
-      const { certificates } = await getDoctorCertificates(doctorUserId);
+      const { certificates } = await getDoctorCertificates(doctorUserId, doctorName);
       if (certificates && certificates.length > 0) {
         setHasCertificate(true);
         // Obtener URL del primer certificado
         const firstCert = certificates[0];
-        const path = `certificados/${doctorUserId}/${firstCert.name}`;
+        const folderName = doctorName || doctorUserId;
+        const path = `certificados/${folderName}/${firstCert.name}`;
         const { data } = supabase.storage.from('docsDoctor').getPublicUrl(path);
         setCertificateUrl(data?.publicUrl);
       } else {
@@ -130,6 +131,8 @@ export default function DoctorCertificates() {
       const { publicUrl, error } = await uploadDoctorCertificate({
         fileUri: fileUri,
         filename: filename,
+        doctorUserId: userId,
+        doctorName: profile?.nombre,
       });
       
       if (error) {
@@ -165,7 +168,7 @@ export default function DoctorCertificates() {
       const filename = certificateUrl.split('/').pop();
       
       //Usar la función del servicio para eliminar
-      const { success, error } = await deleteDoctorCertificate(userId, filename);
+      const { success, error } = await deleteDoctorCertificate(userId, filename, profile?.nombre);
       
       if (error) {
         setStatus(`Error al eliminar: ${error.message}`);
