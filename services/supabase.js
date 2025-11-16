@@ -342,10 +342,13 @@ export async function insertPatientByDoctor({ nombre, rut, doctor_user_id, diabe
 			email: null,
 			diabetes_type: diabetes_type ?? null,
 		};
+		console.log('[insertPatientByDoctor] Inserting row:', row);
 		const { data, error } = await supabase.from('pacientes').insert([row]);
+		console.log('[insertPatientByDoctor] Insert result - data:', data, 'error:', error);
 		if (error) return { error };
 		return { paciente: data?.[0] ?? null };
 	} catch (e) {
+		console.error('[insertPatientByDoctor] Error:', e);
 		return { error: e };
 	}
 }

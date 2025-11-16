@@ -23,6 +23,7 @@ export default function DoctorCertificates() {
   const [allowed, setAllowed] = useState(false);
   const [userId, setUserId] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [focusedInput, setFocusedInput] = useState(null);
   const [status, setStatus] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState(null);
@@ -195,7 +196,7 @@ export default function DoctorCertificates() {
 
   if (checking) return (
     <View style={styles.center}>
-      <ActivityIndicator size="large" color="#2196F3" />
+      <ActivityIndicator size="large" color="#00897B" />
       <Text style={styles.loadingText}>Verificando permisos...</Text>
     </View>
   );
@@ -526,7 +527,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   uploadButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#00897B',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -562,25 +563,25 @@ const styles = StyleSheet.create({
     color: '#c62828',
   },
   urlBox: {
-    backgroundColor: '#f0f7ff',
+    backgroundColor: '#e0f2f1',
     borderRadius: 8,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#2196F3',
+    borderColor: '#00897B',
   },
   urlLabel: {
     fontSize: 12,
-    color: '#2196F3',
+    color: '#00897B',
     fontWeight: '600',
     marginBottom: 4,
   },
   url: {
     fontSize: 11,
-    color: '#2196F3',
+    color: '#00897B',
     fontWeight: '500',
   },
   viewCertificateButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#00897B',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 16,

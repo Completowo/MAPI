@@ -11,6 +11,7 @@ export default function AddPatient() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [profile, setProfile] = useState(null);
+  const [focusedInput, setFocusedInput] = useState(null);
   
   //Estados del formulario
   const [patientName, setPatientName] = useState('');
@@ -169,12 +170,18 @@ export default function AddPatient() {
     setLoading(true);
     try {
       const doctorUserId = profile?.user_id ?? null;
+      console.log('[addPatient] Profile:', profile);
+      console.log('[addPatient] Doctor User ID:', doctorUserId);
+      
       const { paciente, error } = await insertPatientByDoctor({
         nombre: patientName,
         rut: cleanedRut,
         doctor_user_id: doctorUserId,
         diabetes_type: patientDiabetesType ? parseInt(patientDiabetesType, 10) : null,
       });
+
+      console.log('[addPatient] Paciente creado:', paciente);
+      console.log('[addPatient] Error:', error);
 
       if (error) {
         setErrorMsg('Error al agregar paciente. Intenta de nuevo.');
@@ -219,10 +226,12 @@ export default function AddPatient() {
           <View style={styles.formGroup}>
             <Text style={styles.label}>Nombre Completo *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, focusedInput === 'nombre' && styles.inputFocused]}
               placeholder="Ej: Juan Pérez García"
               value={patientName}
               onChangeText={setPatientName}
+              onFocus={() => setFocusedInput('nombre')}
+              onBlur={() => setFocusedInput(null)}
               placeholderTextColor="#ccc"
             />
           </View>
@@ -231,7 +240,7 @@ export default function AddPatient() {
           <View style={styles.formGroup}>
             <Text style={styles.label}>RUT *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, focusedInput === 'rut' && styles.inputFocused]}
               placeholder="Ej: 12.345.678-9"
               value={patientRut}
               onChangeText={(text) => {
@@ -251,14 +260,18 @@ export default function AddPatient() {
                   setRutStatus(null);
                 }
               }}
+              onFocus={() => setFocusedInput('rut')}
+              onBlur={() => setFocusedInput(null)}
               keyboardType="default"
               placeholderTextColor="#ccc"
             />
             {/* Mostrar estado del RUT */}
-            {rutStatus === 'valid' ? (
-              <Text style={[styles.helperText, { color: '#2e7d32' }]}>RUT válido</Text>
-            ) : rutStatus === 'invalid' ? (
-              <Text style={[styles.helperText, { color: '#d32f2f' }]}>RUT inválido</Text>
+            {patientRut ? (
+              validateRut(cleanRut(patientRut)) ? (
+                <Text style={[styles.helperText, { color: '#2e7d32' }]}>✔ RUT válido</Text>
+              ) : (
+                <Text style={[styles.helperText, { color: '#d32f2f' }]}>✖ RUT inválido</Text>
+              )
             ) : null}
           </View>
 
@@ -442,6 +455,10 @@ const styles = StyleSheet.create({
     color: '#333',
     backgroundColor: '#fafafa',
   },
+  inputFocused: {
+    borderWidth: 2,
+    borderColor: '#00897B',
+  },
   helperText: {
     fontSize: 12,
     color: '#666',
@@ -461,8 +478,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   diabetesBtnActive: {
-    borderColor: '#2196F3',
-    backgroundColor: '#e3f2fd',
+    borderColor: '#00897B',
+    backgroundColor: '#e0f2f1',
   },
   diabetesBtnText: {
     fontSize: 14,
@@ -470,7 +487,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   diabetesBtnTextActive: {
-    color: '#2196F3',
+    color: '#00897B',
   },
   errorBox: {
     backgroundColor: '#ffebee',
@@ -499,7 +516,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   submitButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#00897B',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
@@ -562,7 +579,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   documentItem: {
-    backgroundColor: '#f0f7ff',
+    backgroundColor: '#e0f2f1',
     borderRadius: 6,
     padding: 10,
     marginBottom: 8,
@@ -570,7 +587,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderLeftWidth: 3,
-    borderLeftColor: '#2196F3',
+    borderLeftColor: '#00897B',
   },
   documentName: {
     fontSize: 12,

@@ -7,6 +7,7 @@ import postalCodes from '../assets/cl_cods_post.json';
 
 export default function DoctorRegister() {
   const router = useRouter();
+  const [focusedInput, setFocusedInput] = useState(null);
   // Estado del formulario con todos los campos necesarios para registrar un médico
   const [formData, setFormData] = useState({
     nombre: '',
@@ -189,10 +190,12 @@ export default function DoctorRegister() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Nombre Completo</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, focusedInput === 'nombre' && styles.inputFocused]}
               placeholder="Combre completo"
               value={formData.nombre}
               onChangeText={(text) => setFormData({...formData, nombre: text})}
+              onFocus={() => setFocusedInput('nombre')}
+              onBlur={() => setFocusedInput(null)}
               autoCapitalize="words"
             />
           </View>
@@ -200,11 +203,11 @@ export default function DoctorRegister() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>RUT</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, focusedInput === 'rut' && styles.inputFocused]}
               placeholder="00.000.000-K"
               value={formData.rut}
               onChangeText={(text) => {
-                const filtered = text.replace(/[^0-9kK\.\-\s]/g, '');
+                const filtered = text.replace(/[^0-9kK\.‑\s]/g, '');
                 const cleaned = cleanRut(filtered);
                 if (/^\d{7,8}[0-9Kk]$/.test(cleaned)) {
                   setFormData(prev => ({ ...prev, rut: formatRut(cleaned) }));
@@ -212,6 +215,8 @@ export default function DoctorRegister() {
                   setFormData(prev => ({ ...prev, rut: filtered }));
                 }
               }}
+              onFocus={() => setFocusedInput('rut')}
+              onBlur={() => setFocusedInput(null)}
               keyboardType="default"
             />
             {/* Mostrar validación del RUT */}
@@ -227,10 +232,12 @@ export default function DoctorRegister() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Correo Electrónico</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, focusedInput === 'email' && styles.inputFocused]}
               placeholder="ejemplo@correo.com"
               value={formData.email}
               onChangeText={(text) => setFormData({...formData, email: text})}
+              onFocus={() => setFocusedInput('email')}
+              onBlur={() => setFocusedInput(null)}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -257,10 +264,12 @@ export default function DoctorRegister() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Institución Médica</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, focusedInput === 'institucion' && styles.inputFocused]}
               placeholder="Ej: Hospital San José"
               value={formData.institucionMedica}
               onChangeText={(text) => setFormData({...formData, institucionMedica: text})}
+              onFocus={() => setFocusedInput('institucion')}
+              onBlur={() => setFocusedInput(null)}
               autoCapitalize="words"
             />
           </View>
@@ -268,7 +277,7 @@ export default function DoctorRegister() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Código Postal (Institución)</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, focusedInput === 'postal' && styles.inputFocused]}
               placeholder="Ej: 0000000"
               value={formData.codigoPostalInstitucion}
               onChangeText={(text) => {
@@ -283,7 +292,9 @@ export default function DoctorRegister() {
                   setPostalInfo(null);
                 }
               }}
+              onFocus={() => setFocusedInput('postal')}
               onBlur={() => {
+                setFocusedInput(null);
                 const value = formData.codigoPostalInstitucion || '';
                 const ok = isValidChilePostalCode(value);
                 setPostalValid(!!ok);
@@ -310,10 +321,12 @@ export default function DoctorRegister() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Contraseña</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, focusedInput === 'password' && styles.inputFocused]}
               placeholder="Ingrese su contraseña"
               value={formData.password}
               onChangeText={(text) => setFormData({...formData, password: text})}
+              onFocus={() => setFocusedInput('password')}
+              onBlur={() => setFocusedInput(null)}
               secureTextEntry
             />
           </View>
@@ -321,10 +334,12 @@ export default function DoctorRegister() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Confirmar Contraseña</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, focusedInput === 'confirmPassword' && styles.inputFocused]}
               placeholder="Confirme su contraseña"
               value={formData.confirmPassword}
               onChangeText={(text) => setFormData({...formData, confirmPassword: text})}
+              onFocus={() => setFocusedInput('confirmPassword')}
+              onBlur={() => setFocusedInput(null)}
               secureTextEntry
             />
           </View>
@@ -375,7 +390,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Platform.OS === 'web' ? 32 : 28,
     fontWeight: '800',
-    color: '#2196F3',
+    color: '#00897B',
     marginBottom: Platform.OS === 'web' ? 8 : 4,
     textAlign: 'center',
   },
@@ -409,6 +424,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#FAFAFA',
   },
+  inputFocused: {
+    borderWidth: 2,
+    borderColor: '#00897B',
+  },
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#E0E0E0',
@@ -430,12 +449,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: '#2196F3',
+    borderColor: '#00897B',
     alignItems: 'center',
     backgroundColor: '#F5F9FF',
   },
   uploadButtonText: {
-    color: '#2196F3',
+    color: '#00897B',
     fontSize: 16,
     fontWeight: '500',
   },
@@ -447,7 +466,7 @@ const styles = StyleSheet.create({
   registerButton: {
     width: '100%',
     padding: 16,
-    backgroundColor: '#2196F3',
+    backgroundColor: '#00897B',
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 16,
@@ -462,7 +481,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginLinkText: {
-    color: '#2196F3',
+    color: '#00897B',
     fontSize: 14,
   },
   errorText: {

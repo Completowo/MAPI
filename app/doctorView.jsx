@@ -62,11 +62,16 @@ export default function DoctorView() {
       }
 
       // Obtener lista de pacientes registrados por este médico
+      console.log('[doctorView] Buscando pacientes con doctor_user_id:', userId);
+      
       const { data: patientsData, error: patientsErr } = await supabase
         .from('pacientes')
         .select('*')
         .eq('doctor_user_id', userId)
         .order('created_at', { ascending: false });
+
+      console.log('[doctorView] Pacientes encontrados:', patientsData);
+      console.log('[doctorView] Error en pacientes:', patientsErr);
 
       if (!patientsErr && patientsData) {
         setPatients(patientsData);
@@ -228,7 +233,7 @@ export default function DoctorView() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color="#00897B" />
       </View>
     );
   }
@@ -425,7 +430,7 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#2196F3',
+    color: '#00897B',
     marginBottom: 4,
   },
   subGreeting: {
@@ -470,7 +475,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   statsCard: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#00897B',
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -549,7 +554,7 @@ const styles = StyleSheet.create({
   },
   patientDiabetes: {
     fontSize: 12,
-    color: '#2196F3',
+    color: '#00897B',
     fontWeight: '500',
     marginBottom: 2,
   },
@@ -558,14 +563,14 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   patientBadge: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: '#e0f2f1',
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   badgeText: {
     fontSize: 11,
-    color: '#2196F3',
+    color: '#00897B',
     fontWeight: '600',
   },
   // Estilos para vista de detalles del paciente
@@ -574,7 +579,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 14,
-    color: '#2196F3',
+    color: '#00897B',
     fontWeight: '600',
   },
   title: {
@@ -687,7 +692,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 8,
     borderLeftWidth: 4,
-    borderLeftColor: '#2196F3',
+    borderLeftColor: '#00897B',
   },
   documentItemContent: {
     flex: 1,

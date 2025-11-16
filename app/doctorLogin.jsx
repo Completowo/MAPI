@@ -10,7 +10,7 @@ export default function DoctorLogin() {
   // Estados para almacenar email, contraseña y estado de carga
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  const [focusedInput, setFocusedInput] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -58,20 +58,24 @@ export default function DoctorLogin() {
         <View style={styles.form}>
           {/* Campo de entrada para email */}
           <TextInput
-            style={styles.input}
+            style={[styles.input, focusedInput === 'email' && styles.inputFocused]}
             placeholder="Correo electrónico"
             value={email}
             onChangeText={setEmail}
+            onFocus={() => setFocusedInput('email')}
+            onBlur={() => setFocusedInput(null)}
             keyboardType="email-address"
             autoCapitalize="none"
           />
 
           {/* Campo de entrada para contraseña */}
           <TextInput
-            style={styles.input}
+            style={[styles.input, focusedInput === 'password' && styles.inputFocused]}
             placeholder="Contraseña"
             value={password}
             onChangeText={setPassword}
+            onFocus={() => setFocusedInput('password')}
+            onBlur={() => setFocusedInput(null)}
             secureTextEntry
           />
 
@@ -100,6 +104,14 @@ export default function DoctorLogin() {
           >
             <Text style={styles.registerButtonText}>¿No tienes cuenta? Regístrate</Text>
           </TouchableOpacity>
+
+          {/* Botón Volver */}
+          <TouchableOpacity 
+            style={styles.backButtonContainer}
+            onPress={() => router.push('RoleSelection')}
+          >
+            <Text style={styles.backButtonText}>Volver</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -116,11 +128,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
+    paddingTop: 60,
   },
   title: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#2196F3',
+    color: '#00897B',
     marginBottom: 8,
   },
   subtitle: {
@@ -141,10 +154,14 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     fontSize: 16,
   },
+  inputFocused: {
+    borderWidth: 2,
+    borderColor: '#00897B',
+  },
   loginButton: {
     width: '100%',
     padding: 16,
-    backgroundColor: '#2196F3',
+    backgroundColor: '#00897B',
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 16,
@@ -194,7 +211,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   registerButtonText: {
-    color: '#2196F3',
+    color: '#00897B',
     fontSize: 14,
+  },
+  backButtonContainer: {
+    marginTop: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  backButtonText: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: '600',
   },
 });
