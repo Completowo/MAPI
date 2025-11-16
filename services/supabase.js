@@ -14,7 +14,20 @@ export async function registerDoctor(formData) {
 	// Crear usuario de autenticación con email y contraseña
 	const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
 	if (signUpError) {
-		return { error: signUpError };
+		// Traducir errores comunes de registro
+		const message = (signUpError.message || '').toLowerCase();
+		let errorMessage = 'Error al registrar. Intenta de nuevo.';
+		
+		if (message.includes('password') && message.includes('6 characters')) {
+			errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
+		} else if (message.includes('already registered') || message.includes('user already exists')) {
+			errorMessage = 'Este correo ya está registrado. Intenta con otro correo.';
+		} else if (message.includes('invalid email')) {
+			errorMessage = 'Correo electrónico inválido. Verifica tu correo.';
+		}
+		
+		const translatedError = new Error(errorMessage);
+		return { error: translatedError };
 	}
 
 	// Obtener los datos del usuario creado
@@ -70,23 +83,37 @@ export async function registerDoctor(formData) {
 			continue;
 		}
 	}
+	
+	// Si falló la inserción, crear error con mensaje específico
+	if (lastError) {
+		const message = (lastError.message || '').toLowerCase();
+		let errorMessage = 'Error al registrar. Intenta de nuevo.';
+		
+		if (message.includes('duplicate') || message.includes('rut')) {
+			errorMessage = 'Este RUT ya está registrado.';
+		} else if (message.includes('email')) {
+			errorMessage = 'Este correo ya está registrado.';
+		}
+		
+		const translatedError = new Error(errorMessage);
+		return { error: translatedError };
+	}
+	
 	return { error: lastError };
 }
 
 // Inicia sesión de un médico existente
 // Valida credenciales y recupera el perfil completo del médico
 export async function loginDoctor({ email, password }) {
-	// Autenticar con email y contraseña en Supabase Auth
 	const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 	if (signInError) {
-		return { error: signInError };
+		return { error: true }; // Solo retorna que hubo error, sin el mensaje de Supabase
 	}
 	const user = data?.user || null;
 	if (!user) {
-		return { error: new Error('No se obtuvo usuario desde Auth') };
+		return { error: true };
 	}
 	try {
-		// Buscar el perfil completo del médico en la tabla 'doctores' usando su ID de usuario
 		const { data: profile, error: profileErr } = await supabase
 			.from('doctores')
 			.select('*')
@@ -94,11 +121,11 @@ export async function loginDoctor({ email, password }) {
 			.single();
 
 		if (profileErr) {
-			return { user, error: profileErr };
+			return { error: true };
 		}
 		return { user, profile };
 	} catch (e) {
-		return { user, error: e };
+		return { error: true };
 	}
 }
 

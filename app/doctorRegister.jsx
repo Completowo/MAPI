@@ -158,14 +158,14 @@ export default function DoctorRegister() {
       // Llamar función de registro desde servicio Supabase
       const { error, user } = await registerDoctor(formData);
       if (error) {
-        setErrorMsg(error.message || 'Error al registrar en Supabase.');
+        setErrorMsg(error.message || 'Error al registrar. Intenta de nuevo.');
       } else {
         setSuccessMsg('Registro exitoso. Redirigiendo al login...');
         setTimeout(() => router.push('doctorLogin'), 1200);
 
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Error inesperado.');
+      setErrorMsg('Error inesperado. Intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -329,8 +329,8 @@ export default function DoctorRegister() {
             />
           </View>
 
-          {errorMsg ? <Text style={{ color: 'red', textAlign: 'center' }}>{errorMsg}</Text> : null}
-          {successMsg ? <Text style={{ color: 'green', textAlign: 'center' }}>{successMsg}</Text> : null}
+          {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
+          {successMsg ? <Text style={styles.successText}>{successMsg}</Text> : null}
 
           <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={loading}>
             {loading ? (
@@ -464,5 +464,17 @@ const styles = StyleSheet.create({
   loginLinkText: {
     color: '#2196F3',
     fontSize: 14,
+  },
+  errorText: {
+    color: '#e53935',
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 12,
+  },
+  successText: {
+    color: '#2e7d32',
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 12,
   },
 });

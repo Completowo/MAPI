@@ -17,20 +17,31 @@ export default function DoctorLogin() {
   // Función para manejar el inicio de sesión
   const handleLogin = () => {
     setError('');
+    
+    if (!email.trim()) {
+      setError('Por favor ingresa tu correo electrónico');
+      return;
+    }
+    
+    if (!password.trim()) {
+      setError('Por favor ingresa tu contraseña');
+      return;
+    }
+    
     setLoading(true);
     (async () => {
       try {
-        // Llamar función de login desde servicio Supabase
         const { error, user, profile } = await loginDoctor({ email, password });
         if (error) {
-          setError(error.message || 'Error al iniciar sesión');
+          setError('Credenciales incorrectas, Revisa tu correo y/o contraseña.');
+        } else if (!profile) {
+          setError('No se encontró el perfil del médico. Contacta al administrador');
         } else {
-          // Si login es exitoso, obtener el nombre del médico y navegar a doctorView
           const name = (profile && profile.nombre) ? profile.nombre : (user?.email || '');
           router.push(`doctorView?name=${encodeURIComponent(name)}`);
         }
       } catch (e) {
-        setError(e.message || 'Error inesperado');
+        setError('Credenciales incorrectas, Revisa tu correo y/o contraseña.');
       } finally {
         setLoading(false);
       }
@@ -78,7 +89,9 @@ export default function DoctorLogin() {
           </TouchableOpacity>
 
           {/* Mostrar mensaje de error si existe */}
-          {error ? <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text> : null}
+          {error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : null}
 
           {/* Botón para navegar a registro de médico */}
           <TouchableOpacity 
@@ -140,6 +153,41 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  errorBox: {
+    backgroundColor: '#ffebee',
+    borderLeftWidth: 4,
+    borderLeftColor: '#e53935',
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  errorIcon: {
+    fontSize: 24,
+    marginRight: 12,
+    marginTop: 2,
+  },
+  errorContent: {
+    flex: 1,
+  },
+  errorTitle: {
+    color: '#c62828',
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  errorText: {
+    color: '#e53935',
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 12,
   },
   registerButton: {
     padding: 16,
