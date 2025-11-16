@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Platform, FlatList, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Platform, FlatList, useWindowDimensions, Linking } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { getSession, logout, getDoctorByUserId } from '../services/supabase';
+import { getSession, logout, getDoctorByUserId, getPatientDocuments, uploadPatientDocument, deletePatientDocument } from '../services/supabase';
 import { supabase } from '../services/supabase';
+import * as DocumentPicker from 'expo-document-picker';
 
 // Pantalla principal para médicos después de iniciar sesión
 export default function DoctorView() {
@@ -13,6 +14,10 @@ export default function DoctorView() {
   const [name, setName] = useState('');
   const [profile, setProfile] = useState(null);
   const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null); // Para vista detallada
+  const [patientDocuments, setPatientDocuments] = useState([]); // Documentos del paciente seleccionado
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docStatus, setDocStatus] = useState('');
 
   // Función para limpiar RUT
   function cleanRut(value) {
@@ -97,6 +102,108 @@ export default function DoctorView() {
     router.replace('doctorLogin');
   };
 
+  // Cargar documentos cuando se selecciona un paciente
+  const handleSelectPatient = async (patient) => {
+    setSelectedPatient(patient);
+    setDocStatus('');
+    setPatientDocuments([]);
+    
+    // Cargar documentos del paciente
+    const { documents } = await getPatientDocuments(patient.nombre);
+    setPatientDocuments(documents || []);
+  };
+
+  // Volver a la lista de pacientes
+  const handleBackToList = () => {
+    setSelectedPatient(null);
+    setPatientDocuments([]);
+    setDocStatus('');
+  };
+
+  // Seleccionar y subir documento para el paciente seleccionado
+  const handleSelectDocument = async () => {
+    if (!selectedPatient) return;
+
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf'],
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled) {
+        setDocStatus('Selección cancelada');
+        return;
+      }
+
+      if (!result.assets || result.assets.length === 0) {
+        setDocStatus('No se seleccionó ningún archivo');
+        return;
+      }
+
+      const file = result.assets[0];
+      const filename = file.name || `documento_${Date.now()}.pdf`;
+
+      if (!filename.toLowerCase().endsWith('.pdf')) {
+        setDocStatus('Error: Solo se permiten archivos PDF');
+        return;
+      }
+
+      setDocStatus(`Cargando archivo: ${filename}...`);
+      setUploadingDoc(true);
+
+      const { publicUrl, error } = await uploadPatientDocument({
+        fileUri: file.uri,
+        filename: filename,
+        patientId: selectedPatient.id,
+        patientName: selectedPatient.nombre,
+      });
+
+      if (error) {
+        console.error('Upload error:', error);
+        setDocStatus(`Error: ${String(error.message || error)}`);
+      } else {
+        setDocStatus('Documento subido correctamente');
+        // Recargar lista de documentos
+        const { documents } = await getPatientDocuments(selectedPatient.nombre);
+        setPatientDocuments(documents || []);
+        setTimeout(() => {
+          setDocStatus('');
+        }, 2000);
+      }
+    } catch (e) {
+      console.error('Error al seleccionar documento:', e);
+      setDocStatus(`Error: ${e.message}`);
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
+
+  // Eliminar documento del paciente
+  const handleDeleteDocument = async (filename) => {
+    if (!selectedPatient) return;
+
+    try {
+      setDocStatus(`Eliminando ${filename}...`);
+      const { success, error } = await deletePatientDocument(selectedPatient.nombre, filename);
+
+      if (error) {
+        console.error('Delete error:', error);
+        setDocStatus(`Error: ${String(error.message || error)}`);
+      } else {
+        setDocStatus('Documento eliminado correctamente');
+        // Recargar lista de documentos
+        const { documents } = await getPatientDocuments(selectedPatient.nombre);
+        setPatientDocuments(documents || []);
+        setTimeout(() => {
+          setDocStatus('');
+        }, 2000);
+      }
+    } catch (e) {
+      console.error('Error al eliminar documento:', e);
+      setDocStatus(`Error: ${e.message}`);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -104,6 +211,91 @@ export default function DoctorView() {
       </View>
     );
   }
+
+  // Pantalla de detalles del paciente
+  const renderPatientDetails = () => (
+    <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      {/* Header con botón atrás */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleBackToList} style={styles.backButtonContainer}>
+          <Text style={styles.backButton}>← Volver</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Documentos del Paciente</Text>
+      </View>
+
+      {/* Información del paciente */}
+      <View style={styles.patientDetailCard}>
+        <Text style={styles.cardTitle}>{selectedPatient?.nombre}</Text>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>RUT:</Text>
+          <Text style={styles.detailValue}>{formatRut(selectedPatient?.rut)}</Text>
+        </View>
+        {selectedPatient?.diabetes_type && (
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Diabetes:</Text>
+            <Text style={styles.detailValue}>Tipo {selectedPatient.diabetes_type}</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Botón para cargar documento */}
+      <TouchableOpacity
+        style={[styles.uploadDocButton, uploadingDoc && styles.uploadDocButtonDisabled]}
+        onPress={handleSelectDocument}
+        disabled={uploadingDoc}
+      >
+        <Text style={styles.uploadDocButtonText}>
+          {uploadingDoc ? 'Cargando...' : '📎 Cargar Documento'}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Mensaje de estado */}
+      {docStatus ? (
+        <View style={[styles.docStatusBox, docStatus.includes('Error') && styles.docStatusError]}>
+          <Text style={[styles.docStatusText, docStatus.includes('Error') && styles.docStatusErrorText]}>
+            {docStatus}
+          </Text>
+        </View>
+      ) : null}
+
+      {/* Lista de documentos */}
+      <View style={styles.documentsSection}>
+        <Text style={styles.documentsTitle}>
+          Documentos ({patientDocuments.length})
+        </Text>
+        
+        {patientDocuments.length === 0 ? (
+          <View style={styles.noDocuments}>
+            <Text style={styles.noDocumentsText}>Sin documentos aún</Text>
+          </View>
+        ) : (
+          patientDocuments.map((doc, index) => (
+            <View key={index} style={styles.documentItemContainer}>
+              <TouchableOpacity
+                style={styles.documentItemContent}
+                onPress={() => {
+                  // Aquí se puede abrir el documento si se desea
+                  // Por ahora solo mostramos el nombre
+                }}
+              >
+                <Text style={styles.documentItemName} numberOfLines={2}>
+                  📄 {doc.name}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteDocButton}
+                onPress={() => handleDeleteDocument(doc.name)}
+              >
+                <Text style={styles.deleteDocButtonText}>🗑️</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
+      </View>
+
+      <View style={styles.bottomSpacer} />
+    </ScrollView>
+  );
 
   // Pantalla de inicio (home)
   const renderHome = () => (
@@ -133,7 +325,10 @@ export default function DoctorView() {
             data={patients}
             keyExtractor={(item) => item.id?.toString() || item.rut}
             renderItem={({ item }) => (
-              <View style={styles.patientCard}>
+              <TouchableOpacity
+                onPress={() => handleSelectPatient(item)}
+                style={styles.patientCard}
+              >
                 <View style={styles.patientInfo}>
                   <Text style={styles.patientName}>{item.nombre}</Text>
                   <Text style={styles.patientRut}>RUT: {formatRut(item.rut)}</Text>
@@ -149,9 +344,9 @@ export default function DoctorView() {
                   )}
                 </View>
                 <View style={styles.patientBadge}>
-                  <Text style={styles.badgeText}>Paciente</Text>
+                  <Text style={styles.badgeText}>Ver Docs</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             )}
             scrollEnabled={false}
           />
@@ -164,8 +359,8 @@ export default function DoctorView() {
 
   return (
     <View style={styles.container}>
-      {/* Contenido principal */}
-      {renderHome()}
+      {/* Mostrar vista de detalles o lista principal */}
+      {selectedPatient ? renderPatientDetails() : renderHome()}
 
       {/* Navbar inferior */}
       <View style={styles.navbar}>
@@ -354,6 +549,145 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#2196F3',
     fontWeight: '600',
+  },
+  // Estilos para vista de detalles del paciente
+  backButtonContainer: {
+    marginBottom: 12,
+  },
+  backButton: {
+    fontSize: 14,
+    color: '#2196F3',
+    fontWeight: '600',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#333',
+  },
+  patientDetailCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 12,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  detailLabel: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
+  detailValue: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '600',
+  },
+  uploadDocButton: {
+    backgroundColor: '#4caf50',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  uploadDocButtonDisabled: {
+    opacity: 0.6,
+  },
+  uploadDocButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  docStatusBox: {
+    backgroundColor: '#e8f5e9',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4caf50',
+  },
+  docStatusError: {
+    backgroundColor: '#ffebee',
+    borderLeftColor: '#e53935',
+  },
+  docStatusText: {
+    color: '#2e7d32',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  docStatusErrorText: {
+    color: '#c62828',
+  },
+  documentsSection: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  documentsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 12,
+  },
+  noDocuments: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  noDocumentsText: {
+    fontSize: 14,
+    color: '#999',
+    fontStyle: 'italic',
+  },
+  documentItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+  },
+  documentItemContent: {
+    flex: 1,
+    marginRight: 8,
+  },
+  documentItemName: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '500',
+  },
+  deleteDocButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#ffebee',
+    borderRadius: 6,
+  },
+  deleteDocButtonText: {
+    fontSize: 16,
   },
   bottomSpacer: {
     height: 20,

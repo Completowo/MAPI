@@ -498,3 +498,204 @@ export async function updateDoctorCertificateUrl(doctorUserId, certificateUrl) {
 		return { error: e };
 	}
 }
+
+// Sube un documento de un paciente al bucket público `docsPatient`
+// Los documentos se organizan en: documentos/{patientNombre}/{filename}
+// Solo los médicos pueden subir documentos de sus pacientes
+export async function uploadPatientDocument({ fileUri, filename, patientId, patientName }) {
+	try {
+		// Validar que el filename no sea undefined o vacío
+		if (!filename || filename === 'undefined' || typeof filename !== 'string') {
+			return { error: new Error('Nombre de archivo inválido. Por favor selecciona un archivo válido.') };
+		}
+
+		if (!patientId) {
+			return { error: new Error('ID del paciente requerido.') };
+		}
+
+		// Usar patientName si se proporciona, si no usar patientId
+		const folderName = patientName || patientId;
+
+		// Sanitizar el nombre del archivo
+		const sanitizedFilename = filename
+			.replace(/[^\w\s.-]/g, '_')
+			.replace(/\s+/g, '_')
+			.replace(/_+/g, '_')
+			.toLowerCase()
+			.trim();
+
+		if (!sanitizedFilename || sanitizedFilename === '_') {
+			return { error: new Error('El nombre del archivo no es válido después de sanitizar.') };
+		}
+
+		// Obtener la sesión actual (solo médicos autenticados)
+		const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+		if (sessionErr || !sessionData?.session?.user?.id) {
+			return { error: new Error('No autenticado. Por favor inicia sesión primero.') };
+		}
+
+		// Construir ruta: documentos/{patientName}/{filename}
+		const path = `documentos/${folderName}/${sanitizedFilename}`;
+
+		// Obtener el blob del archivo
+		let uploadBody = fileUri;
+		
+		if (typeof fileUri === 'string') {
+			console.log('Intentando fetch de URI:', fileUri);
+			const response = await fetch(fileUri);
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
+			uploadBody = await response.blob();
+			console.log('Blob obtenido del fetch, tamaño:', uploadBody.size);
+		}
+
+		if (!uploadBody) {
+			return { error: new Error('El archivo está vacío o no se pudo procesar.') };
+		}
+		
+		console.log('Listos para subir, tipo:', uploadBody.constructor?.name, 'tamaño:', uploadBody.size);
+
+		// Convertir Blob a base64 para compatibilidad con Supabase en Expo
+		let base64Data = null;
+		
+		if (uploadBody.uri) {
+			// Expo Blob tiene uri
+			console.log('Leyendo archivo desde URI:', uploadBody.uri);
+			const response = await fetch(uploadBody.uri);
+			const blob = await response.blob();
+			const reader = new FileReader();
+			base64Data = await new Promise((resolve, reject) => {
+				reader.onload = () => {
+					const base64 = reader.result.split(',')[1];
+					resolve(base64);
+				};
+				reader.onerror = reject;
+				reader.readAsDataURL(blob);
+			});
+		} else if (uploadBody instanceof Blob) {
+			// Blob estándar
+			const reader = new FileReader();
+			base64Data = await new Promise((resolve, reject) => {
+				reader.onload = () => {
+					const base64 = reader.result.split(',')[1];
+					resolve(base64);
+				};
+				reader.onerror = reject;
+				reader.readAsDataURL(uploadBody);
+			});
+		}
+		
+		if (!base64Data) {
+			return { error: new Error('No se pudo convertir el archivo a base64.') };
+		}
+		
+		console.log('Base64 listo, tamaño:', base64Data.length);
+		
+		// Convertir base64 a Uint8Array
+		const binaryString = atob(base64Data);
+		const bytes = new Uint8Array(binaryString.length);
+		for (let i = 0; i < binaryString.length; i++) {
+			bytes[i] = binaryString.charCodeAt(i);
+		}
+		
+		// Upload
+		return await uploadPatientDocumentToSupabase(path, bytes, sanitizedFilename, filename);
+		
+	} catch (e) {
+		console.error('Error en uploadPatientDocument:', e);
+		return { error: e };
+	}
+}
+
+async function uploadPatientDocumentToSupabase(path, fileBytes, sanitizedFilename, filename) {
+	try {
+		console.log('Iniciando upload a:', path, 'tamaño:', fileBytes.length);
+		
+		const { data, error: uploadError } = await supabase.storage
+			.from('docsPatient')
+			.upload(path, fileBytes, { 
+				upsert: true,
+				contentType: 'application/pdf'
+			});
+
+		if (uploadError) {
+			console.error('Error de upload:', uploadError);
+			return { error: uploadError };
+		}
+
+		console.log('Upload exitoso, data:', data);
+
+		// Obtener URL pública
+		const { data: publicData } = supabase.storage.from('docsPatient').getPublicUrl(path);
+		console.log('✓ URL pública generada:', publicData?.publicUrl);
+		
+		return { publicUrl: publicData?.publicUrl ?? null };
+	} catch (e) {
+		console.error('Error en uploadPatientDocumentToSupabase:', e);
+		return { error: e };
+	}
+}
+
+// Obtiene los documentos de un paciente
+export async function getPatientDocuments(patientName) {
+	try {
+		const folderPath = `documentos/${patientName}`;
+		const { data, error } = await supabase.storage
+			.from('docsPatient')
+			.list(folderPath);
+
+		if (error) {
+			// Si la carpeta no existe, retornar vacío
+			return { documents: [] };
+		}
+
+		// Filtrar solo archivos (no carpetas)
+		const files = data.filter(item => !item.metadata?.mimetype || item.metadata.mimetype.includes('pdf'));
+		return { documents: files };
+	} catch (e) {
+		console.error('Error al obtener documentos del paciente:', e);
+		return { documents: [] };
+	}
+}
+
+// Obtiene la URL pública de un documento de paciente
+export async function getPatientDocumentUrl(patientName, filename) {
+	try {
+		const path = `documentos/${patientName}/${filename}`;
+		const { data } = supabase.storage.from('docsPatient').getPublicUrl(path);
+		return { publicUrl: data?.publicUrl ?? null };
+	} catch (e) {
+		return { error: e };
+	}
+}
+
+// Elimina un documento de un paciente
+export async function deletePatientDocument(patientName, filename) {
+	try {
+		// Obtener la sesión actual para verificar que es un médico autenticado
+		const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+		if (sessionErr || !sessionData?.session?.user?.id) {
+			return { error: new Error('No autenticado. Por favor inicia sesión primero.') };
+		}
+
+		const path = `documentos/${patientName}/${filename}`;
+		
+		console.log('Eliminando documento:', path);
+		
+		const { error } = await supabase.storage
+			.from('docsPatient')
+			.remove([path]);
+
+		if (error) {
+			console.error('Error al eliminar documento:', error);
+			return { error };
+		}
+
+		console.log('✓ Documento eliminado correctamente:', filename);
+		return { success: true };
+	} catch (e) {
+		console.error('Error en deletePatientDocument:', e);
+		return { error: e };
+	}
+}

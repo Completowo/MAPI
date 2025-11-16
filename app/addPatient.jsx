@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput, Platform, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { getSession, getDoctorByUserId, insertPatientByDoctor } from '../services/supabase';
+import { getSession, getDoctorByUserId, insertPatientByDoctor, uploadPatientDocument } from '../services/supabase';
+import * as DocumentPicker from 'expo-document-picker';
 
 export default function AddPatient() {
   const router = useRouter();
@@ -18,6 +19,9 @@ export default function AddPatient() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [rutStatus, setRutStatus] = useState(null); // null, 'valid', 'invalid'
+  const [patientDocuments, setPatientDocuments] = useState([]); // Documentos subidos del paciente
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docStatus, setDocStatus] = useState('');
 
   // Verificar que el usuario está autenticado
   useEffect(() => {
@@ -90,6 +94,61 @@ export default function AddPatient() {
     else expectedDv = String(expected);
     return expectedDv === dv;
   }
+
+  // Seleccionar y subir documento del paciente
+  const handleSelectDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf'],
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled) {
+        setDocStatus('Selección cancelada');
+        return;
+      }
+
+      if (!result.assets || result.assets.length === 0) {
+        setDocStatus('No se seleccionó ningún archivo');
+        return;
+      }
+
+      const file = result.assets[0];
+      const filename = file.name || `documento_${Date.now()}.pdf`;
+
+      if (!filename.toLowerCase().endsWith('.pdf')) {
+        setDocStatus('Error: Solo se permiten archivos PDF');
+        return;
+      }
+
+      setDocStatus(`Cargando archivo: ${filename}...`);
+      setUploadingDoc(true);
+
+      const { publicUrl, error } = await uploadPatientDocument({
+        fileUri: file.uri,
+        filename: filename,
+        patientId: profile?.id || null,
+        patientName: patientName,
+      });
+
+      if (error) {
+        console.error('Upload error:', error);
+        setDocStatus(`Error: ${String(error.message || error)}`);
+      } else {
+        setDocStatus('Documento subido correctamente');
+        // Agregar documento a la lista
+        setPatientDocuments([...patientDocuments, { name: filename, url: publicUrl }]);
+        setTimeout(() => {
+          setDocStatus('');
+        }, 2000);
+      }
+    } catch (e) {
+      console.error('Error al seleccionar documento:', e);
+      setDocStatus(`Error: ${e.message}`);
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
 
   // Manejar agregar paciente
   const handleAddPatient = async () => {
@@ -224,6 +283,39 @@ export default function AddPatient() {
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+
+          {/* Sección de documentos del paciente */}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Documentos del Paciente</Text>
+            <TouchableOpacity
+              style={[styles.uploadDocButton, uploadingDoc && styles.uploadDocButtonDisabled]}
+              onPress={handleSelectDocument}
+              disabled={uploadingDoc}
+            >
+              <Text style={styles.uploadDocButtonText}>
+                {uploadingDoc ? 'Cargando...' : '📎 Seleccionar Documento'}
+              </Text>
+            </TouchableOpacity>
+            
+            {docStatus ? (
+              <View style={[styles.docStatusBox, docStatus.includes('Error') && styles.docStatusError]}>
+                <Text style={[styles.docStatusText, docStatus.includes('Error') && styles.docStatusErrorText]}>
+                  {docStatus}
+                </Text>
+              </View>
+            ) : null}
+
+            {patientDocuments.length > 0 && (
+              <View style={styles.documentsListContainer}>
+                <Text style={styles.documentsListTitle}>Documentos Cargados:</Text>
+                {patientDocuments.map((doc, index) => (
+                  <View key={index} style={styles.documentItem}>
+                    <Text style={styles.documentName}>{doc.name}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
 
           {/* Mensajes */}
@@ -412,6 +504,69 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
+  },
+  uploadDocButton: {
+    backgroundColor: '#4caf50',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  uploadDocButtonDisabled: {
+    opacity: 0.6,
+  },
+  uploadDocButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  docStatusBox: {
+    backgroundColor: '#e8f5e9',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4caf50',
+  },
+  docStatusError: {
+    backgroundColor: '#ffebee',
+    borderLeftColor: '#e53935',
+  },
+  docStatusText: {
+    color: '#2e7d32',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  docStatusErrorText: {
+    color: '#c62828',
+  },
+  documentsListContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  documentsListTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 8,
+  },
+  documentItem: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 6,
+    padding: 10,
+    marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  documentName: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
+    flex: 1,
   },
   cancelButton: {
     backgroundColor: '#f0f0f0',
