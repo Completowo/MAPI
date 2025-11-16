@@ -207,7 +207,7 @@ export default function DoctorCertificates() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} scrollEnabled={true} nestedScrollEnabled={true}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Tu Perfil</Text>
@@ -259,10 +259,9 @@ export default function DoctorCertificates() {
               {certificateUrl && (
                 <TouchableOpacity
                   onPress={() => Linking.openURL(certificateUrl)}
-                  style={styles.urlBox}
+                  style={styles.viewCertificateButton}
                 >
-                  <Text style={styles.urlLabel}>Ver certificado</Text>
-                  <Text style={styles.url} numberOfLines={2}>{certificateUrl}</Text>
+                  <Text style={styles.viewCertificateButtonText}>Ver certificado</Text>
                 </TouchableOpacity>
               )}
               
@@ -324,16 +323,18 @@ export default function DoctorCertificates() {
           )}
         </View>
 
-        {/* Botón de cerrar sesión */}
-        <TouchableOpacity
-          style={[styles.logoutButton, loggingOut && styles.logoutButtonDisabled]}
-          onPress={handleLogout}
-          disabled={loggingOut}
-        >
-          <Text style={styles.logoutButtonText}>
-            {loggingOut ? 'Cerrando...' : 'Cerrar Sesión'}
-          </Text>
-        </TouchableOpacity>
+        {/* Botón de cerrar sesión dentro del ScrollView */}
+        <View style={styles.logoutButtonWrapper}>
+          <TouchableOpacity
+            style={[styles.logoutButton, loggingOut && styles.logoutButtonDisabled]}
+            onPress={handleLogout}
+            disabled={loggingOut}
+          >
+            <Text style={styles.logoutButtonText}>
+              {loggingOut ? 'Cerrando...' : 'Cerrar Sesión'}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -371,9 +372,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   content: {
+    flex: 1,
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 120, // Espacio para el navbar y botones del sistema
+    paddingBottom: 200, // Espacio para el navbar y botones del sistema
   },
   header: {
     marginBottom: 24,
@@ -473,11 +475,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginVertical: 6,
+    alignItems: 'center',
   },
   infoBoxText: {
     fontSize: 13,
     color: '#666',
     fontWeight: '500',
+    textAlign: 'center',
   },
   deleteButton: {
     backgroundColor: '#ff5252',
@@ -486,7 +490,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     alignItems: 'center',
     marginTop: 12,
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
   },
   deleteButtonDisabled: {
     opacity: 0.6,
@@ -572,14 +576,26 @@ const styles = StyleSheet.create({
     color: '#2196F3',
     fontWeight: '500',
   },
+  viewCertificateButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginTop: 12,
+    alignSelf: 'center',
+  },
+  viewCertificateButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   logoutButton: {
     backgroundColor: '#e53935',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
     alignItems: 'center',
-    marginBottom: 16,
-    marginTop: 24,
   },
   logoutButtonDisabled: {
     opacity: 0.6,
@@ -590,7 +606,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   bottomSpacer: {
-    height: 40,
+    height: 150,
+  },
+  logoutButtonWrapper: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    paddingTop: 24,
+    alignItems: 'flex-end',
   },
   // Estilos del navbar
   navbar: {

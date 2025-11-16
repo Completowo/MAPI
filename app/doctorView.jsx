@@ -14,6 +14,23 @@ export default function DoctorView() {
   const [profile, setProfile] = useState(null);
   const [patients, setPatients] = useState([]);
 
+  // Función para limpiar RUT
+  function cleanRut(value) {
+    if (!value) return '';
+    return value.replace(/\.|\-|\s/g, '').toUpperCase();
+  }
+
+  // Función para formatear el RUT
+  function formatRut(value) {
+    const cleaned = cleanRut(value);
+    if (cleaned.length === 0) return '';
+    const body = cleaned.slice(0, -1);
+    const dv = cleaned.slice(-1);
+    if (!body) return cleaned;
+    const withDots = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${withDots}-${dv}`;
+  }
+
   // Cargar datos del médico y pacientes
   const loadDoctorData = async () => {
     setLoading(true);
@@ -119,7 +136,7 @@ export default function DoctorView() {
               <View style={styles.patientCard}>
                 <View style={styles.patientInfo}>
                   <Text style={styles.patientName}>{item.nombre}</Text>
-                  <Text style={styles.patientRut}>RUT: {item.rut}</Text>
+                  <Text style={styles.patientRut}>RUT: {formatRut(item.rut)}</Text>
                   {item.diabetes_type && (
                     <Text style={styles.patientDiabetes}>
                       Diabetes Tipo {item.diabetes_type}

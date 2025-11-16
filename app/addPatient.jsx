@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput, Platform, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { getSession, getDoctorByUserId, insertPatientByDoctor, findPatientByRut } from '../services/supabase';
+import { getSession, getDoctorByUserId, insertPatientByDoctor } from '../services/supabase';
 
 export default function AddPatient() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function AddPatient() {
   const [patientDiabetesType, setPatientDiabetesType] = useState('1');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [rutStatus, setRutStatus] = useState(null); // null, 'registered', 'not-registered', 'invalid'
+  const [rutStatus, setRutStatus] = useState(null); // null, 'valid', 'invalid'
 
   // Verificar que el usuario está autenticado
   useEffect(() => {
@@ -181,16 +181,9 @@ export default function AddPatient() {
                 if (/^\d{7,8}[0-9Kk]$/.test(cleaned)) {
                   setPatientRut(formatRut(cleaned));
                   
-                  // Verificar si el RUT está registrado
+                  // Verificar si el RUT es válido
                   if (validateRut(cleaned)) {
-                    (async () => {
-                      const { paciente } = await findPatientByRut(cleaned);
-                      if (paciente) {
-                        setRutStatus('registered');
-                      } else {
-                        setRutStatus('not-registered');
-                      }
-                    })();
+                    setRutStatus('valid');
                   } else {
                     setRutStatus('invalid');
                   }
@@ -203,10 +196,8 @@ export default function AddPatient() {
               placeholderTextColor="#ccc"
             />
             {/* Mostrar estado del RUT */}
-            {rutStatus === 'registered' ? (
-              <Text style={[styles.helperText, { color: '#2e7d32' }]}>RUT registrado en el sistema</Text>
-            ) : rutStatus === 'not-registered' ? (
-              <Text style={[styles.helperText, { color: '#d32f2f' }]}>RUT no registrado por ningún doctor</Text>
+            {rutStatus === 'valid' ? (
+              <Text style={[styles.helperText, { color: '#2e7d32' }]}>RUT válido</Text>
             ) : rutStatus === 'invalid' ? (
               <Text style={[styles.helperText, { color: '#d32f2f' }]}>RUT inválido</Text>
             ) : null}
