@@ -9,16 +9,16 @@ import {
   Platform,
 } from "react-native";
 import { Header } from "../components/Header";
-import { useRouter } from "expo-router";
 import CustomDropdown from "../components/CustomDropdown";
 
 import { useUserStore } from "../store/useUserStore";
+import { useOpcionesStore } from "../store/optionStore";
 
 export default function Customizing() {
   const vestimenta = useUserStore((state) => state.vestimenta);
   const setVestimenta = useUserStore((state) => state.setVestimenta);
 
-  const opciones = ["Enfermera", "Elegante"];
+  const { opciones } = useOpcionesStore();
 
   return (
     <View style={styles.container}>

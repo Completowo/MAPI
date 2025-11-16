@@ -24,6 +24,7 @@ import { Missions } from "../components/Missions";
 import { Chat } from "../components/Chat";
 import { BotonGrabacion } from "../components/BotonGrabacion";
 import { getGeminiResponse } from "../services/gemini";
+import { Header } from "../components/Header";
 
 //Import misiones
 import missions from "../assets/missions.json";
@@ -252,11 +253,11 @@ export function Main() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
+      <Header title="MAPI" visible={false} />
       <View style={[styles.header]}>
         <Points points={120} />
         <View style={styles.icons}>
           <ShopIcon onPress={() => router.push("/Shop")} />
-          <BellIcon />
           <SettingIcon onPress={() => router.push("/Setting")} />
         </View>
       </View>

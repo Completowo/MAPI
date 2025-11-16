@@ -2,13 +2,22 @@ import { Text, View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 
 import { BackButton } from "../components/BackButton";
+import { useState } from "react";
 
-export function Header({ title = "" }) {
+export function Header({ title = "", visible }) {
   const router = useRouter();
+
+  const checkVisible = (vis) => {
+    if (vis) {
+      return <BackButton onPress={() => router.back()} visible={true} />;
+    } else {
+      return <BackButton onPress={() => router.back()} visible={false} />;
+    }
+  };
 
   return (
     <View style={styles.header}>
-      <BackButton onPress={() => router.back()} />
+      {checkVisible(visible)}
       <Text style={styles.headerTitle}>{title}</Text>
     </View>
   );

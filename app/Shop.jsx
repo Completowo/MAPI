@@ -7,60 +7,36 @@ import {
   TextInput,
   ActivityIndicator,
   Text,
+  Modal,
 } from "react-native";
 
 // Import de componentes
 import { Points } from "../components/Points";
 import { ItemShop } from "../components/ItemShop";
 import { SettingIcon, BellIcon, ShopIcon } from "../components/Icons";
+import { Header } from "../components/Header";
 
 export default function Shop() {
-  const nPoints = 250;
-
   return (
-    
-
-
     <View style={[styles.content]}>
-      
-      <View style={[styles.modalBG]}>
-        <View style={[styles.modalContainer]}>
-          <ItemShop pStatus={2} pPrecio={500} pItem={1}></ItemShop>
-        </View>
-      </View>
-      
-      
+      <Header title="Tienda" />
       <View style={[styles.header]}>
-        <View style={[styles.points]}>
-          <Points points={nPoints} />
-        </View>
-
-        <View style={styles.icons}>
-          <ShopIcon onPress={() => router.push("/Shop")} />
-          <BellIcon />
-          <SettingIcon onPress={() => router.push("/Setting")} />
-        </View>
+        <Points />
       </View>
-
-
 
       <Text style={[styles.title]}>TIENDA</Text>
       <Text style={[styles.subTitle]}>Accesorios</Text>
 
-      <ScrollView style={[styles.scroll]} showsVerticalScrollIndicator = {false}>
+      <ScrollView style={[styles.scroll]} showsVerticalScrollIndicator={false}>
         <View style={[styles.c_Items]}>
           <ItemShop pStatus={0} pPrecio={0} pItem={0}></ItemShop>
           <ItemShop pStatus={1} pPrecio={500} pItem={1}></ItemShop>
-          <View style={{height: 100, width: "100%"}}></View> 
+          <View style={{ height: 100, width: "100%" }}></View>
         </View>
       </ScrollView>
-
-
-
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   content: {
@@ -68,19 +44,18 @@ const styles = StyleSheet.create({
     height: "100%",
     position: "relative",
     overflow: "scroll",
+    backgroundColor: "white",
+    flex: 1,
   },
 
   header: {
     position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
     width: "100%",
     height: 70,
     //backgroundColor: "#ffb1b1ff",
     flexDirection: "row",
-  },
-
-  points: {
-    position: "absolute",
-    left: 20,
   },
 
   icons: {
@@ -94,7 +69,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    width:"100%",
+    width: "100%",
     textAlign: "center",
     marginTop: 30,
     marginBlock: -15,
@@ -103,10 +78,9 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#4EA4FB",
     //backgroundColor: "#ffb1b1ff",
-    
   },
   subTitle: {
-    width:"100%",
+    width: "100%",
     textAlign: "center",
     marginTop: 0,
     fontSize: 17,
@@ -117,33 +91,13 @@ const styles = StyleSheet.create({
   },
 
   c_Items: {
-    maxWidth:"100%",
+    maxWidth: "100%",
     flexDirection: "row",
     justifyContent: "center",
     flexWrap: "wrap",
-  }, 
+  },
 
   scroll: {
     marginTop: 50,
   },
-
-  modalBG: {
-    display: "none",
-    justifyContent: 'center', //Centered vertically
-    alignItems: 'center', //Centered horizontally
-    flex:1,
-    zIndex: 10,
-    position: "absolute",
-    height: "100%",
-    width: "100%",
-    bottom: 0,
-    backgroundColor: "#00000085",
-  },
-
-  modalContainer: {
-    width: 300,
-    minHeight: 140,
-    backgroundColor: "#fff",
-  }
-
 });
