@@ -323,7 +323,7 @@ export function Main() {
 
 const styles = StyleSheet.create({
   container: {
-    height: "50vh",
+    height: "100vh",
     flex: 1,
     backgroundColor: "#fff",
   },
