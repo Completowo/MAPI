@@ -164,7 +164,7 @@ export default function DoctorCertificates() {
       // Extraer el nombre del archivo de la URL
       const filename = certificateUrl.split('/').pop();
       
-      // Usar la función del servicio para eliminar
+      //Usar la función del servicio para eliminar
       const { success, error } = await deleteDoctorCertificate(userId, filename);
       
       if (error) {

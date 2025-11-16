@@ -11,7 +11,7 @@ export default function AddPatient() {
   const [checking, setChecking] = useState(true);
   const [profile, setProfile] = useState(null);
   
-  // Estados del formulario
+  //Estados del formulario
   const [patientName, setPatientName] = useState('');
   const [patientRut, setPatientRut] = useState('');
   const [patientDiabetesType, setPatientDiabetesType] = useState('1');
