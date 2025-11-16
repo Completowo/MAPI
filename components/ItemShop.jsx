@@ -12,7 +12,7 @@ import { supabase } from "../services/supabase";
 import { usePointsStore } from "../store/pointsStore";
 import { useOpcionesStore } from "../store/optionStore";
 
-export function ItemShop({ pStatus, pPrecio, pItem, interaction }) {
+export function ItemShop({ pStatus, pPrecio, pItem, interaction, onBought }) {
   const { points, setPoints } = usePointsStore();
 
   //Zusband agregar traje comprado
@@ -81,12 +81,15 @@ export function ItemShop({ pStatus, pPrecio, pItem, interaction }) {
       setPoints(newPoints); // actualizar estado global
       setVisible(false);
 
+      onBought();
+
       addOpcion(checkNombreItem(idItem));
+      const nuevasOpciones = useOpcionesStore.getState().opciones;
 
       // actualizar Supabase
       const { error } = await supabase
         .from("chats")
-        .update({ points: newPoints })
+        .update({ points: newPoints, Skins: nuevasOpciones })
         .eq("id", 2);
 
       if (error) {
@@ -100,6 +103,8 @@ export function ItemShop({ pStatus, pPrecio, pItem, interaction }) {
   return (
     <View>
       <TouchableOpacity
+        disabled={pStatus === 0}
+        style={[pStatus === 0 && { opacity: 0.5 }]}
         onPress={() => {
           setVisible(intec);
         }}

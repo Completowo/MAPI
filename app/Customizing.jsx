@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -12,19 +12,43 @@ import { Header } from "../components/Header";
 import CustomDropdown from "../components/CustomDropdown";
 
 import { useUserStore } from "../store/useUserStore";
-import { useOpcionesStore } from "../store/optionStore";
+import { supabase } from "../services/supabase";
 
 export default function Customizing() {
   const vestimenta = useUserStore((state) => state.vestimenta);
   const setVestimenta = useUserStore((state) => state.setVestimenta);
 
-  const { opciones } = useOpcionesStore();
+  const [opciones, setOpciones] = useState(["Enfermera"]); // valor por defecto
+
+  //Traer trajes desde Supabase
+  const fetchSkins = async () => {
+    const { data, error } = await supabase
+      .from("chats")
+      .select("Skins")
+      .eq("id", 2)
+      .single();
+
+    if (error) {
+      console.log("Error al obtener el chat", error);
+      return ["Enfermera"];
+    }
+
+    return data?.Skins || ["Enfermera"];
+  };
+
+  useEffect(() => {
+    const cargar = async () => {
+      const skins = await fetchSkins();
+      setOpciones(skins);
+    };
+
+    cargar();
+  }, []);
 
   return (
     <View style={styles.container}>
-      <View>
-        <Header title="Personalización" />
-      </View>
+      <Header title="Personalización" />
+
       <View style={{ padding: 20 }}>
         <CustomDropdown
           label="Selecciona tu vestimenta"
