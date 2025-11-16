@@ -4,20 +4,12 @@ import { useRouter } from "expo-router";
 import { BackButton } from "../components/BackButton";
 import { useState } from "react";
 
-export function Header({ title = "", visible }) {
+export function Header({ title = "", visible = true }) {
   const router = useRouter();
-
-  const checkVisible = (vis) => {
-    if (vis) {
-      return <BackButton onPress={() => router.back()} visible={true} />;
-    } else {
-      return <BackButton onPress={() => router.back()} visible={false} />;
-    }
-  };
 
   return (
     <View style={styles.header}>
-      {checkVisible(visible)}
+      <BackButton onPress={() => router.back()} visible={visible} />
       <Text style={styles.headerTitle}>{title}</Text>
     </View>
   );
