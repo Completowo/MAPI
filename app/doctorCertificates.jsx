@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, ActivityIndicator, StyleSheet, Linking, ScrollView, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
-import { getSession, getDoctorByUserId, uploadDoctorCertificate, logout, getDoctorCertificates } from '../services/supabase';
+import { getSession, getDoctorByUserId, uploadDoctorCertificate, logout, getDoctorCertificates, deleteDoctorCertificate, updateDoctorCertificateUrl } from '../services/supabase';
 import { supabase } from '../services/supabase';
 
 // Mapeo de IDs de especialidad a nombres
@@ -29,6 +29,7 @@ export default function DoctorCertificates() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [hasCertificate, setHasCertificate] = useState(false);
   const [certificateUrl, setCertificateUrl] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -137,6 +138,10 @@ export default function DoctorCertificates() {
       } else {
         setUploadedUrl(publicUrl);
         setStatus('✓ Archivo subido correctamente');
+        
+        // Guardar la URL en el campo certificado_url de la tabla doctores
+        await updateDoctorCertificateUrl(userId, publicUrl);
+        
         // Actualizar estado para mostrar que ya tiene certificado
         setTimeout(() => {
           setHasCertificate(true);
@@ -148,6 +153,33 @@ export default function DoctorCertificates() {
       setStatus(`Error: ${String(e.message || e)}`);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleDeleteCertificate = async () => {
+    try {
+      setDeleting(true);
+      setStatus('Eliminando certificado...');
+      
+      // Extraer el nombre del archivo de la URL
+      const filename = certificateUrl.split('/').pop();
+      
+      // Usar la función del servicio para eliminar
+      const { success, error } = await deleteDoctorCertificate(userId, filename);
+      
+      if (error) {
+        setStatus(`Error al eliminar: ${error.message}`);
+      } else if (success) {
+        setHasCertificate(false);
+        setCertificateUrl(null);
+        setUploadedUrl(null);
+        setStatus('Certificado eliminado correctamente');
+      }
+    } catch (err) {
+      console.error('Error deleting certificate:', err);
+      setStatus(`Error: ${err.message}`);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -233,6 +265,24 @@ export default function DoctorCertificates() {
                   <Text style={styles.url} numberOfLines={2}>{certificateUrl}</Text>
                 </TouchableOpacity>
               )}
+              
+              {/* Mensaje explicativo */}
+              <View style={styles.infoBox}>
+                <Text style={styles.infoBoxText}>
+                  Para actualizar tu certificado, elimínalo y sube el nuevo.
+                </Text>
+              </View>
+              
+              {/* Botón de eliminar */}
+              <TouchableOpacity
+                style={[styles.deleteButton, deleting && styles.deleteButtonDisabled]}
+                onPress={handleDeleteCertificate}
+                disabled={deleting}
+              >
+                <Text style={styles.deleteButtonText}>
+                  {deleting ? 'Eliminando...' : '🗑️ Eliminar certificado'}
+                </Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <View>
@@ -398,6 +448,35 @@ const styles = StyleSheet.create({
     backgroundColor: '#e8f5e9',
     borderRadius: 8,
     overflow: 'hidden',
+  },
+  infoBox: {
+    backgroundColor: '#fff3e0',
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff9800',
+  },
+  infoBoxText: {
+    fontSize: 13,
+    color: '#e65100',
+    fontWeight: '500',
+  },
+  deleteButton: {
+    backgroundColor: '#ff5252',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  deleteButtonDisabled: {
+    opacity: 0.6,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
   },
   profileInfo: {
     gap: 8,

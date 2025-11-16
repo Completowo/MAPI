@@ -402,3 +402,72 @@ export async function getCertificateUrl(doctorUserId, filename) {
 		return { error: e };
 	}
 }
+
+// Elimina un certificado del bucket
+export async function deleteDoctorCertificate(doctorUserId, filename) {
+	try {
+		// Obtener la sesión actual para verificar que es el propietario
+		const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+		if (sessionErr || !sessionData?.session?.user?.id) {
+			return { error: new Error('No autenticado. Por favor inicia sesión primero.') };
+		}
+		
+		const currentUserId = sessionData.session.user.id;
+		
+		// Verificar que el usuario intenta eliminar sus propios certificados
+		if (currentUserId !== doctorUserId) {
+			return { error: new Error('No tienes permiso para eliminar este certificado.') };
+		}
+
+		const path = `certificados/${doctorUserId}/${filename}`;
+		
+		console.log('Eliminando certificado:', path);
+		
+		const { error } = await supabase.storage
+			.from('docsDoctor')
+			.remove([path]);
+
+		if (error) {
+			console.error('Error al eliminar certificado:', error);
+			return { error };
+		}
+
+		console.log('✓ Certificado eliminado correctamente:', filename);
+		
+		// Limpiar el campo certificado_url en la tabla doctores
+		const { error: updateError } = await supabase
+			.from('doctores')
+			.update({ certificado_url: null })
+			.eq('user_id', doctorUserId);
+		
+		if (updateError) {
+			console.warn('No se pudo actualizar certificado_url:', updateError);
+		}
+		
+		return { success: true };
+	} catch (e) {
+		console.error('Error en deleteDoctorCertificate:', e);
+		return { error: e };
+	}
+}
+
+// Actualiza el campo certificado_url en la tabla doctores
+export async function updateDoctorCertificateUrl(doctorUserId, certificateUrl) {
+	try {
+		const { error } = await supabase
+			.from('doctores')
+			.update({ certificado_url: certificateUrl })
+			.eq('user_id', doctorUserId);
+		
+		if (error) {
+			console.error('Error al actualizar certificado_url:', error);
+			return { error };
+		}
+		
+		console.log('✓ Campo certificado_url actualizado:', certificateUrl);
+		return { success: true };
+	} catch (e) {
+		console.error('Error en updateDoctorCertificateUrl:', e);
+		return { error: e };
+	}
+}
