@@ -1,48 +1,58 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
-import { useRouter } from 'expo-router';
-import { getSession, logout, getDoctorByUserId, insertPatientByDoctor } from '../services/supabase';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Platform, FlatList, useWindowDimensions, Linking } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { getSession, logout, getDoctorByUserId, getPatientDocuments, uploadPatientDocument, deletePatientDocument, getPatientDocumentUrl } from '../services/supabase';
+import { supabase } from '../services/supabase';
+import * as DocumentPicker from 'expo-document-picker';
 
 // Pantalla principal para médicos después de iniciar sesión
-// Permite ver información del médico y registrar nuevos pacientes
 export default function DoctorView() {
   const router = useRouter();
-  // Estados para mostrar datos del médico y manejar el registro de pacientes
+  const { width } = useWindowDimensions();
+  const isWeb = width > 768;
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [profile, setProfile] = useState(null);
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null); // Para vista detallada
+  const [patientDocuments, setPatientDocuments] = useState([]); // Documentos del paciente seleccionado
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docStatus, setDocStatus] = useState('');
 
-  // Estados para el formulario de registro de paciente
-  const [patientName, setPatientName] = useState('');
-  const [patientRut, setPatientRut] = useState('');
-  const [patientDiabetesType, setPatientDiabetesType] = useState('1');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  // Función para limpiar RUT
+  function cleanRut(value) {
+    if (!value) return '';
+    return value.replace(/\.|\-|\s/g, '').toUpperCase();
+  }
 
-  // Efecto para cargar datos del médico al montar el componente
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoading(true);
-      // Obtener sesión actual del usuario autenticado
+  // Función para formatear el RUT
+  function formatRut(value) {
+    const cleaned = cleanRut(value);
+    if (cleaned.length === 0) return '';
+    const body = cleaned.slice(0, -1);
+    const dv = cleaned.slice(-1);
+    if (!body) return cleaned;
+    const withDots = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${withDots}-${dv}`;
+  }
+
+  // Cargar datos del médico y pacientes
+  const loadDoctorData = async () => {
+    setLoading(true);
+    try {
       const { session, error: sessErr } = await getSession();
-      if (sessErr) {
-        if (mounted) router.replace('doctorLogin');
-        return;
-      }
-      if (!session) {
-        if (mounted) router.replace('doctorLogin');
+      if (sessErr || !session) {
+        router.replace('doctorLogin');
         return;
       }
 
-      // Obtener ID del usuario de la sesión
       const userId = session.user?.id;
       if (!userId) {
-        if (mounted) router.replace('doctorLogin');
+        router.replace('doctorLogin');
         return;
       }
 
-      // Obtener perfil completo del médico desde la base de datos
+      // Obtener perfil del médico
       const { profile, error: profErr } = await getDoctorByUserId(userId);
       if (profErr) {
         setName(session.user?.email ?? '');
@@ -51,13 +61,45 @@ export default function DoctorView() {
         setName(profile?.nombre ?? session.user?.email ?? '');
       }
 
-      if (mounted) setLoading(false);
-    })();
+      // Obtener lista de pacientes registrados por este médico
+      console.log('[doctorView] Buscando pacientes con doctor_user_id:', userId);
+      
+      const { data: patientsData, error: patientsErr } = await supabase
+        .from('pacientes')
+        .select('*')
+        .eq('doctor_user_id', userId)
+        .order('created_at', { ascending: false });
 
+      console.log('[doctorView] Pacientes encontrados:', patientsData);
+      console.log('[doctorView] Error en pacientes:', patientsErr);
+
+      if (!patientsErr && patientsData) {
+        setPatients(patientsData);
+      }
+    } catch (err) {
+      console.error('Error al cargar datos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar datos al montar y cuando se enfoca la pantalla
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      loadDoctorData();
+    }
     return () => { mounted = false; };
-  }, [router]);
+  }, []);
 
-  // Función para cerrar sesión del médico
+  // Recargar pacientes cuando vuelve a esta pantalla
+  useFocusEffect(
+    React.useCallback(() => {
+      loadDoctorData();
+    }, [])
+  );
+
+  // Función para cerrar sesión
   const handleLogout = async () => {
     setLoading(true);
     await logout();
@@ -65,148 +107,296 @@ export default function DoctorView() {
     router.replace('doctorLogin');
   };
 
-  // Función para limpiar el RUT (eliminar puntos, guiones y espacios)
-  function cleanRut(value) {
-    if (!value) return '';
-    return value.replace(/\.|\-|\s/g, '').toUpperCase();
-  }
+  // Cargar documentos cuando se selecciona un paciente
+  const handleSelectPatient = async (patient) => {
+    setSelectedPatient(patient);
+    setDocStatus('');
+    setPatientDocuments([]);
+    
+    // Cargar documentos del paciente
+    const { documents } = await getPatientDocuments(patient.nombre);
+    setPatientDocuments(documents || []);
+  };
 
-  // Función para validar RUT chileno usando el algoritmo del dígito verificador
-  function validateRut(value) {
-    const cleaned = cleanRut(value);
-    if (!cleaned || cleaned.length < 2) return false;
-    const body = cleaned.slice(0, -1);
-    let dv = cleaned.slice(-1);
-    dv = dv === 'K' ? 'K' : dv;
-    if (!/^\d{7,8}$/.test(body)) return false;
-    let sum = 0;
-    let multiplier = 2;
-    for (let i = body.length - 1; i >= 0; i--) {
-      sum += parseInt(body.charAt(i), 10) * multiplier;
-      multiplier = multiplier === 7 ? 2 : multiplier + 1;
-    }
-    const remainder = sum % 11;
-    const expected = 11 - remainder;
-    let expectedDv = '';
-    if (expected === 11) expectedDv = '0';
-    else if (expected === 10) expectedDv = 'K';
-    else expectedDv = String(expected);
-    return expectedDv === dv;
-  }
+  // Volver a la lista de pacientes
+  const handleBackToList = () => {
+    setSelectedPatient(null);
+    setPatientDocuments([]);
+    setDocStatus('');
+  };
 
-  // Función para registrar un nuevo paciente asociado a este médico
-  const handleAddPatient = async () => {
-    setErrorMsg('');
-    setSuccessMsg('');
-    const cleanedRut = cleanRut(patientRut);
-    
-    // Validar que nombre y RUT no estén vacíos
-    if (!patientName || !cleanedRut) {
-      setErrorMsg('Por favor completa nombre y RUT del paciente.');
-      return;
-    }
-    
-    // Validar que el RUT sea válido
-    if (!validateRut(cleanedRut)) {
-      setErrorMsg('RUT inválido.');
-      return;
-    }
-    
-    setLoading(true);
+  // Seleccionar y subir documento para el paciente seleccionado
+  const handleSelectDocument = async () => {
+    if (!selectedPatient) return;
+
     try {
-      // Obtener ID del usuario del médico para asociar el paciente
-      const doctorUserId = profile?.user_id ?? null;
-      // Insertar nuevo paciente en la base de datos
-      const { paciente, error } = await insertPatientByDoctor({ 
-        nombre: patientName, 
-        rut: cleanedRut, 
-        doctor_user_id: doctorUserId, 
-        diabetes_type: patientDiabetesType ? parseInt(patientDiabetesType, 10) : null 
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf'],
+        copyToCacheDirectory: true,
       });
+
+      if (result.canceled) {
+        setDocStatus('Selección cancelada');
+        return;
+      }
+
+      if (!result.assets || result.assets.length === 0) {
+        setDocStatus('No se seleccionó ningún archivo');
+        return;
+      }
+
+      const file = result.assets[0];
+      const filename = file.name || `documento_${Date.now()}.pdf`;
+
+      if (!filename.toLowerCase().endsWith('.pdf')) {
+        setDocStatus('Error: Solo se permiten archivos PDF');
+        return;
+      }
+
+      setDocStatus(`Cargando archivo: ${filename}...`);
+      setUploadingDoc(true);
+
+      const { publicUrl, error } = await uploadPatientDocument({
+        fileUri: file.uri,
+        filename: filename,
+        patientId: selectedPatient.id,
+        patientName: selectedPatient.nombre,
+      });
+
       if (error) {
-        setErrorMsg(error.message || String(error));
+        console.error('Upload error:', error);
+        setDocStatus(`Error: ${String(error.message || error)}`);
       } else {
-        setSuccessMsg('Paciente agregado correctamente.');
-        // Limpiar formulario después de agregar paciente
-        setPatientName('');
-        setPatientRut('');
-        setPatientDiabetesType('1');
+        setDocStatus('Documento subido correctamente');
+        // Recargar lista de documentos
+        const { documents } = await getPatientDocuments(selectedPatient.nombre);
+        setPatientDocuments(documents || []);
+        setTimeout(() => {
+          setDocStatus('');
+        }, 2000);
       }
     } catch (e) {
-      setErrorMsg(e.message || 'Error inesperado');
+      console.error('Error al seleccionar documento:', e);
+      setDocStatus(`Error: ${e.message}`);
     } finally {
-      setLoading(false);
+      setUploadingDoc(false);
     }
   };
 
-  // Mostrar pantalla de carga mientras se obtienen los datos
+  // Eliminar documento del paciente
+  const handleDeleteDocument = async (filename) => {
+    if (!selectedPatient) return;
+
+    try {
+      setDocStatus(`Eliminando ${filename}...`);
+      const { success, error } = await deletePatientDocument(selectedPatient.nombre, filename);
+
+      if (error) {
+        console.error('Delete error:', error);
+        setDocStatus(`Error: ${String(error.message || error)}`);
+      } else {
+        setDocStatus('Documento eliminado correctamente');
+        // Recargar lista de documentos
+        const { documents } = await getPatientDocuments(selectedPatient.nombre);
+        setPatientDocuments(documents || []);
+        setTimeout(() => {
+          setDocStatus('');
+        }, 2000);
+      }
+    } catch (e) {
+      console.error('Error al eliminar documento:', e);
+      setDocStatus(`Error: ${e.message}`);
+    }
+  };
+
+  // Abrir/Descargar documento
+  const handleOpenDocument = async (filename) => {
+    if (!selectedPatient) return;
+
+    try {
+      const { publicUrl, error } = await getPatientDocumentUrl(selectedPatient.nombre, filename);
+      
+      if (error || !publicUrl) {
+        setDocStatus('Error al obtener el link del documento');
+        return;
+      }
+
+      // Abrir el documento en el navegador
+      Linking.openURL(publicUrl);
+    } catch (e) {
+      console.error('Error al abrir documento:', e);
+      setDocStatus(`Error: ${e.message}`);
+    }
+  };
+
+
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#00897B" />
       </View>
     );
   }
 
+  // Pantalla de detalles del paciente
+  const renderPatientDetails = () => (
+    <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleBackToList} style={styles.backButtonContainer}>
+          <Text style={styles.backButton}>← Volver</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Documentos del Paciente</Text>
+      </View>
+
+      <View style={styles.patientDetailCard}>
+        <Text style={styles.cardTitle}>{selectedPatient?.nombre}</Text>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>RUT:</Text>
+          <Text style={styles.detailValue}>{formatRut(selectedPatient?.rut)}</Text>
+        </View>
+        {selectedPatient?.diabetes_type && (
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Diabetes:</Text>
+            <Text style={styles.detailValue}>Tipo {selectedPatient.diabetes_type}</Text>
+          </View>
+        )}
+      </View>
+
+      <TouchableOpacity
+        style={[styles.uploadDocButton, uploadingDoc && styles.uploadDocButtonDisabled]}
+        onPress={handleSelectDocument}
+        disabled={uploadingDoc}
+      >
+        <Text style={styles.uploadDocButtonText}>
+          {uploadingDoc ? 'Cargando...' : 'Seleccionar y cargar Documento'}
+        </Text>
+      </TouchableOpacity>
+
+      {docStatus ? (
+        <View style={[styles.docStatusBox, docStatus.includes('Error') && styles.docStatusError]}>
+          <Text style={[styles.docStatusText, docStatus.includes('Error') && styles.docStatusErrorText]}>
+            {docStatus}
+          </Text>
+        </View>
+      ) : null}
+
+      <View style={styles.documentsSection}>
+        <Text style={styles.documentsTitle}>
+          Documentos ({patientDocuments.length})
+        </Text>
+        
+        {patientDocuments.length === 0 ? (
+          <View style={styles.noDocuments}>
+            <Text style={styles.noDocumentsText}>Sin documentos aún</Text>
+          </View>
+        ) : (
+          patientDocuments.map((doc, index) => (
+            <View key={index} style={styles.documentItemContainer}>
+              <TouchableOpacity
+                style={styles.documentItemContent}
+                onPress={() => handleOpenDocument(doc.name)}
+              >
+                <Text style={styles.documentItemName} numberOfLines={2}>
+                  📄 {doc.name}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteDocButton}
+                onPress={() => handleDeleteDocument(doc.name)}
+              >
+                <Text style={styles.deleteDocButtonText}>🗑️</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
+      </View>
+
+      <View style={styles.bottomSpacer} />
+    </ScrollView>
+  );
+
+  const renderHome = () => (
+    <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
+        <Text style={styles.greeting}>¡Hola Dr. {name}!</Text>
+        <Text style={styles.subGreeting}>Tus pacientes registrados</Text>
+      </View>
+
+      <View style={styles.statsCard}>
+        <Text style={styles.statsNumber}>{patients.length}</Text>
+        <Text style={styles.statsLabel}>Pacientes Registrados</Text>
+      </View>
+
+      {patients.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>No has registrado pacientes aún</Text>
+          <Text style={styles.emptyStateSubText}>Usa la opción "Agregar Paciente" para comenzar</Text>
+        </View>
+      ) : (
+        <View>
+          <Text style={styles.patientsListTitle}>Mis Pacientes</Text>
+          <FlatList
+            data={patients}
+            keyExtractor={(item) => item.id?.toString() || item.rut}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => handleSelectPatient(item)}
+                style={styles.patientCard}
+              >
+                <View style={styles.patientInfo}>
+                  <Text style={styles.patientName}>{item.nombre}</Text>
+                  <Text style={styles.patientRut}>RUT: {formatRut(item.rut)}</Text>
+                  {item.diabetes_type && (
+                    <Text style={styles.patientDiabetes}>
+                      Diabetes Tipo {item.diabetes_type}
+                    </Text>
+                  )}
+                  {item.created_at && (
+                    <Text style={styles.patientDate}>
+                      Registrado: {new Date(item.created_at).toLocaleDateString('es-CL')}
+                    </Text>
+                  )}
+                </View>
+                <View style={styles.patientBadge}>
+                  <Text style={styles.badgeText}>Ver Docs</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+            scrollEnabled={false}
+          />
+        </View>
+      )}
+
+      <View style={styles.bottomSpacer} />
+    </ScrollView>
+  );
+
   return (
     <View style={styles.container}>
-      {/* Encabezado con bienvenida al médico */}
-      <Text style={styles.text}>Bienvenido {name}</Text>
-      <View style={styles.divider} />
-      
-      {/* Sección para registrar un nuevo paciente */}
-      <Text style={styles.sectionTitle}>Registrar paciente</Text>
-      
-      {/* Input para nombre del paciente */}
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre paciente"
-        value={patientName}
-        onChangeText={setPatientName}
-      />
-      
-      {/* Input para RUT del paciente */}
-      <TextInput
-        style={styles.input}
-        placeholder="RUT paciente (ej: 12.345.678-9)"
-        value={patientRut}
-        onChangeText={setPatientRut}
-      />
-      
-      {/* Botones para seleccionar tipo de diabetes */}
-      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-        <TouchableOpacity 
-          onPress={() => setPatientDiabetesType('1')} 
-          style={[styles.typeBtn, patientDiabetesType === '1' && styles.typeBtnActive]}
+      {selectedPatient ? renderPatientDetails() : renderHome()}
+
+      <View style={styles.navbar}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => {}}
         >
-          <Text>Diabetes 1</Text>
+          <Text style={styles.navItemText}>📊 Inicio</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={() => setPatientDiabetesType('2')} 
-          style={[styles.typeBtn, patientDiabetesType === '2' && styles.typeBtnActive]}
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('addPatient')}
         >
-          <Text>Diabetes 2</Text>
+          <Text style={styles.navItemText}>➕ Agregar Paciente</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('doctorCertificates')}
+        >
+          <Text style={styles.navItemText}>👤 Tu Perfil</Text>
         </TouchableOpacity>
       </View>
-      
-      {/* Mostrar mensajes de error y éxito */}
-      {errorMsg ? <Text style={{ color: 'red' }}>{errorMsg}</Text> : null}
-      {successMsg ? <Text style={{ color: 'green' }}>{successMsg}</Text> : null}
-      
-      {/* Botón para agregar paciente */}
-      <TouchableOpacity style={styles.addButton} onPress={handleAddPatient} disabled={loading}>
-        <Text style={styles.addButtonText}>{loading ? 'Guardando...' : 'Agregar paciente'}</Text>
-      </TouchableOpacity>
-      
-      {/* Botón para ir a certificados del médico */}
-      <TouchableOpacity style={styles.certButton} onPress={() => router.push('/doctorCertificates')}>
-        <Text style={styles.certButtonText}>Ver certificados</Text>
-      </TouchableOpacity>
-      
-      {/* Botón para cerrar sesión */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Cerrar sesión</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -214,67 +404,341 @@ export default function DoctorView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    flex: 1,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingHorizontal: 16,
+    paddingBottom: 120, // Espacio para el navbar y botones del sistema
+  },
+  header: {
+    marginBottom: 24,
+    paddingVertical: 16,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#00897B',
+    marginBottom: 4,
+  },
+  subGreeting: {
+    fontSize: 14,
+    color: '#666',
+  },
+  profileCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  profileInfo: {
+    gap: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  infoLabel: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
+  infoValue: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '600',
+  },
+  statsCard: {
+    backgroundColor: '#00897B',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  statsNumber: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#fff',
+  },
+  statsLabel: {
+    fontSize: 14,
+    color: '#fff',
+    marginTop: 4,
+    opacity: 0.9,
+  },
+  // Estilos para la sección de pacientes
+  patientsListTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  emptyState: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#999',
+    marginBottom: 4,
+  },
+  emptyStateSubText: {
+    fontSize: 13,
+    color: '#bbb',
+  },
+  patientListContent: {
+    paddingBottom: 16,
+  },
+  patientCard: {
     backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  text: {
-    fontSize: 24,
+  patientInfo: {
+    flex: 1,
+  },
+  patientName: {
+    fontSize: 15,
     fontWeight: '700',
-    color: '#222',
-    marginBottom: 20,
+    color: '#333',
+    marginBottom: 2,
   },
-  logoutButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#e53935',
-    borderRadius: 8,
+  patientRut: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 2,
   },
-  logoutText: {
-    color: '#fff',
+  patientDiabetes: {
+    fontSize: 12,
+    color: '#00897B',
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  patientDate: {
+    fontSize: 11,
+    color: '#999',
+  },
+  patientBadge: {
+    backgroundColor: '#e0f2f1',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeText: {
+    fontSize: 11,
+    color: '#00897B',
     fontWeight: '600',
   },
-  divider: {
-    height: 1,
-    width: '80%',
-    backgroundColor: '#eee',
-    marginVertical: 16,
+  // Estilos para vista de detalles del paciente
+  backButtonContainer: {
+    marginBottom: 12,
   },
-  sectionTitle: {
+  backButton: {
+    fontSize: 14,
+    color: '#00897B',
+    fontWeight: '600',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#333',
+  },
+  patientDetailCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 12,
   },
-  input: {
-    width: '80%',
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  detailLabel: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
+  detailValue: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '600',
+  },
+  uploadDocButton: {
+    backgroundColor: '#4caf50',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  uploadDocButtonDisabled: {
+    opacity: 0.6,
+  },
+  uploadDocButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  docStatusBox: {
+    backgroundColor: '#e8f5e9',
+    borderRadius: 8,
     padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4caf50',
+  },
+  docStatusError: {
+    backgroundColor: '#ffebee',
+    borderLeftColor: '#e53935',
+  },
+  docStatusText: {
+    color: '#2e7d32',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  docStatusErrorText: {
+    color: '#c62828',
+  },
+  documentsSection: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  documentsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 12,
+  },
+  noDocuments: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  noDocumentsText: {
+    fontSize: 14,
+    color: '#999',
+    fontStyle: 'italic',
+  },
+  documentItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
     borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     marginBottom: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#00897B',
   },
-  addButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#2196F3',
+  documentItemContent: {
+    flex: 1,
+    marginRight: 8,
+  },
+  documentItemName: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '500',
+  },
+  deleteDocButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#ffebee',
+    borderRadius: 6,
+  },
+  deleteDocButtonText: {
+    fontSize: 16,
+  },
+  bottomSpacer: {
+    height: 20,
+  },
+  // Estilos del navbar
+  navbar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    paddingBottom: Platform.OS === 'ios' ? 30 : 50,
+    paddingTop: 8,
+    paddingHorizontal: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  navItem: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 8,
-    marginTop: 8,
+    minWidth: 80,
   },
-  addButtonText: {
-    color: '#fff',
+  navItemText: {
+    fontSize: 12,
     fontWeight: '600',
-  },
-  typeBtn: { padding: 8, borderWidth: 1, borderColor: '#ddd', borderRadius: 6, marginRight: 8 },
-  typeBtnActive: { backgroundColor: '#cfe8ff' },
-  certButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#4CAF50',
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  certButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: '#666',
+    textAlign: 'center',
   },
 });

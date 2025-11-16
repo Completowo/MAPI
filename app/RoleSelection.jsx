@@ -14,7 +14,7 @@ const RoleSelection = () => {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.buttonPatient]}
-            onPress={() => router.push('patientEntry')}
+            onPress={() => router.push('patientLogin')}
           >
             <Text style={[styles.buttonText, styles.buttonTextPrimary]}>Paciente</Text>
             <Text style={[styles.buttonEmoji]}>😉</Text>
@@ -74,13 +74,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#2196F3',
   },
   buttonPatient: {
     backgroundColor: '#2196F3',
+    borderColor: '#2196F3',
   },
   buttonDoctor: {
     backgroundColor: '#ffffff',
+    borderColor: '#00897B',
   },
   buttonText: {
     fontSize: 28,
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   buttonTextSecondary: {
-    color: '#2196F3',
+    color: '#00897B',
   },
   buttonEmoji: {
     fontSize: 40,
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   buttonDescriptionSecondary: {
-    color: '#2196F3',
+    color: '#00897B',
     opacity: 0.9,
   }
 });
