@@ -32,7 +32,10 @@ export default function Setting() {
           <Text style={styles.optionText}>Personalización</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.option}>
+        <TouchableOpacity
+          style={styles.option}
+          onPress={() => router.push("/RoleSelection")}
+        >
           <Text style={styles.optionText}>Cerrar sesión</Text>
         </TouchableOpacity>
       </ScrollView>
