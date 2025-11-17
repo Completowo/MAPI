@@ -28,12 +28,37 @@ export default function DoctorRegister() {
   // Función para formatear el RUT
   function formatRut(value) {
     const cleaned = cleanRut(value);
+
     if (cleaned.length === 0) return '';
+    
+    // El último carácter es el DV (dígito verificador)
+    // El resto es el cuerpo del RUT
     const body = cleaned.slice(0, -1);
     const dv = cleaned.slice(-1);
-    if (!body) return cleaned;
-    const withDots = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    return `${withDots}-${dv}`;
+    
+    if (body.length === 0) return cleaned; // Solo se escribió el DV
+    
+    // Formatear según la longitud del cuerpo (sin DV)
+    // Formato: X.XXX.XXX-X
+    if (body.length === 1) {
+      return body + '-' + dv;
+    } else if (body.length === 2) {
+      return body.slice(0, 1) + '.' + body.slice(1) + '-' + dv;
+    } else if (body.length === 3) {
+      return body.slice(0, 1) + '.' + body.slice(1) + '.' + body.slice(2) + '-' + dv;
+    } else if (body.length === 4) {
+      return body.slice(0, 1) + '.' + body.slice(1, 4) + '.' + body.slice(4) + '-' + dv;
+    } else if (body.length === 5) {
+      return body.slice(0, 2) + '.' + body.slice(2, 5) + '.' + body.slice(5) + '-' + dv;
+    } else if (body.length === 6) {
+      return body.slice(0, 2) + '.' + body.slice(2, 5) + '.' + body.slice(5) + '-' + dv;
+    } else if (body.length === 7) {
+      return body.slice(0, 1) + '.' + body.slice(1, 4) + '.' + body.slice(4) + '-' + dv;
+    } else if (body.length === 8) {
+      return body.slice(0, 2) + '.' + body.slice(2, 5) + '.' + body.slice(5) + '-' + dv;
+    }
+    
+    return cleaned; // Si excede 8 dígitos, retornar sin formato
   }
 
   // Función para validar RUT usando el algoritmo del dígito verificador
@@ -161,7 +186,7 @@ export default function DoctorRegister() {
         setErrorMsg(error.message || 'Error al registrar. Intenta de nuevo.');
       } else {
         setSuccessMsg('Registro exitoso. Redirigiendo al login...');
-        setTimeout(() => router.push('doctorLogin'), 1200);
+        setTimeout(() => router.push('doctorLogin2'), 1200);
 
       }
     } catch (err) {
@@ -190,12 +215,13 @@ export default function DoctorRegister() {
             <Text style={styles.label}>Nombre Completo</Text>
             <TextInput
               style={[styles.input, focusedInput === 'nombre' && styles.inputFocused]}
-              placeholder="Combre completo"
+              placeholder="Nombre completo"
               value={formData.nombre}
               onChangeText={(text) => setFormData({...formData, nombre: text})}
               onFocus={() => setFocusedInput('nombre')}
               onBlur={() => setFocusedInput(null)}
               autoCapitalize="words"
+              placeholderTextColor="#999"
             />
           </View>
 
@@ -217,6 +243,7 @@ export default function DoctorRegister() {
               onFocus={() => setFocusedInput('rut')}
               onBlur={() => setFocusedInput(null)}
               keyboardType="default"
+              placeholderTextColor="#999"
             />
             {formData.rut ? (
               validateRut(formData.rut) ? (
@@ -238,6 +265,7 @@ export default function DoctorRegister() {
               onBlur={() => setFocusedInput(null)}
               keyboardType="email-address"
               autoCapitalize="none"
+              placeholderTextColor="#999"
             />
           </View>
 
@@ -247,14 +275,15 @@ export default function DoctorRegister() {
               <Picker
                 selectedValue={formData.id_especialidad}
                 onValueChange={(value) => setFormData({...formData, id_especialidad: value})}
-                style={styles.picker}>
-                <Picker.Item label="Seleccione especialidad..." value="" />
-                <Picker.Item label="Endocrinología" value={1} />
-                <Picker.Item label="Medicina Interna" value={2} />
-                <Picker.Item label="Pediatría" value={3} />
-                <Picker.Item label="Medicina Familiar" value={4} />
-                <Picker.Item label="Nutrición y Dietética" value={5} />
-                <Picker.Item label="Diabetólogo" value={6} />
+                style={styles.picker}
+                itemStyle={{ color: 'white', backgroundColor: '#7F7F7F' }}>
+                <Picker.Item label="Seleccione especialidad..." value="" color="white" />
+                <Picker.Item label="Endocrinología" value={1} color="white" />
+                <Picker.Item label="Medicina Interna" value={2} color="white" />
+                <Picker.Item label="Pediatría" value={3} color="white" />
+                <Picker.Item label="Medicina Familiar" value={4} color="white" />
+                <Picker.Item label="Nutrición y Dietética" value={5} color="white" />
+                <Picker.Item label="Diabetólogo" value={6} color="white" />
               </Picker>
             </View>
           </View>
@@ -269,6 +298,7 @@ export default function DoctorRegister() {
               onFocus={() => setFocusedInput('institucion')}
               onBlur={() => setFocusedInput(null)}
               autoCapitalize="words"
+              placeholderTextColor="#999"
             />
           </View>
 
@@ -299,6 +329,7 @@ export default function DoctorRegister() {
                 setPostalInfo(ok ? getPostalInfo(value) : null);
               }}
               keyboardType="numeric"
+              placeholderTextColor="#999"
             />
             {formData.codigoPostalInstitucion ? (
               postalValid === null ? (
@@ -325,6 +356,7 @@ export default function DoctorRegister() {
               onFocus={() => setFocusedInput('password')}
               onBlur={() => setFocusedInput(null)}
               secureTextEntry
+              placeholderTextColor="#999"
             />
           </View>
 
@@ -338,6 +370,7 @@ export default function DoctorRegister() {
               onFocus={() => setFocusedInput('confirmPassword')}
               onBlur={() => setFocusedInput(null)}
               secureTextEntry
+              placeholderTextColor="#999"
             />
           </View>
 
@@ -354,7 +387,7 @@ export default function DoctorRegister() {
 
           <TouchableOpacity 
             style={styles.loginLink}
-            onPress={() => router.push('doctorLogin')}
+            onPress={() => router.push('doctorLogin2')}
           >
             <Text style={styles.loginLinkText}>¿Ya tienes cuenta? Inicia sesión</Text>
           </TouchableOpacity>
@@ -368,7 +401,7 @@ export default function DoctorRegister() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#757575",
   },
   scrollView: {
     flex: 1,
@@ -384,52 +417,59 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   title: {
-    fontSize: Platform.OS === 'web' ? 32 : 28,
+    fontSize: Platform.OS === 'web' ? 46 : 40,
     fontWeight: '800',
-    color: '#00897B',
+    color: "#ffffffff",
     marginBottom: Platform.OS === 'web' ? 8 : 4,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: Platform.OS === 'web' ? 18 : 16,
-    color: '#666',
+    fontSize: Platform.OS === 'web' ? 20 : 16,
+    color: "#ffffffff",
     marginBottom: Platform.OS === 'web' ? 32 : 24,
     textAlign: 'center',
+    fontWeight: "500",
   },
   form: {
     width: '100%',
     maxWidth: 480,
     gap: Platform.OS === 'web' ? 16 : 12,
     alignSelf: 'center',
+    backgroundColor: "#515151",
+    borderRadius: 25,
+    padding: 24,
+    borderColor: "#afafafff",
+    boxShadow: "0px 6px 6px 6px rgba(0, 0, 0, 0.1)",
   },
   inputContainer: {
     gap: Platform.OS === 'web' ? 8 : 6,
     marginBottom: Platform.OS === 'web' ? 0 : 4,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: "#ffffffff",
   },
   input: {
     width: '100%',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 25,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: "#7F7F7F",
     fontSize: 16,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: "#7F7F7F",
+    color: "white",
   },
   inputFocused: {
     borderWidth: 2,
-    borderColor: '#00897B',
+    borderColor: "#ffffff",
   },
   pickerContainer: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 12,
+    borderColor: "#7F7F7F",
+    borderRadius: 25,
     overflow: 'hidden',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: "#7F7F7F",
   },
   picker: {
     width: '100%',
@@ -437,15 +477,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: Platform.OS === 'web' ? 10 : 12,
     fontSize: 16,
-    color: '#333',
+    color: 'white',
     justifyContent: 'center',
+    backgroundColor: "#7F7F7F",
   },
   uploadButton: {
     padding: 16,
     borderRadius: 12,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: '#00897B',
+    borderColor: "#00897B",
     alignItems: 'center',
     backgroundColor: '#F5F9FF',
   },
@@ -456,19 +497,19 @@ const styles = StyleSheet.create({
   },
   helperText: {
     fontSize: 12,
-    color: '#666',
+    color: "#ffffffff",
     marginTop: 4,
   },
   registerButton: {
     width: '100%',
     padding: 16,
-    backgroundColor: '#00897B',
-    borderRadius: 12,
+    backgroundColor: 'white',
+    borderRadius: 16,
     alignItems: 'center',
     marginTop: 16,
   },
   registerButtonText: {
-    color: '#ffffff',
+    color: '#515151',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -477,17 +518,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginLinkText: {
-    color: '#00897B',
+    color: '#5EC7FF',
     fontSize: 14,
   },
   errorText: {
-    color: '#e53935',
+    color: '#ffcdd2',
     fontSize: 14,
     textAlign: 'center',
     marginVertical: 12,
   },
   successText: {
-    color: '#2e7d32',
+    color: '#c8e6c9',
     fontSize: 14,
     textAlign: 'center',
     marginVertical: 12,

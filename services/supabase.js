@@ -125,6 +125,49 @@ export async function loginDoctor({ email, password }) {
 	}
 }
 
+// Inicia sesión de un paciente existente
+// Valida credenciales y recupera el perfil completo del paciente
+export async function loginPatient({ rut, password }) {
+	try {
+		// Buscar al paciente por RUT
+		const cleaned = rut.replace(/[^\dkK]/g, "").toUpperCase();
+		const { data: pacienteData, error: findErr } = await supabase
+			.from('pacientes')
+			.select('*')
+			.eq('rut', cleaned)
+			.single();
+
+		if (findErr || !pacienteData) {
+			return { error: true };
+		}
+
+		// Si el paciente no tiene user_id, no tiene cuenta
+		if (!pacienteData.user_id) {
+			return { error: true };
+		}
+
+		// Intentar login con el email del paciente
+		const emailToUse = pacienteData.email || `${cleaned}@mapi.local`;
+		const { data, error: signInError } = await supabase.auth.signInWithPassword({
+			email: emailToUse,
+			password
+		});
+
+		if (signInError) {
+			return { error: true };
+		}
+
+		const user = data?.user || null;
+		if (!user) {
+			return { error: true };
+		}
+
+		return { user, paciente: pacienteData };
+	} catch (e) {
+		return { error: true };
+	}
+}
+
 // Obtiene la sesión actual del usuario autenticado
 // Retorna los datos de sesión si existe una sesión activa
 export async function getSession() {

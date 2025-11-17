@@ -42,13 +42,13 @@ export default function DoctorView() {
     try {
       const { session, error: sessErr } = await getSession();
       if (sessErr || !session) {
-        router.replace('doctorLogin');
+        router.replace('doctorLogin2');
         return;
       }
 
       const userId = session.user?.id;
       if (!userId) {
-        router.replace('doctorLogin');
+        router.replace('doctorLogin2');
         return;
       }
 
@@ -104,7 +104,7 @@ export default function DoctorView() {
     setLoading(true);
     await logout();
     setLoading(false);
-    router.replace('doctorLogin');
+    router.replace('doctorLogin2');
   };
 
   // Cargar documentos cuando se selecciona un paciente

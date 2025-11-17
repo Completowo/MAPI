@@ -1,10 +1,50 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import { TextInput } from "react-native";
+import { TextInput } from "react-native-web";
+import { loginDoctor } from "../services/supabase";
 
 const doctorLogin2 = () => {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [focusedInput, setFocusedInput] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Función para manejar el inicio de sesión
+  const handleLogin = () => {
+    setError("");
+
+    if (!email.trim()) {
+      setError("Por favor ingresa tu correo electrónico");
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Por favor ingresa tu contraseña");
+      return;
+    }
+
+    setLoading(true);
+    (async () => {
+      try {
+        const { error, user, profile } = await loginDoctor({ email, password });
+        if (error) {
+          setError("Credenciales incorrectas, Revisa tu correo y/o contraseña.");
+        } else if (!profile) {
+          setError("No se encontró el perfil del médico. Contacta al administrador");
+        } else {
+          const name = (profile && profile.nombre) ? profile.nombre : (user?.email || "");
+          router.push(`/doctorView?name=${encodeURIComponent(name)}`);
+        }
+      } catch (e) {
+        setError("Credenciales incorrectas, Revisa tu correo y/o contraseña.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
 
   return (
     <View style={styles.container}>
@@ -46,14 +86,48 @@ const doctorLogin2 = () => {
           >
             !Porfavor ingresa tu rut para empezar¡
           </Text>
-          <TextInput style={styles.input} placeholder="Ingresa tu Rut" />
-          <TextInput style={styles.input} placeholder="Contraseña" />
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Entrar</Text>
+          <TextInput
+            style={[styles.input, focusedInput === "email" && styles.inputFocused]}
+            placeholder="Correo electrónico"
+            value={email}
+            onChangeText={setEmail}
+            onFocus={() => setFocusedInput("email")}
+            onBlur={() => setFocusedInput(null)}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor="#999"
+          />
+          <TextInput
+            style={[styles.input, focusedInput === "password" && styles.inputFocused]}
+            placeholder="Contraseña"
+            value={password}
+            onChangeText={setPassword}
+            onFocus={() => setFocusedInput("password")}
+            onBlur={() => setFocusedInput(null)}
+            secureTextEntry
+            placeholderTextColor="#999"
+          />
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#515151" />
+            ) : (
+              <Text style={styles.buttonText}>Entrar</Text>
+            )}
           </TouchableOpacity>
         </View>
         <TouchableOpacity onPress={() => router.push("/RoleSelection")}>
           <Text style={styles.downText}>Volver al Login de pacientes</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ marginTop: 25 }}
+          onPress={() => router.push("/doctorRegister")}
+        >
+          <Text style={styles.downText}>¿No tienes cuenta? Regístrate aquí</Text>
         </TouchableOpacity>
       </View>
 
@@ -115,6 +189,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "white",
   },
+  inputFocused: {
+    borderWidth: 2,
+    borderColor: "#ffffff",
+  },
   button: {
     width: "100%",
     height: 40,
@@ -123,10 +201,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
   },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
   buttonText: {
     fontSize: 16,
     fontWeight: "600",
     color: "#515151",
+  },
+  errorText: {
+    color: "#ffcdd2",
+    fontSize: 14,
+    textAlign: "center",
+    marginVertical: 12,
+    paddingHorizontal: 8,
   },
   downText: {
     marginTop: 12,
