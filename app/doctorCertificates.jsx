@@ -191,7 +191,7 @@ export default function DoctorCertificates() {
     setLoggingOut(true);
     await logout();
     setLoggingOut(false);
-    router.replace('doctorLogin2');
+    router.replace('doctorLogin');
   };
 
   if (checking) return (
@@ -205,7 +205,7 @@ export default function DoctorCertificates() {
     <View style={styles.center}>
       <Text style={styles.title}>Acceso denegado</Text>
       <Text style={styles.errorText}>Esta vista es solo para médicos autenticados.</Text>
-      <Button title="Ir al login" onPress={() => router.replace('doctorLogin2')} />
+      <Button title="Ir al login" onPress={() => router.replace('doctorLogin')} />
     </View>
   );
 

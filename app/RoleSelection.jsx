@@ -247,7 +247,7 @@ const RoleSelection = () => {
             )}
           </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => router.push("/doctorLogin2")}>
+        <TouchableOpacity onPress={() => router.push("/doctorLogin")}>
           <Text style={styles.downText}>
             Si formas parte del personal médico inicia sesión aquí
           </Text>

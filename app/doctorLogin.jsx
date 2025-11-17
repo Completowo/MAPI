@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { TextInput } from "react-native-web";
 import { loginDoctor } from "../services/supabase";
 
-const doctorLogin2 = () => {
+const doctorLogin = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -227,4 +227,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default doctorLogin2;
+export default doctorLogin;
