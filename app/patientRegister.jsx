@@ -291,22 +291,7 @@ export default function PatientRegister() {
           {/* Si el RUT fue encontrado, mostrar formulario para crear cuenta */}
           {foundPatient ? (
             <>
-              <View style={styles.infoSection}>
-                <Text style={styles.infoLabel}>Paciente registrado:</Text>
-                <Text style={styles.infoValue}>{foundPatient.nombre}</Text>
-                {foundPatient.diabetes_type && (
-                  <>
-                    <Text style={styles.infoLabel}>Tipo de Diabetes:</Text>
-                    <Text style={styles.infoValue}>
-                      {foundPatient.diabetes_type === "1"
-                        ? "Tipo 1"
-                        : foundPatient.diabetes_type === "2"
-                          ? "Tipo 2"
-                          : foundPatient.diabetes_type}
-                    </Text>
-                  </>
-                )}
-              </View>
+              <Text style={styles.greetingText}>¡Hola {foundPatient.nombre}!</Text>
 
               <TextInput
                 style={[
@@ -492,5 +477,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     padding: 16,
     fontWeight: "600",
+  },
+  greetingText: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#5EC7FF",
+    textAlign: "center",
+    marginVertical: 16,
   },
 });
