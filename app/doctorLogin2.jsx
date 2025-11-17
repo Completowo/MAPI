@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
-import { TextInput } from "react-native-web";
+import { TextInput } from "react-native";
 
 const doctorLogin2 = () => {
   const router = useRouter();
