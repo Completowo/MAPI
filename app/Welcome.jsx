@@ -81,14 +81,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 42,
     fontWeight: "700",
-    color: "#007FFF",
+    color: "white",
     textAlign: "center",
     marginBottom: 60,
   },
 
   desc: {
     fontSize: 18,
-    color: "#007FFF",
+    color: "white",
     textAlign: "center",
     marginBottom: 400,
   },

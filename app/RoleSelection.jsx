@@ -270,7 +270,7 @@ const RoleSelection = () => {
               fontWeight: "800",
             }}
           >
-            !Porfavor ingresa tu rut para empezar¡
+            ¡Porfavor ingresa tu rut para empezar!
           </Text>
           <TextInput
             style={styles.input}
