@@ -10,6 +10,8 @@ import {
 import Swiper from "react-native-swiper";
 import { useRouter } from "expo-router";
 import slides from "../slides";
+import { LinearGradient } from "expo-linear-gradient";
+
 const { width } = Dimensions.get("window");
 
 export default function Welcome() {
@@ -17,42 +19,47 @@ export default function Welcome() {
 
   return (
     <View style={styles.container}>
-      <Swiper
-        loop={false}
-        showsPagination={true}
-        dotStyle={styles.dot}
-        activeDotStyle={styles.activeDot}
+      <LinearGradient
+        colors={["#0080ff86", "#cdddecff", "#ffffffff"]}
+        style={{ flex: 1 }}
       >
-        {/* Slides */}
-        {slides.map((item, index) => (
-          <View key={index} style={styles.slide}>
-            <Image
-              source={item.image}
-              style={styles.image}
-              resizeMode="contain"
-            />
+        <Swiper
+          loop={false}
+          showsPagination={true}
+          dotStyle={styles.dot}
+          activeDotStyle={styles.activeDot}
+        >
+          {/* Slides */}
+          {slides.map((item, index) => (
+            <View key={index} style={styles.slide}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.desc}>{item.desc}</Text>
 
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.desc}>{item.desc}</Text>
+              <Image
+                source={item.image}
+                style={styles.image}
+                resizeMode="contain"
+              />
 
-            {/* Botón solo en el último */}
-            {index === slides.length - 1 && (
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => router.replace("/RoleSelection")}
-              >
-                <Text style={styles.btnText}>Comenzar</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        ))}
-      </Swiper>
+              {/* Botón solo en el último */}
+              {index === slides.length - 1 && (
+                <TouchableOpacity
+                  style={styles.btn}
+                  onPress={() => router.replace("/RoleSelection")}
+                >
+                  <Text style={styles.btnText}>Comenzar</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
+        </Swiper>
+      </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "white" },
+  container: { flex: 1, backgroundColor: "#0080ff94" },
 
   slide: {
     flex: 1,
@@ -62,24 +69,28 @@ const styles = StyleSheet.create({
   },
 
   image: {
-    width: width * 0.8,
-    height: width * 0.8,
+    width: 220,
+    height: 220,
     marginBottom: 30,
+    marginLeft: 120,
+    resizeMode: "contain",
+    position: "absolute",
+    bottom: 100,
   },
 
   title: {
-    fontSize: 24,
+    fontSize: 42,
     fontWeight: "700",
-    color: "#6EA8FF",
+    color: "#007FFF",
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 60,
   },
 
   desc: {
-    fontSize: 16,
-    color: "#555",
+    fontSize: 18,
+    color: "#007FFF",
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom: 400,
   },
 
   dot: {
@@ -103,7 +114,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 40,
     borderRadius: 25,
-    marginTop: 20,
+    marginTop: -20,
   },
   btnText: {
     color: "white",
