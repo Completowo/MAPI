@@ -191,12 +191,12 @@ export default function DoctorCertificates() {
     setLoggingOut(true);
     await logout();
     setLoggingOut(false);
-    router.replace('doctorLogin2');
+    router.replace('doctorLogin');
   };
 
   if (checking) return (
     <View style={styles.center}>
-      <ActivityIndicator size="large" color="#00897B" />
+      <ActivityIndicator size="large" color="#7F7F7F" />
       <Text style={styles.loadingText}>Verificando permisos...</Text>
     </View>
   );
@@ -205,7 +205,7 @@ export default function DoctorCertificates() {
     <View style={styles.center}>
       <Text style={styles.title}>Acceso denegado</Text>
       <Text style={styles.errorText}>Esta vista es solo para médicos autenticados.</Text>
-      <Button title="Ir al login" onPress={() => router.replace('doctorLogin2')} />
+      <Button title="Ir al login" onPress={() => router.replace('doctorLogin')} />
     </View>
   );
 
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    color: '#666',
+    color: '#7F7F7F',
   },
   title: {
     fontSize: 28,
@@ -401,11 +401,11 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#7F7F7F',
   },
   errorText: {
     marginVertical: 12,
-    color: '#666',
+    color: '#7F7F7F',
     textAlign: 'center',
   },
   profileCard: {
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   },
   infoBoxText: {
     fontSize: 13,
-    color: '#666',
+    color: '#7F7F7F',
     fontWeight: '500',
     textAlign: 'center',
   },
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 13,
-    color: '#666',
+    color: '#7F7F7F',
     fontWeight: '500',
   },
   infoValue: {
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   uploadButton: {
-    backgroundColor: '#00897B',
+    backgroundColor: '#7F7F7F',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -556,25 +556,25 @@ const styles = StyleSheet.create({
     color: '#c62828',
   },
   urlBox: {
-    backgroundColor: '#e0f2f1',
+    backgroundColor: '#efefef',
     borderRadius: 8,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#00897B',
+    borderColor: '#7F7F7F',
   },
   urlLabel: {
     fontSize: 12,
-    color: '#00897B',
+    color: '#7F7F7F',
     fontWeight: '600',
     marginBottom: 4,
   },
   url: {
     fontSize: 11,
-    color: '#00897B',
+    color: '#7F7F7F',
     fontWeight: '500',
   },
   viewCertificateButton: {
-    backgroundColor: '#00897B',
+    backgroundColor: '#7F7F7F',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 16,
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
   navItemText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: '#7F7F7F',
     textAlign: 'center',
   },
 });

@@ -186,7 +186,7 @@ export default function DoctorRegister() {
         setErrorMsg(error.message || 'Error al registrar. Intenta de nuevo.');
       } else {
         setSuccessMsg('Registro exitoso. Redirigiendo al login...');
-        setTimeout(() => router.push('doctorLogin2'), 1200);
+        setTimeout(() => router.push('doctorLogin'), 1200);
 
       }
     } catch (err) {
@@ -387,7 +387,7 @@ export default function DoctorRegister() {
 
           <TouchableOpacity 
             style={styles.loginLink}
-            onPress={() => router.push('doctorLogin2')}
+            onPress={() => router.push('doctorLogin')}
           >
             <Text style={styles.loginLinkText}>¿Ya tienes cuenta? Inicia sesión</Text>
           </TouchableOpacity>

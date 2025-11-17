@@ -1,17 +1,10 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { TextInput } from "react-native";
 import { loginDoctor } from "../services/supabase";
 
-const doctorLogin2 = () => {
+const doctorLogin = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,16 +31,11 @@ const doctorLogin2 = () => {
       try {
         const { error, user, profile } = await loginDoctor({ email, password });
         if (error) {
-          setError(
-            "Credenciales incorrectas, Revisa tu correo y/o contraseña."
-          );
+          setError("Credenciales incorrectas, Revisa tu correo y/o contraseña.");
         } else if (!profile) {
-          setError(
-            "No se encontró el perfil del médico. Contacta al administrador"
-          );
+          setError("No se encontró el perfil del médico. Contacta al administrador");
         } else {
-          const name =
-            profile && profile.nombre ? profile.nombre : user?.email || "";
+          const name = (profile && profile.nombre) ? profile.nombre : (user?.email || "");
           router.push(`/doctorView?name=${encodeURIComponent(name)}`);
         }
       } catch (e) {
@@ -88,23 +76,18 @@ const doctorLogin2 = () => {
           <Text
             style={{
               position: "absolute",
-              height: 100,
-              width: 190,
               top: -105,
               left: 175,
               textAlign: "center",
               color: "white",
               fontSize: 12,
-              fontWeight: "800",
+              fontWeight: "bold",
             }}
           >
             !Porfavor ingresa tu rut para empezar¡
           </Text>
           <TextInput
-            style={[
-              styles.input,
-              focusedInput === "email" && styles.inputFocused,
-            ]}
+            style={[styles.input, focusedInput === "email" && styles.inputFocused]}
             placeholder="Correo electrónico"
             value={email}
             onChangeText={setEmail}
@@ -115,10 +98,7 @@ const doctorLogin2 = () => {
             placeholderTextColor="#999"
           />
           <TextInput
-            style={[
-              styles.input,
-              focusedInput === "password" && styles.inputFocused,
-            ]}
+            style={[styles.input, focusedInput === "password" && styles.inputFocused]}
             placeholder="Contraseña"
             value={password}
             onChangeText={setPassword}
@@ -147,9 +127,7 @@ const doctorLogin2 = () => {
           style={{ marginTop: 25 }}
           onPress={() => router.push("/doctorRegister")}
         >
-          <Text style={styles.downText}>
-            ¿No tienes cuenta? Regístrate aquí
-          </Text>
+          <Text style={styles.downText}>¿No tienes cuenta? Regístrate aquí</Text>
         </TouchableOpacity>
       </View>
 
@@ -199,7 +177,6 @@ const styles = StyleSheet.create({
     borderColor: "#afafafff",
     boxShadow: "0px 6px 6px 6px rgba(0, 0, 0, 0.1)",
     backgroundColor: "#515151",
-    marginTop: "auto",
   },
   input: {
     width: "100%",
@@ -250,4 +227,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default doctorLogin2;
+export default doctorLogin;
