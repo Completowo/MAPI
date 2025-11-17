@@ -34,7 +34,7 @@ import { useUserStore } from "../store/useUserStore";
 //Import imagenes de emociones
 import { emotionImages } from "../config/emotionImages";
 
-export function Main() {
+export default function Main() {
   const scrollViewRef = useRef();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);

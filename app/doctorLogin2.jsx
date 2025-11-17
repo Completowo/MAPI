@@ -3,13 +3,13 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { TextInput } from "react-native-web";
 
-const RoleSelection = () => {
+const doctorLogin2 = () => {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>BIENVENIDO</Text>
-      <Text style={styles.subtitle}>Pacientes</Text>
+      <Text style={styles.subtitle}>Profesional Médico</Text>
       <View style={styles.content}>
         <View style={styles.loginContainer}>
           <Image
@@ -23,7 +23,7 @@ const RoleSelection = () => {
             }}
           />
           <Image
-            source={require("../assets/MAPI-emociones/Burbujas/Burbuja1.png")}
+            source={require("../assets/MAPI-emociones/Burbujas/Burbuja2.png")}
             style={{
               position: "absolute",
               resizeMode: "contain",
@@ -52,24 +52,18 @@ const RoleSelection = () => {
             <Text style={styles.buttonText}>Entrar</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => router.push("/doctorLogin2")}>
-          <Text style={styles.downText}>
-            Si formas parte del personal médico inicia sesión aquí
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{ marginTop: 25 }}
-          onPress={() => router.push("/patientRegister")}
-        >
-          <Text style={styles.downText}>
-            ¿Ya te registraron? Valida tu rut aquí
-          </Text>
+        <TouchableOpacity onPress={() => router.push("/RoleSelection")}>
+          <Text style={styles.downText}>Volver al Login de pacientes</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.footer}>
-        <Text style={{ fontWeight: "bold", color: "#7e7e7eff" }}>M.A.P.I</Text>
-        <Text style={{ fontWeight: "bold", color: "#7e7e7eff" }}>Software</Text>
+        <Text style={{ fontWeight: "bold", color: "#FFFFFF", opacity: 0.5 }}>
+          M.A.P.I
+        </Text>
+        <Text style={{ fontWeight: "bold", color: "#FFFFFF", opacity: 0.5 }}>
+          Software
+        </Text>
       </View>
     </View>
   );
@@ -78,7 +72,7 @@ const RoleSelection = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#757575",
   },
   content: {
     flex: 1,
@@ -89,14 +83,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 46,
-    color: "#4EA4FB",
+    color: "#ffffffff",
     textAlign: "center",
     marginTop: 80,
     fontWeight: "800",
   },
   subtitle: {
     fontSize: 20,
-    color: "#4EA4FB",
+    color: "#ffffffff",
     fontWeight: "500",
     textAlign: "center",
   },
@@ -108,17 +102,18 @@ const styles = StyleSheet.create({
     padding: 24,
     borderColor: "#afafafff",
     boxShadow: "0px 6px 6px 6px rgba(0, 0, 0, 0.1)",
+    backgroundColor: "#515151",
   },
   input: {
     width: "100%",
     padding: 16,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    backgroundColor: "#e6e6e6ff",
+    borderColor: "#7F7F7F",
+    backgroundColor: "#7F7F7F",
     fontSize: 16,
     textAlign: "center",
-    color: "#616161ff",
+    color: "white",
   },
   button: {
     width: "100%",
@@ -126,17 +121,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 16,
     alignItems: "center",
-    backgroundColor: "#2196F3",
-    borderColor: "#2196F3",
+    backgroundColor: "white",
   },
   buttonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "white",
+    color: "#515151",
   },
   downText: {
     marginTop: 12,
-    color: "#228adfff",
+    color: "#5EC7FF",
     fontSize: 12,
   },
   footer: {
@@ -145,4 +139,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RoleSelection;
+export default doctorLogin2;
