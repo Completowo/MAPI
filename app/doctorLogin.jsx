@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import { TextInput } from "react-native-web";
+import { TextInput } from "react-native";
 import { loginDoctor } from "../services/supabase";
 
 const doctorLogin = () => {

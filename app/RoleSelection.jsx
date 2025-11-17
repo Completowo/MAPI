@@ -1,8 +1,19 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { TextInput } from "react-native";
-import { createPatientAccount, findPatientByRut, loginPatient } from "../services/supabase";
+import {
+  createPatientAccount,
+  findPatientByRut,
+  loginPatient,
+} from "../services/supabase";
 
 const RoleSelection = () => {
   const router = useRouter();
@@ -17,14 +28,14 @@ const RoleSelection = () => {
     const cleaned = value.replace(/[^\dkK]/g, "").toUpperCase();
 
     if (cleaned.length === 0) return "";
-    
+
     // El último carácter es el DV (dígito verificador)
     // El resto es el cuerpo del RUT
     const body = cleaned.slice(0, -1);
     const dv = cleaned.slice(-1);
-    
+
     if (body.length === 0) return cleaned; // Solo se escribió el DV
-    
+
     // Formatear según la longitud del cuerpo (sin DV)
     // Formato: X.XXX.XXX-X
     if (body.length === 1) {
@@ -32,19 +43,61 @@ const RoleSelection = () => {
     } else if (body.length === 2) {
       return body.slice(0, 1) + "." + body.slice(1) + "-" + dv;
     } else if (body.length === 3) {
-      return body.slice(0, 1) + "." + body.slice(1) + "." + body.slice(2) + "-" + dv;
+      return (
+        body.slice(0, 1) + "." + body.slice(1) + "." + body.slice(2) + "-" + dv
+      );
     } else if (body.length === 4) {
-      return body.slice(0, 1) + "." + body.slice(1, 4) + "." + body.slice(4) + "-" + dv;
+      return (
+        body.slice(0, 1) +
+        "." +
+        body.slice(1, 4) +
+        "." +
+        body.slice(4) +
+        "-" +
+        dv
+      );
     } else if (body.length === 5) {
-      return body.slice(0, 2) + "." + body.slice(2, 5) + "." + body.slice(5) + "-" + dv;
+      return (
+        body.slice(0, 2) +
+        "." +
+        body.slice(2, 5) +
+        "." +
+        body.slice(5) +
+        "-" +
+        dv
+      );
     } else if (body.length === 6) {
-      return body.slice(0, 2) + "." + body.slice(2, 5) + "." + body.slice(5) + "-" + dv;
+      return (
+        body.slice(0, 2) +
+        "." +
+        body.slice(2, 5) +
+        "." +
+        body.slice(5) +
+        "-" +
+        dv
+      );
     } else if (body.length === 7) {
-      return body.slice(0, 1) + "." + body.slice(1, 4) + "." + body.slice(4) + "-" + dv;
+      return (
+        body.slice(0, 1) +
+        "." +
+        body.slice(1, 4) +
+        "." +
+        body.slice(4) +
+        "-" +
+        dv
+      );
     } else if (body.length === 8) {
-      return body.slice(0, 2) + "." + body.slice(2, 5) + "." + body.slice(5) + "-" + dv;
+      return (
+        body.slice(0, 2) +
+        "." +
+        body.slice(2, 5) +
+        "." +
+        body.slice(5) +
+        "-" +
+        dv
+      );
     }
-    
+
     return cleaned; // Si excede 8 dígitos, retornar sin formato
   };
 
@@ -55,7 +108,7 @@ const RoleSelection = () => {
     } else {
       // Limpiar el valor
       const cleaned = value.replace(/[^\dkK]/g, "").toUpperCase();
-      
+
       // Solo formatear si tiene 8-9 caracteres limpios (7-8 dígitos + DV)
       if (/^\d{7,8}[0-9Kk]$/.test(cleaned)) {
         const formatted = formatRut(cleaned);
@@ -76,7 +129,10 @@ const RoleSelection = () => {
     }
 
     if (cleaned.length > 9) {
-      return { valid: false, message: "El RUT no puede tener más de 9 caracteres" };
+      return {
+        valid: false,
+        message: "El RUT no puede tener más de 9 caracteres",
+      };
     }
 
     const body = cleaned.slice(0, -1);
@@ -204,12 +260,14 @@ const RoleSelection = () => {
           <Text
             style={{
               position: "absolute",
+              height: 100,
+              width: 190,
               top: -105,
               left: 175,
               textAlign: "center",
               color: "white",
               fontSize: 12,
-              fontWeight: "bold",
+              fontWeight: "800",
             }}
           >
             !Porfavor ingresa tu rut para empezar¡
@@ -303,6 +361,7 @@ const styles = StyleSheet.create({
     padding: 24,
     borderColor: "#afafafff",
     boxShadow: "0px 6px 6px 6px rgba(0, 0, 0, 0.1)",
+    marginTop: "auto",
   },
   input: {
     width: "100%",
@@ -334,10 +393,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#e53935",
-    fontSize: 14,
+    fontSize: 12,
     textAlign: "center",
-    marginVertical: 12,
-    paddingHorizontal: 8,
   },
   downText: {
     marginTop: 12,
