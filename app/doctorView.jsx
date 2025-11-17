@@ -233,7 +233,7 @@ export default function DoctorView() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#00897B" />
+        <ActivityIndicator size="large" color="#7F7F7F" />
       </View>
     );
   }
@@ -419,12 +419,12 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#00897B',
+    color: '#7F7F7F',
     marginBottom: 4,
   },
   subGreeting: {
     fontSize: 14,
-    color: '#666',
+    color: '#7F7F7F',
   },
   profileCard: {
     backgroundColor: '#fff',
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 13,
-    color: '#666',
+    color: '#7F7F7F',
     fontWeight: '500',
   },
   infoValue: {
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   statsCard: {
-    backgroundColor: '#00897B',
+    backgroundColor: '#7F7F7F',
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -503,12 +503,12 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#999',
+    color: '#7F7F7F',
     marginBottom: 4,
   },
   emptyStateSubText: {
     fontSize: 13,
-    color: '#bbb',
+    color: '#7F7F7F',
   },
   patientListContent: {
     paddingBottom: 16,
@@ -538,28 +538,28 @@ const styles = StyleSheet.create({
   },
   patientRut: {
     fontSize: 12,
-    color: '#666',
+    color: '#7F7F7F',
     marginBottom: 2,
   },
   patientDiabetes: {
     fontSize: 12,
-    color: '#00897B',
+    color: '#7F7F7F',
     fontWeight: '500',
     marginBottom: 2,
   },
   patientDate: {
     fontSize: 11,
-    color: '#999',
+    color: '#7F7F7F',
   },
   patientBadge: {
-    backgroundColor: '#e0f2f1',
+    backgroundColor: '#efefef',
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   badgeText: {
     fontSize: 11,
-    color: '#00897B',
+    color: '#7F7F7F',
     fontWeight: '600',
   },
   // Estilos para vista de detalles del paciente
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 14,
-    color: '#00897B',
+    color: '#7F7F7F',
     fontWeight: '600',
   },
   title: {
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 13,
-    color: '#666',
+    color: '#7F7F7F',
     fontWeight: '500',
   },
   detailValue: {
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   uploadDocButton: {
-    backgroundColor: '#4caf50',
+    backgroundColor: '#7F7F7F',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -681,7 +681,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 8,
     borderLeftWidth: 4,
-    borderLeftColor: '#00897B',
+    borderLeftColor: '#7F7F7F',
   },
   documentItemContent: {
     flex: 1,
@@ -738,7 +738,7 @@ const styles = StyleSheet.create({
   navItemText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: '#7F7F7F',
     textAlign: 'center',
   },
 });

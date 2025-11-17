@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#7F7F7F',
   },
   form: {
     backgroundColor: '#fff',
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#7F7F7F',
     marginBottom: 8,
   },
   input: {
@@ -455,11 +455,11 @@ const styles = StyleSheet.create({
   },
   inputFocused: {
     borderWidth: 2,
-    borderColor: '#00897B',
+    borderColor: '#7F7F7F',
   },
   helperText: {
     fontSize: 12,
-    color: '#666',
+    color: '#7F7F7F',
     marginTop: 4,
   },
   diabetesOptions: {
@@ -476,16 +476,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   diabetesBtnActive: {
-    borderColor: '#00897B',
-    backgroundColor: '#e0f2f1',
+    borderColor: '#7F7F7F',
+    backgroundColor: '#efefef',
   },
   diabetesBtnText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
+    color: '#7F7F7F',
   },
   diabetesBtnTextActive: {
-    color: '#00897B',
+    color: '#7F7F7F',
   },
   errorBox: {
     backgroundColor: '#ffebee',
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   uploadDocButton: {
-    backgroundColor: '#4caf50',
+    backgroundColor: '#7F7F7F',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -573,11 +573,11 @@ const styles = StyleSheet.create({
   documentsListTitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: '#7F7F7F',
     marginBottom: 8,
   },
   documentItem: {
-    backgroundColor: '#e0f2f1',
+    backgroundColor: '#efefef',
     borderRadius: 6,
     padding: 10,
     marginBottom: 8,
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderLeftWidth: 3,
-    borderLeftColor: '#00897B',
+    borderLeftColor: '#7F7F7F',
   },
   documentName: {
     fontSize: 12,
@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: '#666',
+    color: '#7F7F7F',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
   navItemText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: '#7F7F7F',
     textAlign: 'center',
   },
 });
