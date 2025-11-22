@@ -13,8 +13,12 @@ import CustomDropdown from "../components/CustomDropdown";
 
 import { useUserStore } from "../store/useUserStore";
 import { supabase } from "../services/supabase";
+import { useAuthStore } from "../store/useAuthStore";
 
 export default function Customizing() {
+  //Id usuario
+  const user_id = useAuthStore((s) => s.pacienteId);
+
   const vestimenta = useUserStore((state) => state.vestimenta);
   const setVestimenta = useUserStore((state) => state.setVestimenta);
 
@@ -23,17 +27,17 @@ export default function Customizing() {
   //Traer trajes desde Supabase
   const fetchSkins = async () => {
     const { data, error } = await supabase
-      .from("chats")
-      .select("Skins")
-      .eq("id", 2)
+      .from("chat")
+      .select("skins")
+      .eq("user_id", user_id)
       .single();
 
     if (error) {
-      console.log("Error al obtener el chat", error);
+      console.log("Error al obtener el chat desde customizing", error);
       return ["Enfermera"];
     }
 
-    return data?.Skins || ["Enfermera"];
+    return data?.skins || ["Enfermera"];
   };
 
   useEffect(() => {

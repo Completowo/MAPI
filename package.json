@@ -26,6 +26,7 @@
     "expo-linking": "~8.0.8",
     "expo-router": "~6.0.14",
     "expo-status-bar": "~3.0.8",
+    "expo-zustand-persist": "^1.0.4",
     "fs-extra": "^11.3.2",
     "prettier": "^3.6.2",
     "react": "19.1.0",
@@ -43,6 +44,7 @@
   },
   "private": true,
   "devDependencies": {
+    "baseline-browser-mapping": "^2.8.30",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~10.0.0"
   }

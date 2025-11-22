@@ -10,6 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import { supabase } from "../services/supabase";
 import ModalGlucose from "./ModalGlucose";
+import { useAuthStore } from "../store/useAuthStore";
 
 export function LastCheck({ lastCheck }) {
   const [modal, setModal] = useState(false);
@@ -23,19 +24,20 @@ export function LastCheck({ lastCheck }) {
   //Constante para abrir modal
   const toggleModal = () => setModal(!modal);
 
+  const user_id = useAuthStore((s) => s.pacienteId);
   //Cargar el valor desde Supabase al iniciar
   useEffect(() => {
     //LLamar a mgdl y fecha para el lastCheck
     const fetchGlucose = async () => {
       const { data, error } = await supabase
-        .from("chats")
-        .select("mgdl, last_Check")
-        .eq("id", 2)
+        .from("chat")
+        .select("mgdl, last_check")
+        .eq("user_id", user_id)
         .single();
 
       if (!error) {
         setGlucose(data?.mgdl || "0");
-        setLastCheckTime(data?.last_Check);
+        setLastCheckTime(data?.last_check);
       }
     };
 
@@ -64,9 +66,9 @@ export function LastCheck({ lastCheck }) {
       toggleModal();
 
       const { error } = await supabase
-        .from("chats")
-        .update({ mgdl: tempGlucose, last_Check: new Date() })
-        .eq("id", 2);
+        .from("chat")
+        .update({ mgdl: tempGlucose, last_check: new Date() })
+        .eq("user_id", user_id);
 
       if (error) console.error("Error guardando glucosa:", error);
       else console.log("✅ Glucosa guardada correctamente:", tempGlucose);

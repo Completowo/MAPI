@@ -15,6 +15,8 @@ import {
   loginPatient,
 } from "../services/supabase";
 
+import { useAuthStore } from "../store/useAuthStore";
+
 const RoleSelection = () => {
   const router = useRouter();
   const [rut, setRut] = useState("");
@@ -212,6 +214,10 @@ const RoleSelection = () => {
           setError("Credenciales incorrectas. Revisa tu contraseña.");
           return;
         }
+
+        //Guarda el id del paciente
+        useAuthStore.getState().setPacienteId(paciente.id);
+        console.log("ID del paciente:", paciente.id);
 
         const name = paciente.nombre || "Paciente";
         router.push("/Main");

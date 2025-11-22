@@ -11,10 +11,11 @@ import ModalShop from "./ModalShop";
 import { supabase } from "../services/supabase";
 import { usePointsStore } from "../store/pointsStore";
 import { useOpcionesStore } from "../store/optionStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 export function ItemShop({ pStatus, pPrecio, pItem, interaction, onBought }) {
   const { points, setPoints } = usePointsStore();
-
+  const user_id = useAuthStore((s) => s.pacienteId);
   //Zusband agregar traje comprado
   const { addOpcion } = useOpcionesStore();
 
@@ -88,9 +89,9 @@ export function ItemShop({ pStatus, pPrecio, pItem, interaction, onBought }) {
 
       // actualizar Supabase
       const { error } = await supabase
-        .from("chats")
-        .update({ points: newPoints, Skins: nuevasOpciones })
-        .eq("id", 2);
+        .from("chat")
+        .update({ points: newPoints, skins: nuevasOpciones })
+        .eq("user_id", user_id);
 
       if (error) {
         console.log("Error al actualizar puntos en Supabase:", error);

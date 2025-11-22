@@ -2,17 +2,18 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
 import { supabase } from "../services/supabase";
 import { usePointsStore } from "../store/pointsStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 export function Points() {
   const { points, setPoints } = usePointsStore();
 
-  const id = "2";
+  const user_id = useAuthStore((s) => s.pacienteId);
   //Traer puntos desde supabase
   const fecthPoints = async () => {
     const { data, error } = await supabase
-      .from("chats")
+      .from("chat")
       .select("points")
-      .eq("id", id)
+      .eq("user_id", user_id)
       .single();
 
     if (error) {

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../services/supabase";
+import { useAuthStore } from "../store/useAuthStore";
 
 //Async Storage Para guardar las misiones y que se cambien cada 24Horas
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -40,6 +41,7 @@ export default function Main() {
   const [isLoading, setIsLoading] = useState(false);
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
   const [dailyMissions, setDailyMissions] = useState([]);
+  const [chatId, setChatId] = useState(null);
 
   //Router para navegación
   const router = useRouter();
@@ -54,14 +56,14 @@ export default function Main() {
   };
 
   //Id del chat en Supabase(Para pruebas)
-  const id = "2";
+  const user_id = useAuthStore((s) => s.pacienteId);
 
   //Función para obtener el chat de Supabase
   const fetchChatHistory = async () => {
     const { data, error } = await supabase
-      .from("chats")
-      .select("messages", "emotion", "points")
-      .eq("id", id)
+      .from("chat")
+      .select("id, messages, emotion, points")
+      .eq("user_id", user_id)
       .single();
 
     if (error) {
@@ -69,7 +71,10 @@ export default function Main() {
       return [];
     }
 
+    setChatId(data?.id);
+
     return {
+      id: data?.id,
       messages: data?.messages || [],
       emotion: data?.emotion || "neutral",
       points: data?.points || 0,
@@ -126,14 +131,22 @@ export default function Main() {
       setIsLoading(false);
 
       // Guardar nuevo chat en Supabase
-      await supabase.from("chats").upsert([
-        {
-          id: id,
-          messages: combinedMessages,
-          emotion: emotion,
-          created_at: new Date(),
-        },
-      ]);
+      const { data, error } = await supabase
+        .from("chat")
+        .upsert([
+          {
+            id: chatId,
+            user_id,
+            messages: combinedMessages,
+            emotion,
+            created_at: new Date(),
+          },
+        ])
+        .select();
+
+      if (!error && data?.length > 0) {
+        setChatId(data[0].id);
+      }
     };
 
     fetchData();
@@ -199,12 +212,13 @@ export default function Main() {
     setIsLoading(false);
 
     //Mandar chat a Supabase
-    const { error } = await supabase.from("chats").upsert([
+    const { error } = await supabase.from("chat").upsert([
       {
-        id: id,
+        id: chatId,
+        user_id: user_id,
         messages: finalMessages,
-        created_at: new Date(),
         emotion: emotion,
+        created_at: new Date(),
       },
     ]);
 
