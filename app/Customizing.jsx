@@ -28,26 +28,41 @@ export default function Customizing() {
   const fetchSkins = async () => {
     const { data, error } = await supabase
       .from("chat")
-      .select("skins")
+      .select("skins, selected_skin")
       .eq("user_id", user_id)
       .single();
 
     if (error) {
       console.log("Error al obtener el chat desde customizing", error);
-      return ["Enfermera"];
+      return { skins: ["Enfermera"], selected: "Enfermera" };
     }
 
-    return data?.skins || ["Enfermera"];
+    return {
+      skins: data?.skins || ["Enfermera"],
+      selected: data?.selected_skin || "Enfermera",
+    };
   };
 
   useEffect(() => {
     const cargar = async () => {
-      const skins = await fetchSkins();
+      const { skins, selected } = await fetchSkins();
       setOpciones(skins);
+      setVestimenta(selected);
     };
 
     cargar();
   }, []);
+
+  const saveDress = async (skin) => {
+    const { error } = await supabase
+      .from("chat")
+      .update({ selected_skin: skin })
+      .eq("user_id", user_id);
+
+    if (error) {
+      console.log("Error al guardar el chat desde customizing", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -60,6 +75,7 @@ export default function Customizing() {
           value={vestimenta}
           onChange={(nuevaVestimenta) => {
             setVestimenta(nuevaVestimenta);
+            saveDress(nuevaVestimenta);
           }}
         />
       </View>
