@@ -12,6 +12,8 @@ import {
 
 import { supabase } from "../services/supabase";
 
+import { useAuthStore } from "../store/useAuthStore";
+
 // Import de componentes
 import { Points } from "../components/Points";
 import { ItemShop } from "../components/ItemShop";
@@ -20,17 +22,17 @@ import itemsData from "../itemsInShop.json";
 
 export default function Shop() {
   const [items, setItems] = useState([]);
-
+  const user_id = useAuthStore((s) => s.pacienteId);
   useEffect(() => {
     const loadShop = async () => {
       // Traer skins comprados desde Supabase
       const { data, error } = await supabase
-        .from("chats")
-        .select("Skins")
-        .eq("id", 2)
+        .from("chat")
+        .select("skins")
+        .eq("user_id", user_id)
         .single();
 
-      const skinsComprados = data?.Skins || [];
+      const skinsComprados = data?.skins || [];
 
       // Combinar JSON + estado comprado
       const procesados = itemsData.map((item) => ({

@@ -2,7 +2,8 @@
   {
     "id": 0,
     "nombre": "Enfermera",
-    "precio": 100
+    "precio": 100,
+    "status": 1
   },
   {
     "id": 1,

@@ -13,8 +13,12 @@ import CustomDropdown from "../components/CustomDropdown";
 
 import { useUserStore } from "../store/useUserStore";
 import { supabase } from "../services/supabase";
+import { useAuthStore } from "../store/useAuthStore";
 
 export default function Customizing() {
+  //Id usuario
+  const user_id = useAuthStore((s) => s.pacienteId);
+
   const vestimenta = useUserStore((state) => state.vestimenta);
   const setVestimenta = useUserStore((state) => state.setVestimenta);
 
@@ -23,27 +27,42 @@ export default function Customizing() {
   //Traer trajes desde Supabase
   const fetchSkins = async () => {
     const { data, error } = await supabase
-      .from("chats")
-      .select("Skins")
-      .eq("id", 2)
+      .from("chat")
+      .select("skins, selected_skin")
+      .eq("user_id", user_id)
       .single();
 
     if (error) {
-      console.log("Error al obtener el chat", error);
-      return ["Enfermera"];
+      console.log("Error al obtener el chat desde customizing", error);
+      return { skins: ["Enfermera"], selected: "Enfermera" };
     }
 
-    return data?.Skins || ["Enfermera"];
+    return {
+      skins: data?.skins || ["Enfermera"],
+      selected: data?.selected_skin || "Enfermera",
+    };
   };
 
   useEffect(() => {
     const cargar = async () => {
-      const skins = await fetchSkins();
+      const { skins, selected } = await fetchSkins();
       setOpciones(skins);
+      setVestimenta(selected);
     };
 
     cargar();
   }, []);
+
+  const saveDress = async (skin) => {
+    const { error } = await supabase
+      .from("chat")
+      .update({ selected_skin: skin })
+      .eq("user_id", user_id);
+
+    if (error) {
+      console.log("Error al guardar el chat desde customizing", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -56,6 +75,7 @@ export default function Customizing() {
           value={vestimenta}
           onChange={(nuevaVestimenta) => {
             setVestimenta(nuevaVestimenta);
+            saveDress(nuevaVestimenta);
           }}
         />
       </View>

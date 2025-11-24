@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { supabase } from "./supabase";
+import { useAuthStore } from "../store/useAuthStore";
 
 //API KEY
 const API_KEY = "AIzaSyC6_Xg99KGiIgfTkutSvTlemqIOVmiGnHU";
@@ -7,10 +8,14 @@ const API_KEY = "AIzaSyC6_Xg99KGiIgfTkutSvTlemqIOVmiGnHU";
 export async function getGeminiResponse(apiHistory) {
   try {
     //Obtener glucosa desde Supabase
+    //Id del usuario
+    const user_id = useAuthStore.getState().pacienteId;
+    console.log(user_id);
+
     const { data: glucoseData, error } = await supabase
-      .from("chats")
+      .from("chat")
       .select("mgdl")
-      .eq("id", 2)
+      .eq("user_id", user_id)
       .single();
 
     if (error) console.error("Error al obtener glucosa desde Supabase:", error);
@@ -18,17 +23,17 @@ export async function getGeminiResponse(apiHistory) {
 
     //Obtener nombre del paciente desde Supabase y edad
     const { data: userData, error: userError } = await supabase
-      .from("paciente")
-      .select("nombreacompleto_paciente, edad_paciente")
-      .eq("run_paciente", 21107953)
+      .from("pacientes")
+      .select("nombre, age")
+      .eq("id", user_id)
       .single();
     if (userError)
       console.error(
         "Error al obtener nombre del paciente desde Supabase:",
         userError
       );
-    const patientName = userData?.nombreacompleto_paciente || "Paciente";
-    const patientAge = userData?.edad_paciente || "0";
+    const patientName = userData?.nombre || "Paciente";
+    const patientAge = userData?.age || "0";
 
     //Instrucciones dinámicas con glucosa
     const Perso1 = `

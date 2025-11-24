@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../services/supabase";
+import { useAuthStore } from "../store/useAuthStore";
 
 //Async Storage Para guardar las misiones y que se cambien cada 24Horas
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -31,6 +32,7 @@ import missions from "../assets/missions.json";
 
 //Import zustand store: Sirve para manejar el estado global de la vestimenta
 import { useUserStore } from "../store/useUserStore";
+
 //Import imagenes de emociones
 import { emotionImages } from "../config/emotionImages";
 
@@ -40,28 +42,36 @@ export default function Main() {
   const [isLoading, setIsLoading] = useState(false);
   const [mapiEmotion, setMapiEmotion] = useState("saludo");
   const [dailyMissions, setDailyMissions] = useState([]);
+  const [chatId, setChatId] = useState(null);
+
+  //Id del chat en Supabase(Para pruebas)
+  const user_id = useAuthStore((s) => s.pacienteId);
 
   //Router para navegación
   const router = useRouter();
 
   //Ropa de MAPI
   const dress = useUserStore((s) => s.vestimenta)?.toLowerCase();
+  const loadVestimenta = useUserStore((s) => s.loadVestimenta);
 
   const cambiarImagenEmocion = (emotion) => {
     if (!dress || !emotionImages[dress]) return null;
     console.log("Cambiando imagen a:", dress, emotion); //Console log, despues hay que quitarlo
     return emotionImages[dress][emotion] ?? emotionImages[dress].neutral;
   };
-
-  //Id del chat en Supabase(Para pruebas)
-  const id = "2";
+  //Cambiar Vestimenta y que se guarde
+  useEffect(() => {
+    if (user_id) {
+      loadVestimenta(user_id);
+    }
+  }, [user_id]);
 
   //Función para obtener el chat de Supabase
   const fetchChatHistory = async () => {
     const { data, error } = await supabase
-      .from("chats")
-      .select("messages", "emotion", "points")
-      .eq("id", id)
+      .from("chat")
+      .select("id, messages, emotion, points")
+      .eq("user_id", user_id)
       .single();
 
     if (error) {
@@ -69,7 +79,10 @@ export default function Main() {
       return [];
     }
 
+    setChatId(data?.id);
+
     return {
+      id: data?.id,
       messages: data?.messages || [],
       emotion: data?.emotion || "neutral",
       points: data?.points || 0,
@@ -126,14 +139,22 @@ export default function Main() {
       setIsLoading(false);
 
       // Guardar nuevo chat en Supabase
-      await supabase.from("chats").upsert([
-        {
-          id: id,
-          messages: combinedMessages,
-          emotion: emotion,
-          created_at: new Date(),
-        },
-      ]);
+      const { data, error } = await supabase
+        .from("chat")
+        .upsert([
+          {
+            id: chatId,
+            user_id,
+            messages: combinedMessages,
+            emotion,
+            created_at: new Date(),
+          },
+        ])
+        .select();
+
+      if (!error && data?.length > 0) {
+        setChatId(data[0].id);
+      }
     };
 
     fetchData();
@@ -199,12 +220,13 @@ export default function Main() {
     setIsLoading(false);
 
     //Mandar chat a Supabase
-    const { error } = await supabase.from("chats").upsert([
+    const { error } = await supabase.from("chat").upsert([
       {
-        id: id,
+        id: chatId,
+        user_id: user_id,
         messages: finalMessages,
-        created_at: new Date(),
         emotion: emotion,
+        created_at: new Date(),
       },
     ]);
 
