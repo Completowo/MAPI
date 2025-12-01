@@ -5,9 +5,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Registra un nuevo médico en la aplicación
-// Crea una cuenta de autenticación en Supabase Auth y agrega los datos del médico en la tabla 'doctores'
+// Crea una cuenta de autenticación en Supabase Auth y agrega los datos del médico en la tabla 'doctor'
 export async function registerDoctor(formData) {
 	const { email, password, nombre, rut, id_especialidad, institucionMedica, codigoPostalInstitucion } = formData;
+	
+	// Limpiar el RUT para obtener la parte numérica y el dígito verificador
+	const cleanedRut = rut.replace(/[^\dkK]/g, '').toUpperCase();
+	const rutBody = cleanedRut.slice(0, -1); // Parte numérica
+	const digitoVerificador = cleanedRut.slice(-1); // Dígito verificador
 	
 	// Crear usuario de autenticación con email y contraseña
 	const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
@@ -33,9 +38,10 @@ export async function registerDoctor(formData) {
 
 	// Construir objeto base con datos comunes del médico
 	const baseRow = {
-		user_id: user?.id || null,
+		rut: rutBody,
+		digito_verificador: digitoVerificador,
+		auth_user_id: user?.id || null,
 		nombre,
-		rut,
 		institucion_medica: institucionMedica,
 		codigo_postal_institucion: codigoPostalInstitucion,
 		email,
@@ -60,22 +66,22 @@ export async function registerDoctor(formData) {
 		variants.push({ ...baseRow });
 	}
 
-	// Intentar insertar el registro médico en la tabla 'doctores' con diferentes variantes
+	// Intentar insertar el registro médico en la tabla 'doctor' con diferentes variantes
 	let lastError = null;
 	for (const row of variants) {
 		try {
-			console.debug('Attempting insert into doctores with row keys:', Object.keys(row), 'row:', row);
-			const { error: insertError } = await supabase.from('doctores').insert([row]);
+			console.debug('Attempting insert into doctor with row keys:', Object.keys(row), 'row:', row);
+			const { error: insertError } = await supabase.from('doctor').insert([row]);
 			if (!insertError) {
 				return { user };
 			}
 			lastError = insertError;
 			const msg = String(insertError.message || insertError);
-			console.warn('doctores insert failed:', msg);
+			console.warn('doctor insert failed:', msg);
 			continue;
 		} catch (e) {
 			lastError = e;
-			console.warn('doctores insert threw:', e?.message || e);
+			console.warn('doctor insert threw:', e?.message || e);
 			continue;
 		}
 	}
@@ -111,9 +117,9 @@ export async function loginDoctor({ email, password }) {
 	}
 	try {
 		const { data: profile, error: profileErr } = await supabase
-			.from('doctores')
+			.from('doctor')
 			.select('*')
-			.eq('user_id', user.id)
+			.eq('auth_user_id', user.id)
 			.single();
 
 		if (profileErr) {
@@ -192,13 +198,13 @@ export async function logout() {
 }
 
 // Obtiene el perfil completo de un médico por su ID de usuario
-// Busca en la tabla 'doctores' el registro asociado al usuario
+// Busca en la tabla 'doctor' el registro asociado al usuario
 export async function getDoctorByUserId(userId) {
 	try {
 		const { data, error } = await supabase
-			.from('doctores')
+			.from('doctor')
 			.select('*')
-			.eq('user_id', userId)
+			.eq('auth_user_id', userId)
 			.single();
 		if (error) return { error };
 		return { profile: data };
@@ -514,11 +520,11 @@ export async function deleteDoctorCertificate(doctorUserId, filename, doctorName
 
 		console.log('✓ Certificado eliminado correctamente:', filename);
 		
-		// Limpiar el campo certificado_url en la tabla doctores
+		// Limpiar el campo certificado_url en la tabla doctor
 		const { error: updateError } = await supabase
-			.from('doctores')
+			.from('doctor')
 			.update({ certificado_url: null })
-			.eq('user_id', doctorUserId);
+			.eq('auth_user_id', doctorUserId);
 		
 		if (updateError) {
 			console.warn('No se pudo actualizar certificado_url:', updateError);
@@ -531,13 +537,13 @@ export async function deleteDoctorCertificate(doctorUserId, filename, doctorName
 	}
 }
 
-// Actualiza el campo certificado_url en la tabla doctores
+// Actualiza el campo certificado_url en la tabla doctor
 export async function updateDoctorCertificateUrl(doctorUserId, certificateUrl) {
 	try {
 		const { error } = await supabase
-			.from('doctores')
+			.from('doctor')
 			.update({ certificado_url: certificateUrl })
-			.eq('user_id', doctorUserId);
+			.eq('auth_user_id', doctorUserId);
 		
 		if (error) {
 			console.error('Error al actualizar certificado_url:', error);
